@@ -1,26 +1,171 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   AION — tokens
+   Escuro é o padrão da marca. Claro é uma troca deliberada, não um inverso
+   automático: ganho e perda mudam de luminosidade entre os dois, porque um par
+   verde/vermelho de mesma luminosidade some sob deuteranopia.
+   Ver CLAUDE.md, seção 7, regra 3.
+--------------------------------------------------------------------------- */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* superfícies — carvão quente */
+  --bg-a: #14120d;
+  --bg-b: #2c2718;
+  --card: #221e17;
+  --well: #1a1710;
+  --raised: #2c2820;
+  --input: #131009;
+
+  /* fios: creme translúcido, nunca branco puro */
+  --line: rgba(255, 238, 208, 0.13);
+  --line-soft: rgba(255, 238, 208, 0.08);
+  --line-strong: rgba(255, 238, 208, 0.24);
+
+  /* tinta */
+  --ink: #f6f1e7;
+  --ink-2: #dcd3c2;
+  --ink-3: #a79c89;
+  --ink-4: #7e7462;
+
+  /* acento — só preenchimento; para texto de acento use --accent-soft */
+  --accent: #6a5ae0;
+  --accent-ink: #ffffff;
+  --accent-soft: #a99bff;
+
+  /* dinheiro */
+  --gain: #9bf7ce;
+  --gain-strong: #c4fbe2;
+  --loss: #ec6c82;
+  --neutral: #7e7462;
+  --gain-bg: rgba(9, 58, 44, 0.6);
+  --loss-bg: rgba(74, 20, 30, 0.6);
+
+  /* tabela */
+  --table-head: #221e17;
+  --table-row: #1a1710;
+
+  /* linha de referência (MLPT, MLPD) — neutra, não compete com o acento */
+  --ref: #a79c89;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg-a: #fcf9f2;
+  --bg-b: #e9e2d2;
+  --card: #fffdf8;
+  --well: #f5f1e7;
+  --raised: #efeadc;
+  --input: #ffffff;
+
+  --line: rgba(58, 48, 28, 0.12);
+  --line-soft: rgba(58, 48, 28, 0.09);
+  --line-strong: rgba(58, 48, 28, 0.22);
+
+  --ink: #241e12;
+  --ink-2: #4a4230;
+  --ink-3: #7a6f58;
+  --ink-4: #948a72;
+
+  --accent: #6a5ae0;
+  --accent-ink: #ffffff;
+  --accent-soft: #4a3cc4;
+
+  --gain: #064d3b;
+  --gain-strong: #03362a;
+  --loss: #e24a64;
+  --neutral: #948a72;
+  --gain-bg: rgba(6, 77, 59, 0.12);
+  --loss-bg: rgba(226, 74, 100, 0.13);
+
+  --table-head: #f0eadb;
+  --table-row: #ffffff;
+
+  --ref: #7a6f58;
+
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg-a: var(--bg-a);
+  --color-bg-b: var(--bg-b);
+  --color-card: var(--card);
+  --color-well: var(--well);
+  --color-raised: var(--raised);
+  --color-input: var(--input);
+
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-line-strong: var(--line-strong);
+
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-gain: var(--gain);
+  --color-gain-strong: var(--gain-strong);
+  --color-loss: var(--loss);
+  --color-neutral: var(--neutral);
+  --color-gain-bg: var(--gain-bg);
+  --color-loss-bg: var(--loss-bg);
+
+  --color-table-head: var(--table-head);
+  --color-table-row: var(--table-row);
+  --color-ref: var(--ref);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-inter), sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    /* fundo sólido atrás do degradê: evita faixa clara ao rolar além do fim */
+    background: var(--bg-a);
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background: linear-gradient(180deg, var(--bg-a) 0%, var(--bg-b) 100%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+
+  /* Todo número usa tabular-nums. Sem isso as colunas de valores não alinham
+     e a leitura rápida da tabela se perde. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.022em;
+  }
+
+  a {
+    color: var(--accent-soft);
+    text-decoration: none;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
 }
