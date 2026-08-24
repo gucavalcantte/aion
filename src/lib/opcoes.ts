@@ -38,3 +38,20 @@ export function rotuloRiscoRetorno(valor: number | null | undefined) {
 export function ehTempoGrafico(v: string): v is (typeof TEMPOS_GRAFICOS)[number] {
   return (TEMPOS_GRAFICOS as readonly string[]).includes(v);
 }
+
+/**
+ * Rótulo curto para os cards de contexto, onde três valores se somam numa
+ * linha só. A TABELA continua com o rótulo por extenso — lá há largura, e ler
+ * "Inclinada para baixo" inteiro é melhor.
+ */
+const CURTOS: Record<string, string> = {
+  // Sem citar a média no rótulo: o mesmo valor serve para M20 e para M200.
+  "Inclinada para cima": "Inclinada ↑",
+  "Inclinada para baixo": "Inclinada ↓",
+  "A favor da tendência": "A favor",
+  "Encostado na M20 e M200": "Encostado M20 e M200",
+};
+
+export function curto(valor: string) {
+  return CURTOS[valor] ?? valor;
+}

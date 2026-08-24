@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import { listarBacktestes, totalDoTempo } from "@/lib/dados/backtestes";
 import { listarSetupsSimples } from "@/lib/dados/setups";
 import { emR, inteiro, percentual } from "@/lib/formato";
+import { DIMENSOES, type Dimensao } from "@/lib/analise";
 import { ehTempoGrafico } from "@/lib/opcoes";
+
+import { Contextos } from "./contextos";
 
 import { TabelaBackteste } from "./tabela";
 
@@ -18,8 +21,9 @@ export default async function PaginaTempo({
   const tempo = decodeURIComponent(bruto);
   if (!ehTempoGrafico(tempo)) notFound();
 
-  const { setup } = await searchParams;
+  const { setup, dim } = await searchParams;
   const filtro = typeof setup === "string" && setup !== "" ? setup : undefined;
+  const dimensao = (DIMENSOES.find((d) => d.chave === dim)?.chave ?? "localizacao") as Dimensao;
 
   const [{ linhas, resumo }, setups, total] = await Promise.all([
     listarBacktestes(tempo, filtro),
@@ -88,6 +92,10 @@ export default async function PaginaTempo({
             linhas={linhas}
             setups={setups}
           />
+
+          <div id="contexto" className="mt-5 scroll-mt-6">
+            <Contextos linhas={linhas} tempo={tempo} dimensao={dimensao} filtroSetup={filtro} />
+          </div>
         </>
       )}
     </>
