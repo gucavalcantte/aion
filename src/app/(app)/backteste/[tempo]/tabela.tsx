@@ -45,22 +45,26 @@ const COLUNAS = [
   { chave: "resultado", titulo: "Resultado", largura: 150 },
   { chave: "rr", titulo: "R:R", largura: 155 },
   { chave: "notas", titulo: "Notas", largura: 250 },
-  { chave: "acoes", titulo: "", largura: 78 },
+  { chave: "acoes", titulo: "", largura: 88 },
 ];
 
 const LARGURA = COLUNAS.reduce((a, c) => a + c.largura, 0);
+const FIXA_1 = "sticky left-0 z-20";
+const FIXA_2 = "sticky left-[56px] z-20 shadow-[8px_0_12px_-8px_rgba(0,0,0,0.85)]";
+
+type Setups = { id: string; nome: string }[];
 
 export function TabelaBackteste({
   tempo,
   linhas,
   setups,
-  unidadePadrao,
 }: {
   tempo: string;
   linhas: Backteste[];
-  setups: { id: string; nome: string }[];
-  unidadePadrao: string;
+  setups: Setups;
 }) {
+  const [editando, setEditando] = useState<string | null>(null);
+
   return (
     <div className="overflow-hidden rounded-xl border border-line bg-card">
       <div className="overflow-x-auto">
@@ -88,39 +92,66 @@ export function TabelaBackteste({
             </tr>
           </thead>
           <tbody>
-            <LinhaDeCadastro tempo={tempo} setups={setups} unidadePadrao={unidadePadrao} />
-            {linhas.map((linha, indice) => (
-              <LinhaSalva
-                key={linha.id}
-                linha={linha}
-                numero={linhas.length - indice}
-                tempo={tempo}
-                setups={setups}
-              />
-            ))}
+            <LinhaEditavel formId="nova-linha" tempo={tempo} setups={setups} inicial={null} />
+
+            {linhas.map((linha, indice) => {
+              const numero = linhas.length - indice;
+              return editando === linha.id ? (
+                <LinhaEditavel
+                  key={linha.id}
+                  formId={`editar-${linha.id}`}
+                  tempo={tempo}
+                  setups={setups}
+                  inicial={linha}
+                  numero={numero}
+                  aoFechar={() => setEditando(null)}
+                />
+              ) : (
+                <LinhaSalva
+                  key={linha.id}
+                  linha={linha}
+                  numero={numero}
+                  tempo={tempo}
+                  setups={setups}
+                  aoEditar={() => setEditando(linha.id)}
+                />
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       <p className="border-t border-line px-[18px] py-[13px] text-[13px] text-ink-4">
-        Número e Data ficam fixos ao rolar na horizontal
+        Número e Data ficam fixos ao rolar na horizontal · o lápis abre a linha para correção
       </p>
     </div>
   );
 }
 
-function LinhaDeCadastro({
+/**
+ * Uma única linha editável serve para cadastrar e para corrigir. Duplicar as
+ * 16 colunas seria pedir para as duas divergirem na primeira mudança.
+ */
+function LinhaEditavel({
+  formId,
   tempo,
   setups,
-  unidadePadrao,
+  inicial,
+  numero,
+  aoFechar,
 }: {
+  formId: string;
   tempo: string;
-  setups: { id: string; nome: string }[];
-  unidadePadrao: string;
+  setups: Setups;
+  inicial: Backteste | null;
+  numero?: number;
+  aoFechar?: () => void;
 }) {
+  const editando = inicial !== null;
+
   const [estado, acao, enviando] = useActionState(salvarBackteste, INICIAL);
   const [versao, setVersao] = useState(0);
-  const [campos, setCampos] = useState<Record<string, string>>({});
+  const [campos, setCampos] = useState<Record<string, string>>(() => valoresIniciais(inicial));
   const primeiro = useRef<HTMLInputElement>(null);
 
   const valor = (nome: string) => campos[nome] ?? "";
@@ -137,108 +168,148 @@ function LinhaDeCadastro({
     });
   }
 
-  const unidade =
-    ATIVOS.find((a) => a.codigo === valor("ativo"))?.unidade ?? unidadePadrao;
+  const unidade = ATIVOS.find((a) => a.codigo === valor("ativo"))?.unidade ?? "pontos";
 
-  // Salvou: limpa a linha e volta o foco para a data, para emendar o próximo.
   useEffect(() => {
-    if (estado.ok) {
+    if (!estado.ok) return;
+    if (editando) {
+      aoFechar?.();
+    } else {
+      // Salvou: limpa a linha e volta o foco para a data, para emendar o próximo.
       setVersao((v) => v + 1);
-      setCampos({});
+      setCampos(valoresIniciais(null));
       primeiro.current?.focus();
     }
-  }, [estado]);
+  }, [estado, editando, aoFechar]);
 
-  const fundo = "bg-raised";
+  const td = `bg-raised px-3 py-2 ${editando ? "" : ""}`;
+  const escolha = (nome: string, opcoes?: readonly string[]) => (
+    <Escolha
+      form={formId}
+      nome={nome}
+      opcoes={opcoes}
+      valor={valor(nome)}
+      onChange={(v) => trocar(nome, v)}
+    />
+  );
 
   return (
     <>
       <tr key={versao} className="[&>td]:border-b [&>td]:border-line-strong">
-        <td className={`sticky left-0 z-20 ${fundo} border-l-[3px] border-l-accent px-3 py-2`}>
-          <span className="flex size-[26px] items-center justify-center rounded-[7px] bg-accent/20 text-accent-soft">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-              <path d="M8 3v10M3 8h10" />
-            </svg>
-          </span>
+        <td className={`${FIXA_1} ${td} border-l-[3px] border-l-accent`}>
+          {editando ? (
+            <span className="num text-[14px] text-accent-soft">{numero}</span>
+          ) : (
+            <span className="flex size-[26px] items-center justify-center rounded-[7px] bg-accent/20 text-accent-soft">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                <path d="M8 3v10M3 8h10" />
+              </svg>
+            </span>
+          )}
         </td>
 
-        <td className={`sticky left-[56px] z-20 ${fundo} px-3 py-2 shadow-[8px_0_12px_-8px_rgba(0,0,0,0.85)]`}>
+        <td className={`${FIXA_2} ${td}`}>
           <input
             ref={primeiro}
-            form="nova-linha"
+            form={formId}
             name="data"
             type="date"
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            value={valor("data")}
+            onChange={(e) => trocar("data", e.target.value)}
             className={`${celula} num`}
           />
         </td>
 
-        <td className={`${fundo} px-3 py-2`}>
-          <Escolha form="nova-linha" nome="ativo" valor={valor("ativo")} onChange={(v) => trocar("ativo", v)}>
+        <td className={td}>
+          <Escolha form={formId} nome="ativo" valor={valor("ativo")} onChange={(v) => trocar("ativo", v)}>
             {ATIVOS.map((a) => (
               <option key={a.codigo} value={a.codigo}>{a.codigo} · {a.nome}</option>
             ))}
           </Escolha>
         </td>
 
-        <td className={`${fundo} px-3 py-2`}><Escolha form="nova-linha" nome="periodo" opcoes={PERIODOS} valor={valor("periodo")} onChange={(v) => trocar("periodo", v)} /></td>
-        <td className={`${fundo} px-3 py-2`}><Escolha form="nova-linha" nome="operacao" opcoes={OPERACOES} valor={valor("operacao")} onChange={(v) => trocar("operacao", v)} /></td>
+        <td className={td}>{escolha("periodo", PERIODOS)}</td>
+        <td className={td}>{escolha("operacao", OPERACOES)}</td>
 
-        <td className={`${fundo} px-3 py-2`}>
-          {/* O setup começa sempre vazio, mesmo com filtro ativo. */}
-          <Escolha form="nova-linha" nome="setup_id" valor={valor("setup_id")} onChange={(v) => trocar("setup_id", v)}>
+        <td className={td}>
+          {/* No cadastro o setup começa sempre vazio, mesmo com filtro ativo. */}
+          <Escolha form={formId} nome="setup_id" valor={valor("setup_id")} onChange={(v) => trocar("setup_id", v)}>
             {setups.map((s) => (
               <option key={s.id} value={s.id}>{s.nome}</option>
             ))}
           </Escolha>
         </td>
 
-        <td className={`${fundo} px-3 py-2`}><Escolha form="nova-linha" nome="evento" opcoes={EVENTOS} valor={valor("evento")} onChange={(v) => trocar("evento", v)} /></td>
+        <td className={td}>{escolha("evento", EVENTOS)}</td>
 
-        <td className={`${fundo} px-3 py-2`}>
+        <td className={td}>
           <span className="relative block">
-            <input form="nova-linha" name="tamanho_stop" inputMode="decimal" placeholder="0,00" className={`${celula} num pr-11`} />
+            <input
+              form={formId}
+              name="tamanho_stop"
+              inputMode="decimal"
+              placeholder="0,00"
+              value={valor("tamanho_stop")}
+              onChange={(e) => trocar("tamanho_stop", e.target.value)}
+              className={`${celula} num pr-11`}
+            />
             <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-ink-4">
               {unidade}
             </span>
           </span>
         </td>
 
-        <td className={`${fundo} px-3 py-2`}><Escolha form="nova-linha" nome="entrada" opcoes={ENTRADAS} valor={valor("entrada")} onChange={(v) => trocar("entrada", v)} /></td>
-        <td className={`${fundo} px-3 py-2`}><Escolha form="nova-linha" nome="m20" opcoes={INCLINACOES} valor={valor("m20")} onChange={(v) => trocar("m20", v)} /></td>
-        <td className={`${fundo} px-3 py-2`}><Escolha form="nova-linha" nome="m200" opcoes={INCLINACOES} valor={valor("m200")} onChange={(v) => trocar("m200", v)} /></td>
-        <td className={`${fundo} px-3 py-2`}><Escolha form="nova-linha" nome="alinhamento" opcoes={ALINHAMENTOS} valor={valor("alinhamento")} onChange={(v) => trocar("alinhamento", v)} /></td>
-        <td className={`${fundo} px-3 py-2`}><Escolha form="nova-linha" nome="localizacao" opcoes={LOCALIZACOES} valor={valor("localizacao")} onChange={(v) => trocar("localizacao", v)} /></td>
+        <td className={td}>{escolha("entrada", ENTRADAS)}</td>
+        <td className={td}>{escolha("m20", INCLINACOES)}</td>
+        <td className={td}>{escolha("m200", INCLINACOES)}</td>
+        <td className={td}>{escolha("alinhamento", ALINHAMENTOS)}</td>
+        <td className={td}>{escolha("localizacao", LOCALIZACOES)}</td>
+        <td className={td}>{escolha("resultado", RESULTADOS)}</td>
 
-        <td className={`${fundo} px-3 py-2`}>
-          <Escolha form="nova-linha" nome="resultado" opcoes={RESULTADOS} valor={valor("resultado")} onChange={(v) => trocar("resultado", v)} />
-        </td>
-
-        <td className={`${fundo} px-3 py-2`}>
-          <Escolha form="nova-linha" nome="risco_retorno" valor={valor("risco_retorno")} onChange={(v) => trocar("risco_retorno", v)}>
+        <td className={td}>
+          <Escolha form={formId} nome="risco_retorno" valor={valor("risco_retorno")} onChange={(v) => trocar("risco_retorno", v)}>
             {RISCO_RETORNO.map((r) => (
               <option key={r.valor} value={r.valor}>{r.rotulo}</option>
             ))}
           </Escolha>
         </td>
 
-        <td className={`${fundo} px-3 py-2`}>
-          <input form="nova-linha" name="notas" placeholder="observação" className={celula} />
+        <td className={td}>
+          <input
+            form={formId}
+            name="notas"
+            placeholder="observação"
+            value={valor("notas")}
+            onChange={(e) => trocar("notas", e.target.value)}
+            className={celula}
+          />
         </td>
 
-        <td className={`${fundo} px-3 py-2`}>
-          <div className="flex justify-end">
+        <td className={td}>
+          <div className="flex justify-end gap-1.5">
             <button
-              form="nova-linha"
+              form={formId}
               type="submit"
               disabled={enviando}
-              aria-label="Salvar linha"
+              aria-label={editando ? "Salvar correção" : "Salvar linha"}
               className="flex size-[34px] items-center justify-center rounded-[7px] bg-accent text-accent-ink disabled:opacity-60"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="M3 8.4l3.2 3.2L13 4.8" />
               </svg>
             </button>
+            {editando && (
+              <button
+                type="button"
+                onClick={aoFechar}
+                aria-label="Cancelar edição"
+                className="flex size-[34px] items-center justify-center rounded-[7px] border border-line-strong text-ink-4 hover:text-ink-2"
+              >
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden>
+                  <path d="M4 4l8 8M12 4l-8 8" />
+                </svg>
+              </button>
+            )}
           </div>
         </td>
       </tr>
@@ -253,11 +324,12 @@ function LinhaDeCadastro({
         </tr>
       )}
 
-      {/* O form fica fora da tabela: um <form> não pode envolver <td>. */}
+      {/* O form vive fora das células: <form> não pode envolver <td>. */}
       <tr className="hidden">
         <td>
-          <form id="nova-linha" action={acao}>
+          <form id={formId} action={acao}>
             <input type="hidden" name="tempo_grafico" value={tempo} />
+            {editando && <input type="hidden" name="id" value={inicial.id} />}
           </form>
         </td>
       </tr>
@@ -265,32 +337,57 @@ function LinhaDeCadastro({
   );
 }
 
+function valoresIniciais(linha: Backteste | null): Record<string, string> {
+  if (!linha) {
+    return { data: new Date().toISOString().slice(0, 10) };
+  }
+  return {
+    data: linha.data.slice(0, 10),
+    ativo: linha.ativo,
+    periodo: linha.periodo,
+    operacao: linha.operacao,
+    setup_id: linha.setup_id,
+    evento: linha.evento,
+    tamanho_stop: String(linha.tamanho_stop).replace(".", ","),
+    entrada: linha.entrada,
+    m20: linha.m20,
+    m200: linha.m200,
+    alinhamento: linha.alinhamento,
+    localizacao: linha.localizacao,
+    resultado: linha.resultado,
+    risco_retorno: String(linha.risco_retorno),
+    notas: linha.notas ?? "",
+  };
+}
+
 function LinhaSalva({
   linha,
   numero,
   tempo,
   setups,
+  aoEditar,
 }: {
   linha: Backteste;
   numero: number;
   tempo: string;
-  setups: { id: string; nome: string }[];
+  setups: Setups;
+  aoEditar: () => void;
 }) {
   const setup = setups.find((s) => s.id === linha.setup_id)?.nome ?? VAZIO;
   const ganhou = linha.resultado === "Gain";
-
-  const td = "whitespace-nowrap border-b border-line-soft bg-table-row px-3 py-[10px] text-[14.5px] text-ink-2";
+  const td =
+    "whitespace-nowrap border-b border-line-soft bg-table-row px-3 py-[10px] text-[14.5px] text-ink-2";
 
   return (
     <tr>
-      <td className={`${td} num sticky left-0 z-20 text-ink-4`}>{numero}</td>
-      <td className={`${td} num sticky left-[56px] z-20 shadow-[8px_0_12px_-8px_rgba(0,0,0,0.85)]`}>
-        {formatarData(linha.data)}
-      </td>
+      <td className={`${td} num ${FIXA_1} text-ink-4`}>{numero}</td>
+      <td className={`${td} num ${FIXA_2}`}>{formatarData(linha.data)}</td>
       <td className={`${td} num font-semibold`}>{linha.ativo}</td>
       <td className={td}>{linha.periodo}</td>
       <td className={td}>
-        <span className={linha.operacao === "Compra" ? "text-gain" : "text-loss"}>{linha.operacao}</span>
+        <span className={linha.operacao === "Compra" ? "text-gain" : "text-loss"}>
+          {linha.operacao}
+        </span>
       </td>
       <td className={td}>{setup}</td>
       <td className={td}>{linha.evento}</td>
@@ -315,25 +412,32 @@ function LinhaSalva({
       </td>
       <td className={`${td} text-ink-4`}>{linha.notas || VAZIO}</td>
       <td className={td}>
-        <form action={removerBackteste} className="flex justify-end">
-          <input type="hidden" name="id" value={linha.id} />
-          <input type="hidden" name="tempo_grafico" value={tempo} />
-          <button type="submit" aria-label={`Remover linha ${numero}`} className="text-ink-4 hover:text-loss">
+        <div className="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={aoEditar}
+            aria-label={`Editar linha ${numero}`}
+            className="text-ink-4 hover:text-accent-soft"
+          >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4" />
+              <path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z" />
             </svg>
           </button>
-        </form>
+          <form action={removerBackteste} className="flex">
+            <input type="hidden" name="id" value={linha.id} />
+            <input type="hidden" name="tempo_grafico" value={tempo} />
+            <button type="submit" aria-label={`Remover linha ${numero}`} className="text-ink-4 hover:text-loss">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4" />
+              </svg>
+            </button>
+          </form>
+        </div>
       </td>
     </tr>
   );
 }
 
-/**
- * Sempre controlado. Misturar defaultValue com value faz o React reclamar e
- * o campo passa a ignorar mudanças programáticas — que é justamente o que o
- * Loss precisa fazer com o R:R.
- */
 function Escolha({
   form,
   nome,

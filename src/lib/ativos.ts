@@ -7,10 +7,10 @@ export const ATIVOS = [
   { codigo: "MES", nome: "S&P", valorPonto: 5, unidade: "pontos" },
   { codigo: "MYM", nome: "Dow", valorPonto: 0.5, unidade: "pontos" },
   { codigo: "MNQ", nome: "Nasdaq", valorPonto: 2, unidade: "pontos" },
-  { codigo: "MGC", nome: "Gold", valorPonto: 10, unidade: "dólares" },
+  { codigo: "MGC", nome: "Gold", valorPonto: 10, unidade: "pontos" },
   // MCL é pensado em %: 1% = 1,00 de movimento = $100 por contrato.
   { codigo: "MCL", nome: "Oil", valorPonto: 100, unidade: "%" },
-  { codigo: "MBT", nome: "Bitcoin", valorPonto: 0.1, unidade: "dólares" },
+  { codigo: "MBT", nome: "Bitcoin", valorPonto: 0.1, unidade: "pontos" },
 ] as const;
 
 export type Ativo = (typeof ATIVOS)[number]["codigo"];

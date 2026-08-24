@@ -87,7 +87,6 @@ export default async function PaginaTempo({
             tempo={tempo}
             linhas={linhas}
             setups={setups}
-            unidadePadrao="pontos"
           />
         </>
       )}
