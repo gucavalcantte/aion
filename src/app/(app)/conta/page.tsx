@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { BotaoRemover } from "@/components/botao-remover";
+
 import { buscarConta, listarContas } from "@/lib/dados/contas";
 import { moeda, percentual, VAZIO } from "@/lib/formato";
 import type { ContaComSaldo } from "@/lib/tipos";
@@ -86,14 +88,14 @@ function CartaoConta({ conta }: { conta: ContaComSaldo }) {
               <path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z" />
             </svg>
           </Link>
-          <form action={removerConta}>
-            <input type="hidden" name="id" value={conta.id} />
-            <button type="submit" aria-label={`Remover conta ${conta.numero}`} className="text-ink-4 hover:text-loss">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4" />
-              </svg>
-            </button>
-          </form>
+          <BotaoRemover
+            acao={removerConta}
+            campos={{ id: conta.id }}
+            rotulo={`Remover conta ${conta.numero}`}
+            titulo={`Remover a conta ${conta.numero}?`}
+            descricao="A conta sai da lista e deixa de aparecer na Perfomance."
+            aviso="Se houver trades registrados nela, o banco bloqueia a remoção — o histórico não se perde por acidente."
+          />
         </div>
       </div>
 

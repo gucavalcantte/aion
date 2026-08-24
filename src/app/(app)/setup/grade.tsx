@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { BotaoRemover } from "@/components/botao-remover";
+
 import type { Estatistica, SetupComEstatistica } from "@/lib/dados/setups";
 import { emR, inteiro, percentual, VAZIO } from "@/lib/formato";
 
@@ -82,14 +84,14 @@ export function GradeDeSetups({ setups }: { setups: SetupComEstatistica[] }) {
                     <path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z" />
                   </svg>
                 </Link>
-                <form action={removerSetup}>
-                  <input type="hidden" name="id" value={setup.id} />
-                  <button type="submit" aria-label={`Remover ${setup.nome}`} className="text-ink-4 hover:text-loss">
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4" />
-                    </svg>
-                  </button>
-                </form>
+                <BotaoRemover
+                  acao={removerSetup}
+                  campos={{ id: setup.id }}
+                  rotulo={`Remover ${setup.nome}`}
+                  titulo={`Remover o setup ${setup.nome}?`}
+                  descricao="O setup sai da lista e da tela de Plano, junto com a imagem de referência."
+                  aviso="Se houver backtestes ou trades apontando para ele, o banco bloqueia a remoção."
+                />
               </div>
             </div>
 
