@@ -5,6 +5,7 @@ import { data as fData, hora, moeda } from "@/lib/formato";
 import { BotaoImprimir } from "./botao";
 
 export const metadata = { title: "Plano de trade — AION" };
+export const dynamic = "force-dynamic";
 
 /**
  * Folha A4 paisagem, uma página. Fora do grupo (app) de propósito: sem barra

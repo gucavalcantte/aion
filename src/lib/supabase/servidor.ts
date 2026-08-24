@@ -8,8 +8,11 @@ import { credenciaisSupabase } from "./ambiente";
  * Roda como o usuário logado, via cookie de sessão.
  */
 export async function clienteServidor() {
-  const { url, chave } = credenciaisSupabase();
+  // cookies() vem ANTES de ler o ambiente, e a ordem importa: é ela que avisa
+  // ao Next que a rota é dinâmica. Se o ambiente lançasse primeiro, o build
+  // trataria o erro como falha de pré-renderização em vez de pular a página.
   const cookieStore = await cookies();
+  const { url, chave } = credenciaisSupabase();
 
   return createServerClient(url, chave, {
     cookies: {

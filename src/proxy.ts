@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { credenciaisSupabase } from "@/lib/supabase/ambiente";
 
-const PUBLICAS = ["/login"];
+const PUBLICAS = ["/login", "/api/manter-ativo"];
 
 export async function proxy(request: NextRequest) {
   const { url, chave } = credenciaisSupabase();
@@ -41,7 +41,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(destino);
   }
 
-  if (user && ehPublica) {
+  // Só a tela de login redireciona quem já está logado; a rota do cron não.
+  if (user && caminho.startsWith("/login")) {
     const destino = request.nextUrl.clone();
     destino.pathname = "/conta";
     return NextResponse.redirect(destino);
