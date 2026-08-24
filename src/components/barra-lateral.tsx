@@ -19,7 +19,7 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
   const caminho = usePathname();
 
   return (
-    <aside className="flex w-[236px] shrink-0 flex-col border-r border-line-soft bg-black/15 px-[14px] py-6">
+    <aside className="flex w-[236px] shrink-0 flex-col border-r border-line-soft bg-tint px-[14px] py-6">
       <div className="px-[10px] pb-[26px] pt-0.5">
         <Marca />
       </div>

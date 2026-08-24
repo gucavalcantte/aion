@@ -48,6 +48,12 @@
   /* linha de referência (MLPT, MLPD) — neutra, não compete com o acento */
   --ref: #a79c89;
 
+  /* trilha vazia de barra, tinta de painel e sombra da coluna fixa.
+     Existem como token porque preto puro no modo claro fica pesado. */
+  --track: rgba(0, 0, 0, 0.30);
+  --tint: rgba(0, 0, 0, 0.16);
+  --sombra-fixa: rgba(0, 0, 0, 0.85);
+
   color-scheme: dark;
 }
 
@@ -84,6 +90,10 @@
 
   --ref: #7a6f58;
 
+  --track: rgba(58, 48, 28, 0.13);
+  --tint: rgba(58, 48, 28, 0.045);
+  --sombra-fixa: rgba(58, 48, 28, 0.16);
+
   color-scheme: light;
 }
 
@@ -118,6 +128,8 @@
   --color-table-head: var(--table-head);
   --color-table-row: var(--table-row);
   --color-ref: var(--ref);
+  --color-track: var(--track);
+  --color-tint: var(--tint);
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-bricolage), var(--font-inter), sans-serif;

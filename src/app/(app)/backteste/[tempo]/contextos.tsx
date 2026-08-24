@@ -273,7 +273,7 @@ function Linha({ contexto, bom = false }: { contexto: Contexto; bom?: boolean })
         </div>
       </div>
 
-      <span className="mt-3 flex h-[5px] overflow-hidden rounded-[3px] bg-black/30">
+      <span className="mt-3 flex h-[5px] overflow-hidden rounded-[3px] bg-track">
         <span className={barra} style={{ width: `${solido}%` }} />
         <span className={suave} style={{ width: `${Math.max(0, claro)}%` }} />
       </span>

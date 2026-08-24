@@ -51,7 +51,7 @@ const COLUNAS = [
 
 const LARGURA = COLUNAS.reduce((a, c) => a + c.largura, 0);
 const FIXA_1 = "sticky left-0 z-20";
-const FIXA_2 = "sticky left-[56px] z-20 shadow-[8px_0_12px_-8px_rgba(0,0,0,0.85)]";
+const FIXA_2 = "sticky left-[56px] z-20 shadow-[8px_0_12px_-8px_var(--sombra-fixa)]";
 
 type Setups = { id: string; nome: string }[];
 

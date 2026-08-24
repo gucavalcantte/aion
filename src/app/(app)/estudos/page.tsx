@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AvisoDeConstancia } from "@/components/aviso-constancia";
 import { estudosDoMes, type EstudoComImagem } from "@/lib/dados/estudos";
 import { inteiro } from "@/lib/formato";
 
@@ -48,6 +49,8 @@ export default async function PaginaEstudos({ searchParams }: PageProps<"/estudo
           <FormularioEstudo dia={diaSelecionado} />
         </div>
       </header>
+
+      <AvisoDeConstancia />
 
       <div className="flex items-start gap-3.5">
         <section className="w-[392px] shrink-0 rounded-xl border border-line bg-card p-[22px]">

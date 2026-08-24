@@ -161,7 +161,7 @@ export function FormularioEstudo({
             </p>
           )}
 
-          <footer className="flex items-center justify-between border-t border-line bg-black/15 px-[26px] py-[18px]">
+          <footer className="flex items-center justify-between border-t border-line bg-tint px-[26px] py-[18px]">
             <p className="text-[13.5px] text-ink-4">
               Estudo não entra em nenhuma estatística — é registro, não trade.
             </p>

@@ -118,7 +118,7 @@ function CartaoConta({ conta }: { conta: ContaComSaldo }) {
               <span className="num ml-1.5 text-[13px] text-ink-4">de {moeda(conta.meta)}</span>
             </span>
           </div>
-          <div className="h-[7px] overflow-hidden rounded-[4px] bg-black/30">
+          <div className="h-[7px] overflow-hidden rounded-[4px] bg-track">
             <div
               className="h-full rounded-[4px] bg-accent"
               style={{ width: `${Math.max(0, Math.min(100, conta.progresso.percentual))}%` }}

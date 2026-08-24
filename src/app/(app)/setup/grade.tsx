@@ -151,7 +151,7 @@ function Linha({
   return (
     <div className="grid grid-cols-[78px_1fr_62px_46px] items-center gap-[10px] py-[9px]">
       <span className={`text-[10.5px] font-bold uppercase tracking-[0.10em] ${cor}`}>{titulo}</span>
-      <span className="h-[6px] overflow-hidden rounded-[3px] bg-black/25">
+      <span className="h-[6px] overflow-hidden rounded-[3px] bg-track">
         {dados.assertividade !== null && (
           <span className={`block h-full rounded-[3px] ${barra}`} style={{ width: `${dados.assertividade}%` }} />
         )}
@@ -173,7 +173,7 @@ function Linha({
 
 function Delta({ setup }: { setup: SetupComEstatistica }) {
   let texto: string;
-  let classe = "bg-black/25 text-ink-3";
+  let classe = "bg-track text-ink-3";
 
   if (setup.real.registros === 0) {
     texto = "nunca operado";

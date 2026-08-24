@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AvisoDeConstancia } from "@/components/aviso-constancia";
 import { BotaoRemover } from "@/components/botao-remover";
 import { CalendarioDeConsistencia } from "@/components/calendario";
 import { CurvaDeCapital, ResultadoPorOperacao } from "@/components/graficos";
@@ -7,7 +8,8 @@ import { contasParaSeletor, dadosDaPerfomance } from "@/lib/dados/trades";
 import { data as fData, emR, hora, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
 import { rotuloRiscoRetorno, TEMPOS_GRAFICOS } from "@/lib/opcoes";
 
-import { removerLancamento, removerTrade } from "./acoes";
+import { removerLancamento } from "./acoes";
+import { AcoesDoTrade } from "./acoes-trade";
 import { FormularioLancamento } from "./formulario-lancamento";
 import { FormularioTrade } from "./formulario-trade";
 
@@ -63,6 +65,8 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           <FormularioTrade contaId={conta.id} setups={setups} />
         </div>
       </header>
+
+      <AvisoDeConstancia />
 
       {/* HERO */}
       <div className="mb-3 grid grid-cols-4 gap-3">
@@ -264,17 +268,15 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
                         <Selo ok={t.respeitou_plano}>{t.respeitou_plano ? "Sim" : "Não"}</Selo>
                       </td>
                       <td className={td}>
-                        <span className={`inline-flex h-[23px] items-center rounded-md px-[9px] text-[13px] font-semibold ${t.status === "Gain" ? "bg-gain-bg text-gain" : t.status === "Loss" ? "bg-loss-bg text-loss" : "bg-black/25 text-ink-3"}`}>
+                        <span className={`inline-flex h-[23px] items-center rounded-md px-[9px] text-[13px] font-semibold ${t.status === "Gain" ? "bg-gain-bg text-gain" : t.status === "Loss" ? "bg-loss-bg text-loss" : "bg-track text-ink-3"}`}>
                           {t.status}
                         </span>
                       </td>
                       <td className={td}>
-                        <BotaoRemover
-                          acao={removerTrade}
-                          campos={{ id: t.id }}
-                          rotulo={`Remover trade de ${fData(t.data)}`}
-                          titulo="Remover este trade?"
-                          descricao={`${t.ativo} · ${fData(t.data)} · ${moeda(t.resultado, true)}. O saldo da conta e todas as estatísticas mudam junto.`}
+                        <AcoesDoTrade
+                          trade={{ ...t, imagem: null }}
+                          contaId={conta.id}
+                          setups={setups}
                         />
                       </td>
                     </tr>
@@ -296,7 +298,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           <ul className="flex flex-col gap-2">
             {lancamentos.map((l) => (
               <li key={l.id} className="flex items-center gap-4 rounded-[10px] border border-line-soft bg-well px-4 py-3">
-                <span className={`inline-flex h-[23px] items-center rounded-md px-[9px] text-[13px] font-semibold ${l.tipo === "Aporte" ? "bg-gain-bg text-gain" : "bg-black/25 text-ink-2"}`}>
+                <span className={`inline-flex h-[23px] items-center rounded-md px-[9px] text-[13px] font-semibold ${l.tipo === "Aporte" ? "bg-gain-bg text-gain" : "bg-track text-ink-2"}`}>
                   {l.tipo}
                 </span>
                 <span className="num text-[14px] text-ink-3">{fData(l.data)}</span>
@@ -358,7 +360,7 @@ function Tile({ titulo, valor, extra, cor = "", children }: { titulo: string; va
 
 function Barra({ percentual, cor }: { percentual: number; cor: string }) {
   return (
-    <span className="mt-3.5 block h-[6px] overflow-hidden rounded-[3px] bg-black/30">
+    <span className="mt-3.5 block h-[6px] overflow-hidden rounded-[3px] bg-track">
       <span className={`block h-full rounded-[3px] ${cor}`} style={{ width: `${Math.max(0, Math.min(100, percentual))}%` }} />
     </span>
   );

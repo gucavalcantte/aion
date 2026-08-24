@@ -81,7 +81,7 @@ function LinhaTempo({ resumo }: { resumo: ResumoTempo }) {
       <span className="block">
         <span className="flex h-[9px] gap-0.5">
           {vazio ? (
-            <span className="flex-1 rounded-[5px] bg-black/25" />
+            <span className="flex-1 rounded-[5px] bg-track" />
           ) : (
             <>
               <span
