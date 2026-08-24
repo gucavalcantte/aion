@@ -43,7 +43,7 @@ export async function proxy(request: NextRequest) {
 
   if (user && ehPublica) {
     const destino = request.nextUrl.clone();
-    destino.pathname = "/perfomance";
+    destino.pathname = "/conta";
     return NextResponse.redirect(destino);
   }
 

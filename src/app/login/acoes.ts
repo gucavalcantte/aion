@@ -29,7 +29,7 @@ export async function entrar(
     return { erro: "E-mail ou senha incorretos." };
   }
 
-  redirect("/perfomance");
+  redirect("/conta");
 }
 
 export async function sair() {

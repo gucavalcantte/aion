@@ -1,7 +1,7 @@
 import { Marca } from "@/components/marca";
 import { usuarioAtual } from "@/lib/supabase/servidor";
 
-import { sair } from "../login/acoes";
+import { sair } from "../../login/acoes";
 
 export const metadata = { title: "Perfomance — AION" };
 
