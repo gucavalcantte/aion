@@ -5,7 +5,7 @@ import { credenciaisSupabase } from "@/lib/supabase/ambiente";
 
 const PUBLICAS = ["/login"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { url, chave } = credenciaisSupabase();
   let resposta = NextResponse.next({ request });
 
