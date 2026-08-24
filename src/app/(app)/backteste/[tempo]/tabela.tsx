@@ -16,7 +16,6 @@ import {
   PERIODOS,
   RESULTADOS,
   RISCO_RETORNO,
-  curto,
   rotuloRiscoRetorno,
 } from "@/lib/opcoes";
 
@@ -25,34 +24,34 @@ import { removerBackteste, salvarBackteste, type EstadoLinha } from "../acoes";
 const INICIAL: EstadoLinha = {};
 
 const celula =
-  "h-[36px] w-full rounded-[7px] border border-line-strong bg-input px-2 text-[13.5px] text-ink outline-none focus:border-accent";
+  "h-[38px] w-full rounded-[7px] border border-line-strong bg-input px-[10px] text-[14px] text-ink outline-none focus:border-accent";
 const cabecalho =
-  "whitespace-nowrap bg-table-head px-2.5 py-[10px] text-left text-[11.5px] font-bold uppercase tracking-[0.06em] text-ink";
+  "whitespace-nowrap bg-table-head px-3 py-[11px] text-left text-[12px] font-bold uppercase tracking-[0.07em] text-ink";
 
 /** Larguras fixas: sem elas as colunas dançam quando o conteúdo muda. */
 const COLUNAS = [
-  { chave: "num", titulo: "#", largura: 48 },
-  { chave: "data", titulo: "Data", largura: 132 },
-  { chave: "ativo", titulo: "Ativo", largura: 96 },
-  { chave: "periodo", titulo: "Período", largura: 104 },
-  { chave: "operacao", titulo: "Operação", largura: 108 },
-  { chave: "setup", titulo: "Setup", largura: 146 },
-  { chave: "evento", titulo: "Evento", largura: 138 },
-  { chave: "stop", titulo: "Stop", largura: 110 },
-  { chave: "entrada", titulo: "Entrada", largura: 122 },
-  { chave: "m20", titulo: "M20", largura: 130 },
-  { chave: "m200", titulo: "M200", largura: 130 },
-  { chave: "alinhamento", titulo: "Alinhamento", largura: 124 },
-  { chave: "localizacao", titulo: "Localização", largura: 172 },
-  { chave: "resultado", titulo: "Resultado", largura: 104 },
-  { chave: "rr", titulo: "R:R", largura: 96 },
-  { chave: "notas", titulo: "Notas", largura: 180 },
-  { chave: "acoes", titulo: "", largura: 84 },
+  { chave: "num", titulo: "#", largura: 56 },
+  { chave: "data", titulo: "Data", largura: 172 },
+  { chave: "ativo", titulo: "Ativo", largura: 150 },
+  { chave: "periodo", titulo: "Período", largura: 190 },
+  { chave: "operacao", titulo: "Operação", largura: 160 },
+  { chave: "setup", titulo: "Setup", largura: 210 },
+  { chave: "evento", titulo: "Evento", largura: 195 },
+  { chave: "stop", titulo: "Stop", largura: 135 },
+  { chave: "entrada", titulo: "Entrada", largura: 185 },
+  { chave: "m20", titulo: "M20", largura: 205 },
+  { chave: "m200", titulo: "M200", largura: 205 },
+  { chave: "alinhamento", titulo: "Alinhamento", largura: 225 },
+  { chave: "localizacao", titulo: "Localização", largura: 255 },
+  { chave: "resultado", titulo: "Resultado", largura: 150 },
+  { chave: "rr", titulo: "R:R", largura: 155 },
+  { chave: "notas", titulo: "Notas", largura: 250 },
+  { chave: "acoes", titulo: "", largura: 88 },
 ];
 
 const LARGURA = COLUNAS.reduce((a, c) => a + c.largura, 0);
 const FIXA_1 = "sticky left-0 z-20";
-const FIXA_2 = "sticky left-[48px] z-20 shadow-[8px_0_12px_-8px_rgba(0,0,0,0.85)]";
+const FIXA_2 = "sticky left-[56px] z-20 shadow-[8px_0_12px_-8px_rgba(0,0,0,0.85)]";
 
 type Setups = { id: string; nome: string }[];
 
@@ -85,7 +84,7 @@ export function TabelaBackteste({
                   className={
                     cabecalho +
                     " border-b border-line-strong" +
-                    (i === 0 ? " sticky left-0 z-30" : i === 1 ? " sticky left-[48px] z-30" : "")
+                    (i === 0 ? " sticky left-0 z-30" : i === 1 ? " sticky left-[56px] z-30" : "")
                   }
                 >
                   {c.titulo}
@@ -184,7 +183,7 @@ function LinhaEditavel({
     }
   }, [estado, editando, aoFechar]);
 
-  const td = "bg-raised px-2.5 py-2";
+  const td = `bg-raised px-3 py-2 ${editando ? "" : ""}`;
   const escolha = (nome: string, opcoes?: readonly string[]) => (
     <Escolha
       form={formId}
@@ -225,7 +224,7 @@ function LinhaEditavel({
         <td className={td}>
           <Escolha form={formId} nome="ativo" valor={valor("ativo")} onChange={(v) => trocar("ativo", v)}>
             {ATIVOS.map((a) => (
-              <option key={a.codigo} value={a.codigo}>{a.codigo}</option>
+              <option key={a.codigo} value={a.codigo}>{a.codigo} · {a.nome}</option>
             ))}
           </Escolha>
         </td>
@@ -378,7 +377,7 @@ function LinhaSalva({
   const setup = setups.find((s) => s.id === linha.setup_id)?.nome ?? VAZIO;
   const ganhou = linha.resultado === "Gain";
   const td =
-    "whitespace-nowrap border-b border-line-soft bg-table-row px-2.5 py-[10px] text-[13.5px] text-ink-2";
+    "whitespace-nowrap border-b border-line-soft bg-table-row px-3 py-[10px] text-[14.5px] text-ink-2";
 
   return (
     <tr>
@@ -395,10 +394,10 @@ function LinhaSalva({
       <td className={td}>{linha.evento}</td>
       <td className={`${td} num`}>{String(linha.tamanho_stop).replace(".", ",")}</td>
       <td className={td}>{linha.entrada}</td>
-      <td className={td}>{curto(linha.m20)}</td>
-      <td className={td}>{curto(linha.m200)}</td>
-      <td className={td}>{curto(linha.alinhamento)}</td>
-      <td className={td}>{curto(linha.localizacao)}</td>
+      <td className={td}>{linha.m20}</td>
+      <td className={td}>{linha.m200}</td>
+      <td className={td}>{linha.alinhamento}</td>
+      <td className={td}>{linha.localizacao}</td>
       <td className={td}>
         <span
           className={
@@ -463,7 +462,7 @@ function Escolha({
     >
       <option value="">Selecione</option>
       {opcoes?.map((o) => (
-        <option key={o} value={o}>{curto(o)}</option>
+        <option key={o} value={o}>{o}</option>
       ))}
       {children}
     </select>
