@@ -72,7 +72,9 @@ export async function resumoPorTempo() {
   };
 }
 
-export async function listarBacktestes(tempo: string, setupId?: string) {
+export type FiltrosBackteste = { setup?: string; ativo?: string };
+
+export async function listarBacktestes(tempo: string, filtros: FiltrosBackteste = {}) {
   const supabase = await clienteServidor();
 
   let consulta = supabase
@@ -82,7 +84,9 @@ export async function listarBacktestes(tempo: string, setupId?: string) {
     .order("data", { ascending: false })
     .order("created_at", { ascending: false });
 
-  if (setupId) consulta = consulta.eq("setup_id", setupId);
+  // Os filtros valem para tudo na tela: tabela, cards do topo e análise.
+  if (filtros.setup) consulta = consulta.eq("setup_id", filtros.setup);
+  if (filtros.ativo) consulta = consulta.eq("ativo", filtros.ativo);
 
   const { data, error } = await consulta;
   if (error) throw error;

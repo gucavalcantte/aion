@@ -20,12 +20,12 @@ export function Contextos({
   linhas,
   tempo,
   dimensao,
-  filtroSetup,
+  filtros,
 }: {
   linhas: LinhaAnalisavel[];
   tempo: string;
   dimensao: Dimensao;
-  filtroSetup?: string;
+  filtros: { setup?: string; ativo?: string };
 }) {
   if (linhas.length < MINIMO_PARA_ANALISE) {
     return (
@@ -103,7 +103,8 @@ export function Contextos({
             {DIMENSOES.map((d) => {
               const ativo = d.chave === dimensao;
               const url = new URLSearchParams({ dim: d.chave });
-              if (filtroSetup) url.set("setup", filtroSetup);
+              if (filtros.setup) url.set("setup", filtros.setup);
+              if (filtros.ativo) url.set("ativo", filtros.ativo);
               return (
                 <Link
                   key={d.chave}

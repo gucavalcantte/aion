@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { DIMENSOES, type Dimensao } from "@/lib/analise";
+import { ATIVOS } from "@/lib/ativos";
 import { listarBacktestes, totalDoTempo } from "@/lib/dados/backtestes";
 import { listarSetupsSimples } from "@/lib/dados/setups";
 import { emR, inteiro, percentual } from "@/lib/formato";
-import { DIMENSOES, type Dimensao } from "@/lib/analise";
 import { ehTempoGrafico } from "@/lib/opcoes";
 
 import { Contextos } from "./contextos";
-
 import { TabelaBackteste } from "./tabela";
 
 export const metadata = { title: "Backteste — AION" };
@@ -21,17 +21,23 @@ export default async function PaginaTempo({
   const tempo = decodeURIComponent(bruto);
   if (!ehTempoGrafico(tempo)) notFound();
 
-  const { setup, dim } = await searchParams;
-  const filtro = typeof setup === "string" && setup !== "" ? setup : undefined;
+  const { setup, ativo, dim } = await searchParams;
+
+  // Os filtros valem para a tela inteira: cards do topo, tabela e análise.
+  const filtros = {
+    setup: typeof setup === "string" && setup !== "" ? setup : undefined,
+    ativo: typeof ativo === "string" && ativo !== "" ? ativo : undefined,
+  };
+  const temFiltro = Boolean(filtros.setup || filtros.ativo);
   const dimensao = (DIMENSOES.find((d) => d.chave === dim)?.chave ?? "localizacao") as Dimensao;
 
   const [{ linhas, resumo }, setups, total] = await Promise.all([
-    listarBacktestes(tempo, filtro),
+    listarBacktestes(tempo, filtros),
     listarSetupsSimples(),
     totalDoTempo(tempo),
   ]);
 
-  const nomeFiltro = setups.find((s) => s.id === filtro)?.nome;
+  const nomeDoSetup = setups.find((s) => s.id === filtros.setup)?.nome;
 
   return (
     <>
@@ -49,7 +55,10 @@ export default async function PaginaTempo({
       </header>
 
       <div className="mb-5 grid grid-cols-3 gap-3">
-        <Cartao titulo={filtro ? "Registros no filtro" : "Registros"} valor={inteiro(resumo.registros)} />
+        <Cartao
+          titulo={temFiltro ? "Registros no filtro" : "Registros"}
+          valor={inteiro(resumo.registros)}
+        />
         <Cartao titulo="Assertividade" valor={percentual(resumo.assertividade)} />
         <Cartao
           titulo="Risco retorno"
@@ -77,24 +86,25 @@ export default async function PaginaTempo({
       ) : (
         <>
           <div className="mb-3 flex items-center gap-3">
-            <FiltroSetup tempo={tempo} setups={setups} atual={filtro} />
-            {filtro && (
+            <Filtros
+              tempo={tempo}
+              setups={setups}
+              atual={filtros}
+              dim={typeof dim === "string" ? dim : undefined}
+            />
+            {temFiltro && (
               <p className="text-[14px] text-ink-4">
                 <span className="num">{resumo.registros}</span> de{" "}
                 <span className="num">{total}</span> registros
-                {nomeFiltro ? ` · ${nomeFiltro}` : ""}
+                {[nomeDoSetup, filtros.ativo].filter(Boolean).map((r) => ` · ${r}`).join("")}
               </p>
             )}
           </div>
 
-          <TabelaBackteste
-            tempo={tempo}
-            linhas={linhas}
-            setups={setups}
-          />
+          <TabelaBackteste tempo={tempo} linhas={linhas} setups={setups} />
 
           <div id="contexto" className="mt-5 scroll-mt-6">
-            <Contextos linhas={linhas} tempo={tempo} dimensao={dimensao} filtroSetup={filtro} />
+            <Contextos linhas={linhas} tempo={tempo} dimensao={dimensao} filtros={filtros} />
           </div>
         </>
       )}
@@ -102,35 +112,54 @@ export default async function PaginaTempo({
   );
 }
 
-function FiltroSetup({
+function Filtros({
   tempo,
   setups,
   atual,
+  dim,
 }: {
   tempo: string;
   setups: { id: string; nome: string }[];
-  atual?: string;
+  atual: { setup?: string; ativo?: string };
+  dim?: string;
 }) {
+  const estilo = (aceso: boolean) =>
+    "h-[38px] rounded-lg border bg-raised px-[13px] text-[14.5px] outline-none " +
+    (aceso ? "border-accent text-accent-soft" : "border-line-strong text-ink-2");
+
   return (
-    <form className="flex items-center gap-2">
+    <form action={`/backteste/${encodeURIComponent(tempo)}`} className="flex items-center gap-2">
+      {/* preserva a dimensão escolhida na análise ao trocar de filtro */}
+      {dim && <input type="hidden" name="dim" value={dim} />}
+
       <label htmlFor="filtro-setup" className="sr-only">Filtrar por setup</label>
       <select
         id="filtro-setup"
         name="setup"
-        defaultValue={atual ?? ""}
-        className={
-          "h-[38px] rounded-lg border bg-raised px-[13px] text-[14.5px] outline-none " +
-          (atual ? "border-accent text-accent-soft" : "border-line-strong text-ink-2")
-        }
+        defaultValue={atual.setup ?? ""}
+        className={estilo(Boolean(atual.setup))}
       >
         <option value="">Todos os setups</option>
         {setups.map((s) => (
           <option key={s.id} value={s.id}>{s.nome}</option>
         ))}
       </select>
+
+      <label htmlFor="filtro-ativo" className="sr-only">Filtrar por ativo</label>
+      <select
+        id="filtro-ativo"
+        name="ativo"
+        defaultValue={atual.ativo ?? ""}
+        className={`${estilo(Boolean(atual.ativo))} num`}
+      >
+        <option value="">Todos os ativos</option>
+        {ATIVOS.map((a) => (
+          <option key={a.codigo} value={a.codigo}>{a.codigo} · {a.nome}</option>
+        ))}
+      </select>
+
       <button
         type="submit"
-        formAction={`/backteste/${encodeURIComponent(tempo)}`}
         className="h-[38px] rounded-lg border border-line-strong bg-raised px-[14px] text-[14.5px] font-medium text-ink-2"
       >
         Filtrar
