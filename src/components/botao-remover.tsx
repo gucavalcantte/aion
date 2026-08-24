@@ -53,7 +53,9 @@ export function BotaoRemover({
 
       <dialog
         ref={dialogo}
-        className="m-auto w-[420px] max-w-[calc(100vw-32px)] rounded-xl border border-line bg-card p-0 text-ink backdrop:bg-black/70"
+        /* whitespace-normal: dentro da tabela a célula é nowrap, e o diálogo
+           herda isso mesmo estando na camada de cima — o texto não quebrava. */
+        className="m-auto w-[420px] max-w-[calc(100vw-32px)] whitespace-normal rounded-xl border border-line bg-card p-0 text-left text-ink backdrop:bg-black/70"
       >
         <div className="p-[26px]">
           <div className="mb-4 flex items-start gap-[13px]">

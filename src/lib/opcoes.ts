@@ -38,3 +38,24 @@ export function rotuloRiscoRetorno(valor: number | null | undefined) {
 export function ehTempoGrafico(v: string): v is (typeof TEMPOS_GRAFICOS)[number] {
   return (TEMPOS_GRAFICOS as readonly string[]).includes(v);
 }
+
+/**
+ * Rótulos curtos para a tabela de backteste.
+ * "Inclinada para baixo" ocupa 205px de coluna; "Inclinada ↓" ocupa 128.
+ * Com 16 colunas, essa diferença decide se a tela rola 400px ou 1300px.
+ * O valor gravado no banco continua sendo o longo.
+ */
+const CURTOS: Record<string, string> = {
+  "Inclinada para cima": "Inclinada ↑",
+  "Inclinada para baixo": "Inclinada ↓",
+  "Contra a tendência": "Contra",
+  "A favor da tendência": "A favor",
+  "Encostado na M20": "Encostado M20",
+  "Próximo à M20": "Próximo M20",
+  "Longe da M20": "Longe M20",
+  "Encostado na M20 e M200": "Encostado M20+M200",
+};
+
+export function curto(valor: string) {
+  return CURTOS[valor] ?? valor;
+}
