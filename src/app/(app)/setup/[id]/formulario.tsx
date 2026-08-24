@@ -105,11 +105,11 @@ export function FormularioSetup({ setup }: { setup: SetupEmEdicao }) {
               <button
                 type="button"
                 onClick={() => arquivoRef.current?.click()}
-                className="flex h-[148px] w-full items-center justify-center overflow-hidden rounded-lg bg-input"
+                className="flex h-[210px] w-full items-center justify-center overflow-hidden rounded-lg bg-input p-2"
               >
                 {previa && !removida ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={previa} alt="" className="size-full object-cover" />
+                  <img src={previa} alt="" className="size-full rounded-md object-contain" />
                 ) : (
                   <span className="text-[13.5px] text-ink-4">clique para escolher uma imagem</span>
                 )}

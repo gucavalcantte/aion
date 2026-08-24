@@ -14,6 +14,7 @@ const AMOSTRA_CURTA = 20;
 export function GradeDeSetups({ setups }: { setups: SetupComEstatistica[] }) {
   const [ordem, setOrdem] = useState(setups);
   const [arrastando, setArrastando] = useState<string | null>(null);
+  const [ampliada, setAmpliada] = useState<{ src: string; nome: string } | null>(null);
 
   function soltarSobre(alvo: string) {
     if (!arrastando || arrastando === alvo) return;
@@ -27,6 +28,7 @@ export function GradeDeSetups({ setups }: { setups: SetupComEstatistica[] }) {
   }
 
   return (
+    <>
     <div className="grid grid-cols-3 gap-4">
       {ordem.map((setup) => (
         <article
@@ -41,10 +43,24 @@ export function GradeDeSetups({ setups }: { setups: SetupComEstatistica[] }) {
             (arrastando === setup.id ? "border-accent opacity-40" : "border-line")
           }
         >
-          <div className="relative flex h-[122px] items-center justify-center border-b border-line-soft bg-well">
+          <div className="relative flex h-[186px] items-center justify-center border-b border-line-soft bg-well p-2">
             {setup.imagem ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={setup.imagem} alt="" className="size-full object-cover" />
+              <button
+                type="button"
+                onClick={() => setAmpliada({ src: setup.imagem!, nome: setup.nome })}
+                aria-label={`Ampliar imagem de ${setup.nome}`}
+                className="group relative size-full"
+              >
+                {/* object-contain, não cover: em print de gráfico o corte come
+                    metade do padrão, que é justamente o que se quer ver. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={setup.imagem} alt="" className="size-full rounded-md object-contain" />
+                <span className="absolute inset-0 flex items-center justify-center rounded-md bg-black/45 opacity-0 transition-opacity group-hover:opacity-100">
+                  <svg width="26" height="26" viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="7.2" cy="7.2" r="4.6" /><path d="M10.6 10.6L14 14M7.2 5.4v3.6M5.4 7.2h3.6" />
+                  </svg>
+                </span>
+              </button>
             ) : (
               <span className="text-[13px] text-ink-4">sem imagem</span>
             )}
@@ -95,6 +111,27 @@ export function GradeDeSetups({ setups }: { setups: SetupComEstatistica[] }) {
         </article>
       ))}
     </div>
+
+    {ampliada && (
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Imagem de ${ampliada.nome}`}
+        onClick={() => setAmpliada(null)}
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/80 p-8"
+      >
+        <p className="display text-[19px] text-white">{ampliada.nome}</p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={ampliada.src}
+          alt=""
+          onClick={(e) => e.stopPropagation()}
+          className="max-h-[80vh] max-w-full rounded-lg object-contain shadow-2xl"
+        />
+        <p className="text-[13.5px] text-white/60">clique fora para fechar</p>
+      </div>
+    )}
+    </>
   );
 }
 
