@@ -1,0 +1,214 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Telas"
+    },
+    {
+      "id": "page-2",
+      "name": "Plano"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "title": "Perfomance — escuro",
+      "page": "page-1",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1780
+    },
+    {
+      "file": "PerfomanceClaro.dc.html",
+      "title": "Perfomance — claro",
+      "page": "page-1",
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 1780
+    },
+    {
+      "file": "Login.dc.html",
+      "title": "Login",
+      "page": "page-1",
+      "x": 3040,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "CadastroPerfomance.dc.html",
+      "title": "Cadastro de trade",
+      "page": "page-1",
+      "x": 3040,
+      "y": 1020,
+      "w": 1440,
+      "h": 1020
+    },
+    {
+      "file": "Estudos.dc.html",
+      "title": "Estudos do dia — escuro",
+      "page": "page-1",
+      "x": 0,
+      "y": 1900,
+      "w": 1440,
+      "h": 1080
+    },
+    {
+      "file": "EstudosClaro.dc.html",
+      "title": "Estudos do dia — claro",
+      "page": "page-1",
+      "x": 1520,
+      "y": 1900,
+      "w": 1440,
+      "h": 1080
+    },
+    {
+      "file": "CadastroEstudo.dc.html",
+      "title": "Cadastro de estudo",
+      "page": "page-1",
+      "x": 3040,
+      "y": 2160,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Conta.dc.html",
+      "title": "Contas",
+      "page": "page-1",
+      "x": 0,
+      "y": 3100,
+      "w": 1440,
+      "h": 1080
+    },
+    {
+      "file": "Setup.dc.html",
+      "title": "Setups",
+      "page": "page-1",
+      "x": 1520,
+      "y": 3100,
+      "w": 1440,
+      "h": 990
+    },
+    {
+      "file": "Backteste.dc.html",
+      "title": "Backteste — tempos gráficos",
+      "page": "page-1",
+      "x": 3040,
+      "y": 3180,
+      "w": 1440,
+      "h": 1120
+    },
+    {
+      "file": "BacktesteTabela.dc.html",
+      "title": "Backteste — cadastro na linha",
+      "page": "page-1",
+      "x": 0,
+      "y": 4300,
+      "w": 1440,
+      "h": 2000
+    },
+    {
+      "file": "BacktesteClaro.dc.html",
+      "title": "Backteste — claro",
+      "page": "page-1",
+      "x": 1520,
+      "y": 4300,
+      "w": 1440,
+      "h": 2000
+    },
+    {
+      "file": "Plano.dc.html",
+      "title": "Plano — escuro",
+      "page": "page-2",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1620
+    },
+    {
+      "file": "PlanoClaro.dc.html",
+      "title": "Plano — claro",
+      "page": "page-2",
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 1620
+    },
+    {
+      "file": "PlanoImpressao.dc.html",
+      "title": "Plano — folha A4 para imprimir",
+      "page": "page-2",
+      "x": 3040,
+      "y": 0,
+      "w": 1123,
+      "h": 794,
+      "print": "fixed"
+    },
+    {
+      "file": "PlanoEditar.dc.html",
+      "title": "Plano — editar pré-mercado",
+      "page": "page-2",
+      "x": 0,
+      "y": 1740,
+      "w": 1440,
+      "h": 1160
+    },
+    {
+      "file": "SetupEditar.dc.html",
+      "title": "Setup — editar execução",
+      "page": "page-2",
+      "x": 1520,
+      "y": 1740,
+      "w": 1440,
+      "h": 1040
+    }
+  ],
+  "annotations": [
+    {
+      "id": "nota-plano",
+      "x": 0,
+      "y": -240,
+      "w": 440,
+      "page": "page-2",
+      "text": "PLANO\nTranscrito do seu PDF. Pré-mercado no topo (gerenciamento, ativos, regras, os dois checklists) e um bloco por setup abaixo, com as seis colunas de execução do documento.\n\nA folha A4 à direita é o botão Imprimir — mesmo layout do seu PDF, paisagem, uma página."
+    },
+    {
+      "id": "nota-mlpt",
+      "x": 1520,
+      "y": -240,
+      "w": 440,
+      "page": "page-2",
+      "text": "MLPT E MLPD\nO plano não digita esses números: ele lê da conta selecionada. Digitar duas vezes é como o valor fica errado.\n\nO MLPD (perda máxima do dia) não existia no app — entrou como campo em Conta, ao lado do MLPT."
+    },
+    {
+      "id": "nota-toggle",
+      "x": 0,
+      "y": -240,
+      "w": 440,
+      "page": "page-1",
+      "text": "MENU\nEntraram Plano (3º item) e, no rodapé da barra lateral, o alternador claro/escuro e o Sair.\n\nO cadastro de estudo virou janela: o print é o conteúdo principal, então ele ocupa o lado esquerdo inteiro e os campos ficam à direita."
+    },
+    {
+      "id": "nota-conta",
+      "x": 1520,
+      "y": -240,
+      "w": 440,
+      "page": "page-1",
+      "text": "CONTA\nGanhou o MLPD ao lado do MLPT. São as duas linhas que o Plano usa como regra de gerenciamento — e as duas que o app pode conferir sozinho durante o dia."
+    },
+    {
+      "id": "nota-crud",
+      "x": 3040,
+      "y": -240,
+      "w": 440,
+      "page": "page-2",
+      "text": "CRUD DO PLANO\nEle tem duas metades, porque o plano tem duas naturezas.\n\nPré-mercado (registro único): janela, limites, ativos, regras e checklists. Listas com arrastar, editar e remover.\n\nExecução (por setup): os seis campos vivem dentro do setup, editados na tela do setup. O Plano só monta a folha."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-2"
+  }
+}

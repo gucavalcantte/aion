@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#14120D 0%,#2C2718 100%);color:#F6F1E7;font-family:Inter,system-ui,-apple-system,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+    a{color:#A99BFF;text-decoration:none}
+    .num{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+    .ser{font-family:'Bricolage Grotesque',Inter,system-ui,sans-serif;font-weight:700;letter-spacing:-0.022em}
+    .klabel{font-size:11.5px;letter-spacing:0.10em;text-transform:uppercase;color:#A79C89;font-weight:600;margin-bottom:10px}
+    .btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 19px;border-radius:9px;border:1px solid rgba(255,238,208,0.24);background:#2C2820;color:#DCD3C2;font-size:15px;font-weight:500;font-family:inherit}
+    .btn.pri{background:#6A5AE0;border-color:#6A5AE0;color:#FFFFFF;font-weight:600}
+    .opt{padding:9px 14px;border-radius:8px;border:1px solid rgba(255,238,208,0.24);background:#2C2820;color:#A79C89;font-size:14.5px;font-weight:500;white-space:nowrap}
+    .opt.on{background:#6A5AE0;border-color:#6A5AE0;color:#FFFFFF}
+    .chips{display:flex;flex-wrap:wrap;gap:7px}
+    .inp{height:44px;border-radius:9px;border:1px solid rgba(255,238,208,0.26);background:#131009;color:#F6F1E7;padding:0 14px;display:flex;align-items:center;justify-content:space-between;font-size:15px}
+    kbd{font-family:'JetBrains Mono',monospace;font-size:12px;background:#2C2820;border:1px solid rgba(255,238,208,0.24);border-radius:5px;padding:2px 6px;color:#A79C89}
+  </style>
+</helmet>
+
+<div style="position:relative;min-height:880px;background:linear-gradient(180deg,#14120D 0%,#2C2718 100%)">
+
+  <div style="position:absolute;inset:0;display:flex;opacity:0.26">
+    <div style="width:236px;border-right:1px solid rgba(255,238,208,0.10);background:rgba(0,0,0,0.16)"></div>
+    <div style="flex:1;padding:26px 30px">
+      <div style="height:24px;width:280px;background:#2C2820;border-radius:5px"></div>
+      <div style="height:54px;background:#221E17;border-radius:11px;margin-top:26px"></div>
+      <div style="display:flex;gap:14px;margin-top:20px">
+        <div style="width:392px;height:430px;background:#221E17;border-radius:12px"></div>
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="height:340px;background:#221E17;border-radius:12px"></div>
+          <div style="height:340px;background:#221E17;border-radius:12px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute;inset:0;background:rgba(20,18,13,0.78)"></div>
+
+  <div style="position:relative;display:flex;justify-content:center;padding-top:78px">
+    <div style="width:952px;background:#221E17;border:1px solid rgba(255,238,208,0.20);border-radius:15px;box-shadow:0 34px 90px rgba(0,0,0,0.6)">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid rgba(255,238,208,0.13)">
+        <div class="ser" style="font-size:21px">Novo estudo</div>
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="#A79C89" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      </div>
+
+      <div style="padding:24px 26px;display:grid;grid-template-columns:minmax(0,1fr) 344px;gap:26px">
+
+        <div>
+          <div class="klabel">Print do gr&aacute;fico</div>
+          <div style="border:1px dashed rgba(255,238,208,0.30);border-radius:12px;background:#1A1710;padding:12px">
+            <div style="background:#131009;border-radius:9px;height:294px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+              <svg width="480" height="256" viewBox="0 0 480 256" fill="none">
+                <line x1="0" y1="52" x2="480" y2="52" stroke="rgba(255,238,208,0.06)"/>
+                <line x1="0" y1="112" x2="480" y2="112" stroke="rgba(255,238,208,0.06)"/>
+                <line x1="0" y1="172" x2="480" y2="172" stroke="rgba(255,238,208,0.06)"/>
+                <line x1="0" y1="232" x2="480" y2="232" stroke="rgba(255,238,208,0.06)"/>
+                <path d="M14,196 C90,184 160,158 240,120 C310,90 400,66 468,54" stroke="#A99BFF" stroke-width="1.8" opacity="0.6" fill="none"/>
+                <path d="M14,222 C100,216 190,202 270,182 C350,164 420,150 468,142" stroke="#7E7462" stroke-width="1.5" opacity="0.5" fill="none"/>
+                <rect x="34" y="176" width="14" height="30" rx="3" fill="#EC6C82" opacity="0.7"/><rect x="40" y="164" width="2" height="54" fill="#EC6C82" opacity="0.7"/>
+                <rect x="72" y="166" width="14" height="26" rx="3" fill="#9BF7CE" opacity="0.7"/><rect x="78" y="154" width="2" height="50" fill="#9BF7CE" opacity="0.7"/>
+                <rect x="110" y="160" width="14" height="22" rx="3" fill="#EC6C82" opacity="0.7"/><rect x="116" y="150" width="2" height="42" fill="#EC6C82" opacity="0.7"/>
+                <rect x="148" y="150" width="14" height="24" rx="3" fill="#9BF7CE" opacity="0.7"/><rect x="154" y="138" width="2" height="48" fill="#9BF7CE" opacity="0.7"/>
+                <rect x="186" y="124" width="17" height="14" rx="3" fill="#9BF7CE"/><rect x="193.5" y="88" width="2.4" height="70" fill="#9BF7CE"/>
+                <rect x="228" y="94" width="14" height="30" rx="3" fill="#9BF7CE" opacity="0.7"/><rect x="234" y="82" width="2" height="54" fill="#9BF7CE" opacity="0.7"/>
+                <rect x="266" y="80" width="14" height="24" rx="3" fill="#9BF7CE" opacity="0.7"/><rect x="272" y="68" width="2" height="48" fill="#9BF7CE" opacity="0.7"/>
+                <rect x="304" y="66" width="14" height="20" rx="3" fill="#9BF7CE" opacity="0.7"/><rect x="310" y="56" width="2" height="40" fill="#9BF7CE" opacity="0.7"/>
+                <rect x="342" y="60" width="14" height="16" rx="3" fill="#EC6C82" opacity="0.7"/><rect x="348" y="50" width="2" height="36" fill="#EC6C82" opacity="0.7"/>
+                <rect x="380" y="50" width="14" height="18" rx="3" fill="#9BF7CE" opacity="0.7"/><rect x="386" y="40" width="2" height="38" fill="#9BF7CE" opacity="0.7"/>
+                <path d="M194 172 L194 148" stroke="#A99BFF" stroke-width="2.4"/>
+                <path d="M186 156 L194 146 L202 156" stroke="#A99BFF" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="194" cy="178" r="5.5" fill="#A99BFF"/>
+              </svg>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:13px">
+              <span class="num" style="font-size:13px;color:#A79C89">mnq-0938-tail.png &middot; 214 KB</span>
+              <span style="color:#EC6C82;font-size:14px">Remover</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;margin-top:12px;color:#7E7462;font-size:13.5px">
+            Cole o print com <kbd>Ctrl</kbd>+<kbd>V</kbd>, arraste o arquivo, ou clique para escolher
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div>
+            <div class="klabel">Data</div>
+            <div class="inp">
+              <span class="num">24/08/2026</span>
+              <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="#A79C89" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"/></svg>
+            </div>
+          </div>
+
+          <div>
+            <div class="klabel">Ativo</div>
+            <div class="chips">
+              <div class="opt num">MES</div>
+              <div class="opt num">MYM</div>
+              <div class="opt num on">MNQ</div>
+              <div class="opt num">MGC</div>
+              <div class="opt num">MCL</div>
+              <div class="opt num">MBT</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="klabel">Tempo gr&aacute;fico</div>
+            <div class="chips">
+              <div class="opt num">1m</div>
+              <div class="opt num on">2m</div>
+              <div class="opt num">3m</div>
+              <div class="opt num">5m</div>
+              <div class="opt num">15m</div>
+              <div class="opt num">60m</div>
+              <div class="opt num">1D</div>
+            </div>
+          </div>
+
+          <div style="flex:1;display:flex;flex-direction:column">
+            <div class="klabel">Observa&ccedil;&atilde;o</div>
+            <div style="flex:1;min-height:132px;border-radius:9px;border:1px solid rgba(255,238,208,0.26);background:#131009;padding:13px 15px;color:#A79C89;font-size:14.5px;line-height:1.6">Tail na M200 &agrave;s 09:38, exatamente como est&aacute; no plano. Eu vi, marquei no gr&aacute;fico e n&atilde;o puxei o gatilho.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 26px;border-top:1px solid rgba(255,238,208,0.13);background:rgba(0,0,0,0.18);border-radius:0 0 15px 15px">
+        <div style="color:#7E7462;font-size:13.5px">Estudo n&atilde;o entra em nenhuma estat&iacute;stica &mdash; &eacute; registro, n&atilde;o trade.</div>
+        <div style="display:flex;gap:10px">
+          <div class="btn">Cancelar</div>
+          <div class="btn pri">Salvar estudo</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

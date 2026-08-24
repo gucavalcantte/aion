@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    *{box-sizing:border-box}
+    body{margin:0;background:#FFFFFF;color:#1A1A18;font-family:Inter,system-ui,sans-serif;font-size:9px;-webkit-font-smoothing:antialiased}
+    a{color:#4A3CC4}
+    .num{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+    .ser{font-family:'Bricolage Grotesque',Inter,sans-serif;font-weight:700;letter-spacing:-0.02em}
+    .sec{font-size:10px;font-weight:700;color:#4A3CC4;letter-spacing:0.02em;margin-bottom:7px}
+    .sub{font-size:8px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:#6B6B63;margin:9px 0 5px}
+    .li{display:flex;gap:6px;align-items:flex-start;padding:2px 0;font-size:8.6px;line-height:1.45;color:#2A2A26}
+    .dot{width:3px;height:3px;border-radius:50%;background:#4A3CC4;flex-shrink:0;margin-top:5px}
+    .box{width:8px;height:8px;border-radius:2px;border:1px solid #A8A89E;flex-shrink:0;margin-top:1px}
+    table{width:100%;border-collapse:collapse;table-layout:fixed}
+    th{font-size:7.6px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#3A3A34;background:#F0EFEA;border:0.5px solid #C9C8C0;padding:5px 6px;text-align:left}
+    td{border:0.5px solid #C9C8C0;padding:6px;font-size:7.6px;line-height:1.5;color:#2A2A26;vertical-align:top}
+    .rowlab{background:#F6F5F1;text-align:center;font-weight:700;font-size:8.4px;color:#1A1A18;vertical-align:middle}
+    .chip{display:inline-block;padding:2px 6px;border:0.5px solid #C9C8C0;border-radius:4px;font-size:8px;font-weight:600;margin:0 3px 3px 0}
+  </style>
+</helmet>
+
+<div style="width:1123px;height:794px;background:#FFFFFF;padding:26px 28px;display:flex;flex-direction:column">
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:11px;border-bottom:1.4px solid #1A1A18">
+    <div style="display:flex;align-items:center;gap:10px">
+      <svg width="19" height="19" viewBox="0 0 16 16" fill="none" stroke="#1A1A18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.6 8a5.6 5.6 0 1 1-1.95-4.25"/><path d="M13.8 2.3v3.3h-3.3"/></svg>
+      <span class="ser" style="font-size:17px;letter-spacing:0.20em;padding-left:0.20em">AION</span>
+      <span style="width:1px;height:16px;background:#C9C8C0;margin:0 4px"></span>
+      <span class="ser" style="font-size:17px">Plano de trade</span>
+    </div>
+    <div style="text-align:right;color:#6B6B63;font-size:8.4px;line-height:1.5">
+      <div>Conta <span class="num" style="color:#1A1A18;font-weight:600">512-4471</span> &middot; Remunerada</div>
+      <div>Revis&atilde;o <span class="num">12/08/2026</span></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:268px minmax(0,1fr);gap:22px;flex:1;padding-top:14px">
+
+    <!-- PRE-MERCADO -->
+    <div style="border:0.5px solid #C9C8C0;border-radius:5px;padding:13px 15px">
+      <div class="sec">1. Pr&eacute;-mercado</div>
+
+      <div class="sub">Gerenciamento</div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1;border:0.5px solid #C9C8C0;border-radius:4px;padding:7px 9px">
+          <div class="num" style="font-size:7.6px;color:#6B6B63">MLPT &middot; por trade</div>
+          <div class="num" style="font-size:16px;font-weight:600;color:#B3243C;margin-top:2px">$150</div>
+        </div>
+        <div style="flex:1;border:0.5px solid #C9C8C0;border-radius:4px;padding:7px 9px">
+          <div class="num" style="font-size:7.6px;color:#6B6B63">MLPD &middot; por dia</div>
+          <div class="num" style="font-size:16px;font-weight:600;color:#B3243C;margin-top:2px">$300</div>
+        </div>
+      </div>
+
+      <div class="sub">Ativos</div>
+      <div>
+        <span class="chip num">MYM</span><span class="chip num">MES</span><span class="chip num">MCL</span><span class="chip num">MGC</span><span class="chip num">MNQ</span>
+      </div>
+
+      <div class="sub">Regras</div>
+      <div class="li"><span class="dot"></span><span>Janela operacional: <strong class="num">09h00 &agrave;s 12h00</strong>.</span></div>
+      <div class="li"><span class="dot"></span><span>M&iacute;nimo <strong class="num">2</strong> trades / m&aacute;ximo <strong class="num">5</strong> trades.</span></div>
+      <div class="li"><span class="dot"></span><span>Ap&oacute;s <strong>2 loss seguidos</strong>: encerro o dia.</span></div>
+      <div class="li"><span class="dot"></span><span>N&atilde;o entro a menos de 5 minutos de not&iacute;cia relevante.</span></div>
+      <div class="li"><span class="dot"></span><span>Nunca arrisco mais que o MLPT. Se o stop t&eacute;cnico n&atilde;o cabe no MLPT, o trade n&atilde;o existe.</span></div>
+      <div class="li"><span class="dot"></span><span>S&oacute; entro em setup claro, a regi&atilde;o definida <strong>antes</strong> do clique.</span></div>
+
+      <div class="sub">Checklist de abertura</div>
+      <div class="li"><span class="box"></span><span>Marcar as regi&otilde;es do dia: topo/fundo anterior.</span></div>
+      <div class="li"><span class="box"></span><span>Abrir os Estudos do dia para preencher no p&oacute;s-sess&atilde;o.</span></div>
+
+      <div class="sub">Checklist de fechamento</div>
+      <div class="li"><span class="box"></span><span>Cadastrar todos os trades na Perfomance logo ap&oacute;s a sess&atilde;o.</span></div>
+      <div class="li"><span class="box"></span><span><strong class="num">30</strong> backtests do setup que levou loss pela manh&atilde;.</span></div>
+    </div>
+
+    <!-- EXECUCAO -->
+    <div style="border:0.5px solid #C9C8C0;border-radius:5px;padding:13px 15px;display:flex;flex-direction:column">
+      <div class="sec">2. Execu&ccedil;&atilde;o</div>
+
+      <table>
+        <colgroup>
+          <col style="width:58px"><col style="width:17%"><col style="width:15%"><col style="width:16%"><col style="width:16%"><col style="width:17%"><col style="width:15%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Evento / gatilho</th>
+            <th>Adi&ccedil;&atilde;o</th>
+            <th>Localiza&ccedil;&atilde;o</th>
+            <th>Stop inicial</th>
+            <th>Realiza&ccedil;&atilde;o de lucros</th>
+            <th>Gest&atilde;o de stop</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rowlab">VBS<br>VSS</td>
+            <td>2 ou mais barras de respiro contra a tend&ecirc;ncia. Gatilho na viola&ccedil;&atilde;o da m&aacute;xima (VBS) / m&iacute;nima (VSS) do candle de respiro.<br><br>Qualidade sobe com BT/TT e 180.</td>
+            <td>Somente em novo setup pr&oacute;ximo ao ponto de entrada, ou se for a favor do meu m&eacute;dio.<br><br>Troca de cor. N&atilde;o adicionar quando corrigir mais de 50%.</td>
+            <td>A favor da tend&ecirc;ncia.<br><br>M&aacute;ximo 2 pernadas &mdash; n&atilde;o pego a 3&ordf; nem a 4&ordf;.<br><br>Apoiado em suporte/resist&ecirc;ncia: m&eacute;dia, topo/fundo anterior.</td>
+            <td>Abaixo do fundo do VBS / acima do topo do VSS.<br><br>Double Deep: ajuste em 80% da retra&ccedil;&atilde;o.<br><br>Stop grande demais: MLPT ou passo o trade.</td>
+            <td>Pushes 1 ou 1/5.<br><br>Nova m&aacute;xima / nova m&iacute;nima ap&oacute;s pullback.<br><br>80% da pernada anterior, regi&otilde;es de topo e fundo que podem fazer o pre&ccedil;o reagir.</td>
+            <td>Stop inicial.<br><br>Breakeven se o trade demorar muito.<br><br>Piv&ocirc; ou double deep ap&oacute;s recuperar 80%.</td>
+          </tr>
+          <tr>
+            <td class="rowlab">TRAP</td>
+            <td>Rompimento violento de regi&atilde;o que &eacute; <strong>imediatamente</strong> negado (1 a 3 barras).<br><br>Confirma&ccedil;&atilde;o: 180, barra elefante de retorno, TT/BT na regi&atilde;o.<br><br>Congest&atilde;o bem estabelecida ou final da tend&ecirc;ncia para pegar o retorno.</td>
+            <td>Adicionar ao formar um VBS/VSS depois da trap, em uma pernada clara.<br><br>Outras situa&ccedil;&otilde;es sem adi&ccedil;&atilde;o.</td>
+            <td>Em regi&atilde;o j&aacute; testada e relevante: topo/fundo anterior.<br><br>Se a nega&ccedil;&atilde;o demorar, <strong>N&Atilde;O &eacute; TRAP</strong> &mdash; &eacute; um rompimento v&aacute;lido.</td>
+            <td>Acima/abaixo da extremidade do falso rompimento (o pavio da armadilha).<br><br>Acima ou abaixo da congest&atilde;o se houver uma.<br><br>Barra muito ampla: n&atilde;o fazer.</td>
+            <td>50% e 2/3 do movimento que criou a armadilha.<br><br>Regi&atilde;o oposta da estrutura.<br><br>Pushes 1.</td>
+            <td>Stop inicial.<br><br>Breakeven se o trade demorar muito.<br><br>Realizando lucro em 1:1 ou 1,5:1.</td>
+          </tr>
+          <tr>
+            <td class="rowlab">BE DE<br>LIMPEZA<br>(CEB)</td>
+            <td>Barra elefante ampla, corpo grande, fechamento acima ou abaixo da extremidade.<br><br>Se abrir numa extremidade e fechar na outra em uma vela s&oacute;, n&atilde;o fazer &mdash; soco no topo ou fundo da congest&atilde;o &eacute; mais f&aacute;cil de devolver.<br><br>Entrada por confirma&ccedil;&atilde;o.</td>
+            <td>Somente ap&oacute;s P1 em VBS/VSS.</td>
+            <td>Posi&ccedil;&atilde;o 1, ap&oacute;s 5 ou mais barras pequenas, alinhada &agrave; tend&ecirc;ncia, apenas 2 a 3 vezes maior que as barras da congest&atilde;o.<br><br>Barra excessiva n&atilde;o fazer.</td>
+            <td>MLPT atr&aacute;s da congest&atilde;o.</td>
+            <td>Parcial em 1 push.<br><br>Suportes e resist&ecirc;ncias.<br><br>Perdeu momentum, sair do trade &mdash; pode arredondar o pre&ccedil;o, tempo cura tudo.</td>
+            <td>Stop inicial.<br><br>Breakeven se o trade demorar muito.<br><br>Realizando lucro em 1:1 ou 1,5:1.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:auto;padding-top:11px;font-size:8.4px;font-style:italic;color:#4A4A44;line-height:1.5">
+        Uma boa opera&ccedil;&atilde;o pode dar loss e uma opera&ccedil;&atilde;o ruim pode dar gain. O que se avalia aqui &eacute; o processo: evento + localiza&ccedil;&atilde;o + risco + condu&ccedil;&atilde;o.
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

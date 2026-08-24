@@ -1,0 +1,695 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    .ser{font-family:'Bricolage Grotesque',Inter,system-ui,sans-serif;font-weight:700;letter-spacing:-0.022em}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#FCF9F2 0%,#E9E2D2 100%);background-attachment:fixed;color:#241E12;font-family:Inter,system-ui,-apple-system,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+    a{color:#4A3CC4;text-decoration:none}
+    a:hover{color:#4A3CC4}
+    .num{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+    .side{background:rgba(0,0,0,0.14);width:236px;flex-shrink:0;border-right:1px solid rgba(58,48,28,0.14);padding:22px 14px;display:flex;flex-direction:column}
+    .brand{display:flex;align-items:center;gap:10px;padding:2px 10px 24px;font-size:17px;font-weight:700;letter-spacing:0.17em}
+    .nav{display:flex;flex-direction:column;gap:2px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:7px;color:#7A6F58;font-weight:500}
+    .nav-item.on{background:#6A5AE0;color:#FFFFFF}
+    .klabel{font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#7A6F58;font-weight:600}
+    .btn{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:7px;border:1px solid rgba(58,48,28,0.20);background:#EFEADC;color:#4A4230;font-size:14.5px;font-weight:500;font-family:inherit}
+    .btn.pri{background:#6A5AE0;border-color:#6A5AE0;color:#FFFFFF;font-weight:600}
+    table{border-collapse:separate;border-spacing:0}
+    th{text-align:left;font-size:12px;letter-spacing:0.07em;text-transform:uppercase;color:#241E12;font-weight:700;background:#F0EADB;padding:11px 12px;border-bottom:1px solid rgba(58,48,28,0.20);white-space:nowrap}
+    td{background:#FFFFFF;padding:8px 12px;border-bottom:1px solid rgba(58,48,28,0.10);color:#4A4230;white-space:nowrap;font-size:14.5px;vertical-align:middle}
+    .stick{position:sticky;left:0;background:#F5F1E7;z-index:3;width:56px}
+    .stick2{position:sticky;left:56px;background:#F5F1E7;z-index:3;box-shadow:8px 0 12px -8px rgba(58,48,28,0.14)}
+    th.stick,th.stick2{background:#F0EADB}
+    tr.entry td{background:#EFEADC;border-bottom:1px solid rgba(58,48,28,0.20)}
+    tr.entry td.stick,tr.entry td.stick2{background:#EFEADC}
+    .sel{height:38px;border-radius:7px;border:1px solid rgba(58,48,28,0.22);background:#FFFFFF;color:#7A6F58;padding:0 11px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
+    .sel.has{color:#241E12;border-color:rgba(58,48,28,0.24)}
+    .inp{height:38px;border-radius:7px;border:1px solid rgba(58,48,28,0.22);background:#FFFFFF;color:#241E12;padding:0 11px;display:flex;align-items:center;font-size:14px}
+    .fixed{color:#7A6F58;font-size:14.5px;padding-left:2px}
+    .chip{display:inline-flex;align-items:center;height:23px;padding:0 9px;border-radius:5px;background:#F5F1E7;color:#7A6F58;font-size:13px;font-weight:500}
+    .ttl{font-family:'Bricolage Grotesque',Inter,system-ui,sans-serif;font-weight:700;letter-spacing:-0.022em;font-size:19px}
+    .ctx{background:#F5F1E7;border:1px solid rgba(58,48,28,0.09);border-radius:10px;padding:14px 16px}
+    .ctxh{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+    .ctxn{font-size:14.5px;font-weight:600;color:#241E12;line-height:1.35}
+    .ctxl{font-size:13px;color:#7A6F58;margin-top:5px}
+    .ctxp{font-size:21px;font-weight:600;letter-spacing:-0.03em}
+    .ctxf{font-size:12px;color:#948A72;margin-top:4px}
+    .ctxb{height:5px;border-radius:3px;background:rgba(58,48,28,0.10);overflow:hidden;display:flex;margin-top:12px}
+    .ctxm{display:flex;justify-content:space-between;margin-top:9px;font-size:12.5px}
+    .dim{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:8px;border:1px solid rgba(58,48,28,0.20);background:#EFEADC;color:#7A6F58;font-size:13.5px;font-weight:500}
+    .dim.on{background:#6A5AE0;border-color:#6A5AE0;color:#FFFFFF;font-weight:600}
+    .dimh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;font-size:14px;color:#4A4230}
+    .dimv{font-size:16px;font-weight:600}
+    .dimn{color:#948A72;font-size:12.5px}
+    .split{display:flex;gap:2px;height:9px}
+    .mh{font-size:10px;text-align:center;padding-bottom:4px}
+    .mr{font-size:10px;display:flex;align-items:center}
+    .cell{background:#F5F1E7;border:1px solid rgba(58,48,28,0.09);border-radius:10px;padding:9px 6px;text-align:center}
+    .cv{font-size:15px;font-weight:600}
+    .cn{font-size:11px;color:#948A72;margin-top:3px}
+  </style>
+</helmet>
+
+<div style="background:linear-gradient(180deg,#FCF9F2 0%,#E9E2D2 100%);display:flex;min-height:1980px">
+
+  <aside class="side">
+    <div class="brand">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#4A3CC4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.6 8a5.6 5.6 0 1 1-1.95-4.25"/><path d="M13.8 2.3v3.3h-3.3"/></svg>
+      AION
+    </div>
+    <nav class="nav">
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5A1.5 1.5 0 0 1 3.5 4h9A1.5 1.5 0 0 1 14 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5z"/><path d="M2 6.8h12"/><circle cx="11" cy="10.4" r="0.9"/></svg>
+        Conta
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l6 3-6 3-6-3 6-3z"/><path d="M2 8l6 3 6-3"/><path d="M2 11.2l6 3 6-3"/></svg>
+        Setup
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6 2.4h6.8A1.5 1.5 0 0 1 12.9 3.9v8.2a1.5 1.5 0 0 1-1.5 1.5H4.6a1.5 1.5 0 0 1-1.5-1.5V3.9a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M5.8 6h4.4M5.8 8.6h4.4M5.8 11.2h2.6"/></svg>
+        Plano
+      </div>
+      <div class="nav-item on">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v4.2L2.7 12A1.4 1.4 0 0 0 3.9 14h8.2a1.4 1.4 0 0 0 1.2-2L10 6.2V2"/><path d="M5 2h6"/><path d="M4.7 10.2h6.6"/></svg>
+        Backteste
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11l4-4 3 3 5-5"/><path d="M10 5h4v4"/></svg>
+        Perfomance
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="10" rx="1.6"/><path d="M2 10.6l3.2-3.2 2.6 2.6 2-2L14 11.2"/><circle cx="10.4" cy="5.9" r="1"/></svg>
+        Estudos
+      </div>
+    </nav>
+      <div style="margin-top:auto;padding-top:16px;border-top:1px solid rgba(58,48,28,0.10);display:flex;flex-direction:column;gap:3px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 11px 9px">
+          <span style="color:#7A6F58;font-size:13.5px">Tema</span>
+          <div style="display:flex;background:#FFFFFF;border:1px solid rgba(255,238,208,0.18);border-radius:8px;padding:2px;gap:2px">
+            <div style="padding:5px 10px;border-radius:6px;background:#6A5AE0;color:#FFFFFF;display:flex;align-items:center">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 9.4A5.8 5.8 0 0 1 6.6 2.6a5.8 5.8 0 1 0 6.8 6.8z"/></svg>
+            </div>
+            <div style="padding:5px 10px;border-radius:6px;color:#948A72;display:flex;align-items:center">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.1"/><path d="M8 1.4v1.6M8 13v1.6M14.6 8H13M3 8H1.4M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1M12.7 12.7l-1.1-1.1M4.4 4.4L3.3 3.3"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="nav-item">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 13.6H3.9a1.5 1.5 0 0 1-1.5-1.5V3.9a1.5 1.5 0 0 1 1.5-1.5h2.5"/><path d="M10.6 11.2L13.8 8l-3.2-3.2"/><path d="M13.8 8H6.2"/></svg>
+          Sair
+        </div>
+      </div>
+  </aside>
+
+  <main style="flex:1;min-width:0;padding:26px 30px;display:flex;flex-direction:column;gap:20px">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;color:#7A6F58;font-size:14.5px;margin-bottom:6px">
+          <span>Backteste</span>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>
+          <span style="color:#241E12;font-weight:600">2m</span>
+        </div>
+        <h1 class="ser" style="font-size:31px;margin:0;line-height:1.05">Estudo no grafico de 2 minutos</h1>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:14px">
+      <div style="background:#FFFDF8;border:1px solid rgba(58,48,28,0.14);border-radius:12px;padding:15px 18px">
+        <div class="klabel">Registros no filtro</div>
+        <div class="num" style="font-size:26px;font-weight:600;letter-spacing:-0.03em;margin-top:8px">96</div>
+      </div>
+      <div style="background:#FFFDF8;border:1px solid rgba(58,48,28,0.14);border-radius:12px;padding:15px 18px">
+        <div class="klabel">Assertividade</div>
+        <div class="num" style="font-size:26px;font-weight:600;letter-spacing:-0.03em;margin-top:8px">64,6<span style="font-size:17px;color:#7A6F58">%</span></div>
+      </div>
+      <div style="background:#FFFDF8;border:1px solid rgba(58,48,28,0.14);border-radius:12px;padding:15px 18px">
+        <div class="klabel">Risco retorno</div>
+        <div class="num" style="font-size:26px;font-weight:600;letter-spacing:-0.03em;margin-top:8px;color:#064D3B">+1,08<span style="font-size:17px;opacity:0.6">R</span></div>
+      </div>
+    </div>
+
+    <div style="background:#FFFDF8;border:1px solid rgba(58,48,28,0.14);border-radius:10px;overflow:hidden">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid rgba(58,48,28,0.14)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="#4A3CC4" stroke-width="1.5" stroke-linejoin="round"><rect x="2" y="3" width="12" height="10" rx="1.4"/><path d="M2 6.4h12M6.2 6.4V13"/></svg>
+            <span style="font-size:15px;font-weight:600;letter-spacing:-0.01em">Dados coletados</span>
+            <span class="num" style="color:#7A6F58;font-size:14px">96</span>
+          </div>
+          <div class="btn" style="border-color:#6A5AE0;color:#FFFFFF;background:#6A5AE0">
+            Setup: Tail na M200
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+          </div>
+        </div>
+        <div class="btn pri">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>
+          Novo registro
+        </div>
+      </div>
+
+      <div style="overflow-x:auto">
+        <table style="min-width:2980px">
+          <thead>
+            <tr>
+              <th class="stick">#</th>
+              <th class="stick2" style="width:172px">Data</th>
+              <th style="width:150px">Ativo</th>
+              <th style="width:190px">Periodo</th>
+              <th style="width:160px">Operacao</th>
+              <th style="width:210px">Setup</th>
+              <th style="width:195px">Evento</th>
+              <th style="width:135px">Stop</th>
+              <th style="width:185px">Entrada</th>
+              <th style="width:205px">M20</th>
+              <th style="width:205px">M200</th>
+              <th style="width:225px">Alinhamento</th>
+              <th style="width:255px">Localizacao</th>
+              <th style="width:150px">Resultado</th>
+              <th style="width:155px">R:R</th>
+              <th style="width:250px">Notas</th>
+              <th style="width:78px"></th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr class="entry">
+              <td class="stick" style="border-left:3px solid #4A3CC4">
+                <div style="width:26px;height:26px;border-radius:7px;background:#4A3CC4;color:#2A2016;display:flex;align-items:center;justify-content:center">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>
+                </div>
+              </td>
+              <td class="stick2">
+                <div class="inp num" style="justify-content:space-between">
+                  23/08/2026
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"/></svg>
+                </div>
+              </td>
+              <td>
+                <div class="sel has num">MNQ<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="inp num" style="color:#7A6F58">0,00</div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="sel">Selecione<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7A6F58" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></div>
+              </td>
+              <td>
+                <div class="inp" style="color:#7A6F58">Observacao</div>
+              </td>
+              <td>
+                <div style="display:flex;gap:7px;justify-content:flex-end">
+                  <div style="width:34px;height:34px;border-radius:7px;background:#6A5AE0;color:#FFFFFF;display:flex;align-items:center;justify-content:center">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>
+                  </div>
+                  <div style="width:34px;height:34px;border-radius:7px;border:1px solid rgba(58,48,28,0.20);color:#7A6F58;display:flex;align-items:center;justify-content:center">
+                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="stick num" style="color:#948A72">1</td>
+              <td class="stick2 num">18/08/26</td>
+              <td class="num" style="font-weight:600">MNQ</td>
+              <td>Manha</td>
+              <td><span style="color:#064D3B">Compra</span></td>
+              <td>Tail na M200</td>
+              <td>Tail</td>
+              <td class="num">12,5</td>
+              <td>Confirmada</td>
+              <td>Inclinada p/ cima</td>
+              <td>Plana</td>
+              <td>A favor da tendencia</td>
+              <td>Encostado na M20</td>
+              <td><span class="chip" style="background:rgba(6,77,59,0.12);color:#064D3B">Gain</span></td>
+              <td class="num" style="color:#064D3B;font-weight:600">3,0</td>
+              <td style="color:#7A6F58">Abriu com gap</td>
+              <td>
+                <div style="display:flex;gap:9px;justify-content:flex-end;color:#948A72">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4"/></svg>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="stick num" style="color:#948A72">2</td>
+              <td class="stick2 num">18/08/26</td>
+              <td class="num" style="font-weight:600">MNQ</td>
+              <td>Manha</td>
+              <td><span style="color:#E24A64">Venda</span></td>
+              <td>Tail na M200</td>
+              <td>Tail</td>
+              <td class="num">9,0</td>
+              <td>Antecipada</td>
+              <td>Plana</td>
+              <td>Plana</td>
+              <td>Lateral</td>
+              <td>Longe da M20</td>
+              <td><span class="chip" style="background:rgba(226,74,100,0.13);color:#E24A64">Loss</span></td>
+              <td class="num" style="color:#E24A64;font-weight:600">-1,0</td>
+              <td style="color:#7A6F58">Entrei cedo</td>
+              <td>
+                <div style="display:flex;gap:9px;justify-content:flex-end;color:#948A72">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4"/></svg>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="stick num" style="color:#948A72">3</td>
+              <td class="stick2 num">15/08/26</td>
+              <td class="num" style="font-weight:600">MES</td>
+              <td>Tarde</td>
+              <td><span style="color:#064D3B">Compra</span></td>
+              <td>Tail na M200</td>
+              <td>Tail</td>
+              <td class="num">4,25</td>
+              <td>Confirmada</td>
+              <td>Inclinada p/ cima</td>
+              <td>Inclinada p/ cima</td>
+              <td>A favor da tendencia</td>
+              <td>Encostado na M20 e M200</td>
+              <td><span class="chip" style="background:rgba(6,77,59,0.12);color:#064D3B">Gain</span></td>
+              <td class="num" style="color:#064D3B;font-weight:600">4,0</td>
+              <td style="color:#948A72">&mdash;</td>
+              <td>
+                <div style="display:flex;gap:9px;justify-content:flex-end;color:#948A72">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4"/></svg>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="stick num" style="color:#948A72">4</td>
+              <td class="stick2 num">15/08/26</td>
+              <td class="num" style="font-weight:600">MGC</td>
+              <td>Noite</td>
+              <td><span style="color:#E24A64">Venda</span></td>
+              <td>Tail na M200</td>
+              <td>180</td>
+              <td class="num">3,80</td>
+              <td>Confirmada</td>
+              <td>Inclinada p/ baixo</td>
+              <td>Inclinada p/ baixo</td>
+              <td>A favor da tendencia</td>
+              <td>Proximo a M20</td>
+              <td><span class="chip" style="background:rgba(6,77,59,0.12);color:#064D3B">Gain</span></td>
+              <td class="num" style="color:#064D3B;font-weight:600">2,0</td>
+              <td style="color:#948A72">&mdash;</td>
+              <td>
+                <div style="display:flex;gap:9px;justify-content:flex-end;color:#948A72">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4"/></svg>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="stick num" style="color:#948A72">5</td>
+              <td class="stick2 num">14/08/26</td>
+              <td class="num" style="font-weight:600">MCL</td>
+              <td>Manha</td>
+              <td><span style="color:#064D3B">Compra</span></td>
+              <td>Tail na M200</td>
+              <td>Barra elefante</td>
+              <td class="num">0,18</td>
+              <td>Antecipada</td>
+              <td>Plana</td>
+              <td>Inclinada p/ cima</td>
+              <td>Contra a tendencia</td>
+              <td>Longe da M20</td>
+              <td><span class="chip" style="background:rgba(226,74,100,0.13);color:#E24A64">Loss</span></td>
+              <td class="num" style="color:#E24A64;font-weight:600">-1,0</td>
+              <td style="color:#7A6F58">Contra fluxo</td>
+              <td>
+                <div style="display:flex;gap:9px;justify-content:flex-end;color:#948A72">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4"/></svg>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="stick num" style="color:#948A72">6</td>
+              <td class="stick2 num">14/08/26</td>
+              <td class="num" style="font-weight:600">MYM</td>
+              <td>Tarde</td>
+              <td><span style="color:#064D3B">Compra</span></td>
+              <td>Tail na M200</td>
+              <td>Tail</td>
+              <td class="num">28,0</td>
+              <td>Confirmada</td>
+              <td>Inclinada p/ cima</td>
+              <td>Plana</td>
+              <td>A favor da tendencia</td>
+              <td>Encostado na M20</td>
+              <td><span class="chip" style="background:rgba(6,77,59,0.12);color:#064D3B">Gain</span></td>
+              <td class="num" style="color:#064D3B;font-weight:600">1,5</td>
+              <td style="color:#948A72">&mdash;</td>
+              <td>
+                <div style="display:flex;gap:9px;justify-content:flex-end;color:#948A72">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4"/></svg>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="stick num" style="color:#948A72">7</td>
+              <td class="stick2 num">13/08/26</td>
+              <td class="num" style="font-weight:600">MBT</td>
+              <td>Noite</td>
+              <td><span style="color:#E24A64">Venda</span></td>
+              <td>Tail na M200</td>
+              <td>Troca de cor</td>
+              <td class="num">420,0</td>
+              <td>Confirmada</td>
+              <td>Inclinada p/ baixo</td>
+              <td>Inclinada p/ baixo</td>
+              <td>A favor da tendencia</td>
+              <td>Proximo a M20</td>
+              <td><span class="chip" style="background:rgba(6,77,59,0.12);color:#064D3B">Gain</span></td>
+              <td class="num" style="color:#064D3B;font-weight:600">2,0</td>
+              <td style="color:#948A72">&mdash;</td>
+              <td>
+                <div style="display:flex;gap:9px;justify-content:flex-end;color:#948A72">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4"/></svg>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="stick num" style="color:#948A72">8</td>
+              <td class="stick2 num">13/08/26</td>
+              <td class="num" style="font-weight:600">MES</td>
+              <td>Manha</td>
+              <td><span style="color:#064D3B">Compra</span></td>
+              <td>Tail na M200</td>
+              <td>Tail</td>
+              <td class="num">5,00</td>
+              <td>Confirmada</td>
+              <td>Plana</td>
+              <td>Inclinada p/ cima</td>
+              <td>Lateral</td>
+              <td>Encostado na M20</td>
+              <td><span class="chip" style="background:rgba(226,74,100,0.13);color:#E24A64">Loss</span></td>
+              <td class="num" style="color:#E24A64;font-weight:600">-1,0</td>
+              <td style="color:#7A6F58">Lateral apertada</td>
+              <td>
+                <div style="display:flex;gap:9px;justify-content:flex-end;color:#948A72">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4"/></svg>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-top:1px solid rgba(58,48,28,0.14)">
+        <div style="color:#948A72;font-size:13px">Numero e Data ficam fixos ao rolar na horizontal</div>
+        <div style="display:flex;align-items:center;gap:7px;color:#7A6F58;font-size:14px">
+          <span class="num">1&ndash;8</span> de <span class="num">96</span>
+          <div style="display:flex;gap:5px;margin-left:8px">
+            <div style="width:29px;height:29px;border-radius:6px;border:1px solid rgba(58,48,28,0.20);display:flex;align-items:center;justify-content:center;color:#948A72">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
+            </div>
+            <div style="width:29px;height:29px;border-radius:6px;border:1px solid rgba(58,48,28,0.20);display:flex;align-items:center;justify-content:center;color:#4A4230">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+
+      <div style="background:#FFFDF8;border:1px solid rgba(58,48,28,0.12);border-radius:12px;padding:20px 22px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div class="ttl">Melhores contextos</div>
+            <div style="color:#7A6F58;font-size:13px;margin-top:5px">Onde este setup, neste tempo gr&aacute;fico, aparece mais forte</div>
+          </div>
+          <span style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:7px;background:rgba(106,90,224,0.20);color:#4A3CC4;font-size:11.5px;font-weight:600;white-space:nowrap;letter-spacing:0.05em">ORDENADO PELO PISO</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px">
+
+          <div class="ctx">
+            <div class="ctxh">
+              <div style="min-width:0">
+                <div class="ctxn">Confirmada &middot; A favor da tend&ecirc;ncia</div>
+                <div class="ctxl">Encostado na M20</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div class="num ctxp" style="color:#064D3B">86,4<span style="font-size:13px;color:#7A6F58">%</span></div>
+                <div class="num ctxf">piso 66,7%</div>
+              </div>
+            </div>
+            <div class="ctxb"><div style="width:66.7%;background:#064D3B"></div><div style="width:19.7%;background:rgba(155,247,206,0.32)"></div></div>
+            <div class="ctxm"><span class="num" style="color:#7A6F58">22 registros</span><span class="num" style="color:#064D3B">+2,8R</span></div>
+          </div>
+
+          <div class="ctx">
+            <div class="ctxh">
+              <div style="min-width:0">
+                <div class="ctxn">Confirmada &middot; A favor da tend&ecirc;ncia</div>
+                <div class="ctxl">Encostado na M20 e M200</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div class="num ctxp" style="color:#064D3B">85,7<span style="font-size:13px;color:#7A6F58">%</span></div>
+                <div class="num ctxf">piso 60,1%</div>
+              </div>
+            </div>
+            <div class="ctxb"><div style="width:60.1%;background:#064D3B"></div><div style="width:25.6%;background:rgba(155,247,206,0.32)"></div></div>
+            <div class="ctxm"><span class="num" style="color:#7A6F58">14 registros</span><span class="num" style="color:#064D3B">+2,5R</span></div>
+          </div>
+
+          <div class="ctx">
+            <div class="ctxh">
+              <div style="min-width:0">
+                <div class="ctxn">Confirmada &middot; Lateral</div>
+                <div class="ctxl">Pr&oacute;ximo &agrave; M20</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div class="num ctxp" style="color:#064D3B">81,8<span style="font-size:13px;color:#7A6F58">%</span></div>
+                <div class="num ctxf">piso 52,3%</div>
+              </div>
+            </div>
+            <div class="ctxb"><div style="width:52.3%;background:#064D3B"></div><div style="width:29.5%;background:rgba(155,247,206,0.32)"></div></div>
+            <div class="ctxm"><span class="num" style="color:#7A6F58">11 registros</span><span class="num" style="color:#064D3B">+1,9R</span></div>
+          </div>
+
+          <div class="ctx">
+            <div class="ctxh">
+              <div style="min-width:0">
+                <div class="ctxn">Antecipada &middot; A favor da tend&ecirc;ncia</div>
+                <div class="ctxl">Encostado na M20</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div class="num ctxp" style="color:#064D3B">77,8<span style="font-size:13px;color:#7A6F58">%</span></div>
+                <div class="num ctxf">piso 45,3%</div>
+              </div>
+            </div>
+            <div class="ctxb"><div style="width:45.3%;background:#064D3B"></div><div style="width:32.5%;background:rgba(155,247,206,0.32)"></div></div>
+            <div class="ctxm"><span class="num" style="color:#7A6F58">9 registros</span><span class="num" style="color:#064D3B">+1,4R</span></div>
+          </div>
+
+        </div>
+
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(58,48,28,0.11);display:flex;gap:11px;align-items:flex-start">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#948A72" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><circle cx="8" cy="8" r="6.2"/><path d="M8 5.2v3.4M8 10.9v.1"/></svg>
+          <div style="font-size:12.5px;line-height:1.6;color:#948A72">Fora do ranking por amostra curta: <span style="color:#7A6F58">Confirmada &middot; A favor &middot; Longe da M20</span> tem <span class="num">100%</span> em <span class="num">1</span> registro &mdash; piso de apenas <span class="num">20,7%</span>.</div>
+        </div>
+      </div>
+
+      <div style="background:#FFFDF8;border:1px solid rgba(58,48,28,0.12);border-radius:12px;padding:20px 22px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div class="ttl">Piores contextos</div>
+            <div style="color:#7A6F58;font-size:13px;margin-top:5px">Onde vale parar de operar este setup</div>
+          </div>
+          <span style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:7px;background:rgba(236,108,130,0.18);color:#E24A64;font-size:11.5px;font-weight:600;white-space:nowrap;letter-spacing:0.05em">M&Iacute;NIMO 6</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px">
+
+          <div class="ctx">
+            <div class="ctxh">
+              <div style="min-width:0">
+                <div class="ctxn">Antecipada &middot; Contra a tend&ecirc;ncia</div>
+                <div class="ctxl">Longe da M20</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div class="num ctxp" style="color:#E24A64">16,7<span style="font-size:13px;color:#7A6F58">%</span></div>
+                <div class="num ctxf">teto 41,9%</div>
+              </div>
+            </div>
+            <div class="ctxb"><div style="width:16.7%;background:#E24A64"></div><div style="width:25.2%;background:rgba(236,108,130,0.32)"></div></div>
+            <div class="ctxm"><span class="num" style="color:#7A6F58">12 registros</span><span class="num" style="color:#E24A64">-0,7R</span></div>
+          </div>
+
+          <div class="ctx">
+            <div class="ctxh">
+              <div style="min-width:0">
+                <div class="ctxn">Antecipada &middot; Lateral</div>
+                <div class="ctxl">Longe da M20</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div class="num ctxp" style="color:#E24A64">25,0<span style="font-size:13px;color:#7A6F58">%</span></div>
+                <div class="num ctxf">teto 59,9%</div>
+              </div>
+            </div>
+            <div class="ctxb"><div style="width:25%;background:#E24A64"></div><div style="width:34.9%;background:rgba(236,108,130,0.32)"></div></div>
+            <div class="ctxm"><span class="num" style="color:#7A6F58">8 registros</span><span class="num" style="color:#E24A64">-0,5R</span></div>
+          </div>
+
+          <div class="ctx">
+            <div class="ctxh">
+              <div style="min-width:0">
+                <div class="ctxn">Confirmada &middot; Contra a tend&ecirc;ncia</div>
+                <div class="ctxl">Longe da M20</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div class="num ctxp" style="color:#E24A64">28,6<span style="font-size:13px;color:#7A6F58">%</span></div>
+                <div class="num ctxf">teto 64,2%</div>
+              </div>
+            </div>
+            <div class="ctxb"><div style="width:28.6%;background:#E24A64"></div><div style="width:35.6%;background:rgba(236,108,130,0.32)"></div></div>
+            <div class="ctxm"><span class="num" style="color:#7A6F58">7 registros</span><span class="num" style="color:#E24A64">-0,4R</span></div>
+          </div>
+
+        </div>
+
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(58,48,28,0.11);display:flex;gap:11px;align-items:flex-start">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#E24A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M8 2.4l6 10.4H2z"/><path d="M8 6.4v2.8M8 11.2v.1"/></svg>
+          <div style="font-size:12.5px;line-height:1.6;color:#7A6F58">Os tr&ecirc;s t&ecirc;m <span style="color:#241E12">Longe da M20</span> em comum &mdash; <span class="num">27</span> registros custando <span class="num" style="color:#E24A64">&minus;14,2R</span> no total.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px">
+
+      <div style="background:#FFFDF8;border:1px solid rgba(58,48,28,0.12);border-radius:12px;padding:20px 22px">
+        <div style="margin-bottom:16px">
+          <div class="ttl">Assertividade por dimens&atilde;o</div>
+          <div style="color:#7A6F58;font-size:13px;margin-top:5px">Escolha um campo e veja como ele se comporta sozinho</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:19px">
+          <span class="dim">Evento</span>
+          <span class="dim on">Localiza&ccedil;&atilde;o</span>
+          <span class="dim">M20</span>
+          <span class="dim">M200</span>
+          <span class="dim">Alinhamento</span>
+          <span class="dim">Entrada</span>
+          <span class="dim">Per&iacute;odo</span>
+          <span class="dim">Opera&ccedil;&atilde;o</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div>
+            <div class="dimh"><span>Encostado na M20 e M200</span><span><span class="num dimv" style="color:#064D3B">85,7%</span> <span class="num dimn">&middot; 14</span></span></div>
+            <div class="split"><div style="width:85.7%;background:#064D3B;border-radius:5px"></div><div style="flex:1;background:#E24A64;border-radius:5px"></div></div>
+          </div>
+          <div>
+            <div class="dimh"><span>Encostado na M20</span><span><span class="num dimv" style="color:#064D3B">75,0%</span> <span class="num dimn">&middot; 36</span></span></div>
+            <div class="split"><div style="width:75%;background:#064D3B;border-radius:5px"></div><div style="flex:1;background:#E24A64;border-radius:5px"></div></div>
+          </div>
+          <div>
+            <div class="dimh"><span>Pr&oacute;ximo &agrave; M20</span><span><span class="num dimv" style="color:#064D3B">66,7%</span> <span class="num dimn">&middot; 18</span></span></div>
+            <div class="split"><div style="width:66.7%;background:#064D3B;border-radius:5px"></div><div style="flex:1;background:#E24A64;border-radius:5px"></div></div>
+          </div>
+          <div>
+            <div class="dimh"><span>Longe da M20</span><span><span class="num dimv" style="color:#E24A64">39,3%</span> <span class="num dimn">&middot; 28</span></span></div>
+            <div class="split"><div style="width:39.3%;background:#064D3B;border-radius:5px"></div><div style="flex:1;background:#E24A64;border-radius:5px"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#FFFDF8;border:1px solid rgba(58,48,28,0.12);border-radius:12px;padding:20px 22px">
+        <div style="margin-bottom:16px">
+          <div class="ttl">M20 &times; M200</div>
+          <div style="color:#7A6F58;font-size:13px;margin-top:5px">As duas m&eacute;dias cruzadas</div>
+        </div>
+        <div style="display:grid;grid-template-columns:76px repeat(3, minmax(0,1fr));gap:6px">
+          <div></div>
+          <div class="klabel mh">M200 plana</div>
+          <div class="klabel mh">M200 &uarr;</div>
+          <div class="klabel mh">M200 &darr;</div>
+
+          <div class="klabel mr">M20 plana</div>
+          <div class="cell" style="background:rgba(236,108,130,0.16)"><div class="num cv" style="color:#E24A64">37,5%</div><div class="num cn">8</div></div>
+          <div class="cell" style="background:rgba(236,108,130,0.10)"><div class="num cv" style="color:#E24A64">50,0%</div><div class="num cn">6</div></div>
+          <div class="cell" style="background:rgba(236,108,130,0.14)"><div class="num cv" style="color:#E24A64">40,0%</div><div class="num cn">5</div></div>
+
+          <div class="klabel mr">M20 &uarr;</div>
+          <div class="cell" style="background:rgba(155,247,206,0.13)"><div class="num cv" style="color:#064D3B">66,7%</div><div class="num cn">12</div></div>
+          <div class="cell" style="background:rgba(155,247,206,0.34);border-color:rgba(155,247,206,0.5)"><div class="num cv" style="color:#03362A;font-size:16px;font-weight:700">83,3%</div><div class="num cn" style="color:#7A6F58">24</div></div>
+          <div class="cell" style="background:rgba(236,108,130,0.10)"><div class="num cv" style="color:#E24A64">50,0%</div><div class="num cn">4</div></div>
+
+          <div class="klabel mr">M20 &darr;</div>
+          <div class="cell" style="background:rgba(155,247,206,0.09)"><div class="num cv" style="color:#064D3B">57,1%</div><div class="num cn">7</div></div>
+          <div class="cell" style="background:rgba(236,108,130,0.18)"><div class="num cv" style="color:#E24A64">33,3%</div><div class="num cn">3</div></div>
+          <div class="cell" style="background:rgba(155,247,206,0.20)"><div class="num cv" style="color:#064D3B">70,4%</div><div class="num cn">27</div></div>
+        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(58,48,28,0.11);font-size:12.5px;line-height:1.6;color:#7A6F58">
+          A diagonal manda: com as duas m&eacute;dias apontando para o mesmo lado, a assertividade sobe. C&eacute;lula com menos de <span class="num">6</span> registros fica sem cor forte.
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+</x-dc>
+</body>
+</html>

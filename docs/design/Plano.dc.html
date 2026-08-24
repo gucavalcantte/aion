@@ -1,0 +1,313 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#14120D 0%,#2C2718 100%);background-attachment:fixed;color:#F6F1E7;font-family:Inter,system-ui,-apple-system,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+    a{color:#A99BFF;text-decoration:none}
+    a:hover{color:#C0B6FF}
+    .num{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+    .ser{font-family:'Bricolage Grotesque',Inter,system-ui,sans-serif;font-weight:700;letter-spacing:-0.022em}
+    .side{background:rgba(0,0,0,0.16);width:236px;flex-shrink:0;border-right:1px solid rgba(255,238,208,0.10);padding:24px 14px;display:flex;flex-direction:column}
+    .brand{display:flex;align-items:center;gap:11px;padding:2px 10px 26px}
+    .nav{display:flex;flex-direction:column;gap:3px}
+    .nav-item{display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:8px;color:#A79C89;font-weight:500}
+    .nav-item.on{background:#6A5AE0;color:#FFFFFF;font-weight:600}
+    .klabel{font-size:11.5px;letter-spacing:0.10em;text-transform:uppercase;color:#A79C89;font-weight:600}
+    .card{background:#221E17;border:1px solid rgba(255,238,208,0.13);border-radius:12px}
+    .well{background:#1A1710;border:1px solid rgba(255,238,208,0.08);border-radius:10px}
+    .btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;border-radius:8px;border:1px solid rgba(255,238,208,0.24);background:#2C2820;color:#DCD3C2;font-size:14.5px;font-weight:500;font-family:inherit}
+    .btn.pri{background:#6A5AE0;border-color:#6A5AE0;color:#FFFFFF;font-weight:600}
+    .li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:13.5px;line-height:1.55;color:#DCD3C2}
+    .dot{width:5px;height:5px;border-radius:50%;background:#A99BFF;flex-shrink:0;margin-top:8px}
+    .box{width:15px;height:15px;border-radius:4px;border:1.5px solid rgba(255,238,208,0.30);flex-shrink:0;margin-top:2px}
+    .chip{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:7px;background:#2C2820;color:#DCD3C2;font-size:13px;font-weight:600}
+    .fld{display:flex;flex-direction:column;gap:9px}
+    .ftxt{font-size:13.5px;line-height:1.6;color:#DCD3C2}
+  </style>
+</helmet>
+
+<div style="background:linear-gradient(180deg,#14120D 0%,#2C2718 100%);display:flex;min-height:1560px">
+
+  <aside class="side">
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#A99BFF" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M13.6 8a5.6 5.6 0 1 1-1.95-4.25"/><path d="M13.8 2.3v3.3h-3.3"/></svg>
+      <span class="ser" style="font-size:19px;letter-spacing:0.20em;padding-left:0.22em">AION</span>
+    </div>
+    <nav class="nav">
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5A1.5 1.5 0 0 1 3.5 4h9A1.5 1.5 0 0 1 14 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5z"/><path d="M2 6.8h12"/><circle cx="11" cy="10.4" r="0.9"/></svg>
+        Conta
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l6 3-6 3-6-3 6-3z"/><path d="M2 8l6 3 6-3"/><path d="M2 11.2l6 3 6-3"/></svg>
+        Setup
+      </div>
+      <div class="nav-item on">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6 2.4h6.8A1.5 1.5 0 0 1 12.9 3.9v8.2a1.5 1.5 0 0 1-1.5 1.5H4.6a1.5 1.5 0 0 1-1.5-1.5V3.9a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M5.8 6h4.4M5.8 8.6h4.4M5.8 11.2h2.6"/></svg>
+        Plano
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v4.2L2.7 12A1.4 1.4 0 0 0 3.9 14h8.2a1.4 1.4 0 0 0 1.2-2L10 6.2V2"/><path d="M5 2h6"/><path d="M4.7 10.2h6.6"/></svg>
+        Backteste
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11l4-4 3 3 5-5"/><path d="M10 5h4v4"/></svg>
+        Perfomance
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="10" rx="1.6"/><path d="M2 10.6l3.2-3.2 2.6 2.6 2-2L14 11.2"/><circle cx="10.4" cy="5.9" r="1"/></svg>
+        Estudos
+      </div>
+    </nav>
+      <div style="margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,238,208,0.10);display:flex;flex-direction:column;gap:3px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 11px 9px">
+          <span style="color:#A79C89;font-size:13.5px">Tema</span>
+          <div style="display:flex;background:#131009;border:1px solid rgba(255,238,208,0.18);border-radius:8px;padding:2px;gap:2px">
+            <div style="padding:5px 10px;border-radius:6px;background:#6A5AE0;color:#FFFFFF;display:flex;align-items:center">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 9.4A5.8 5.8 0 0 1 6.6 2.6a5.8 5.8 0 1 0 6.8 6.8z"/></svg>
+            </div>
+            <div style="padding:5px 10px;border-radius:6px;color:#7E7462;display:flex;align-items:center">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.1"/><path d="M8 1.4v1.6M8 13v1.6M14.6 8H13M3 8H1.4M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1M12.7 12.7l-1.1-1.1M4.4 4.4L3.3 3.3"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="nav-item">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 13.6H3.9a1.5 1.5 0 0 1-1.5-1.5V3.9a1.5 1.5 0 0 1 1.5-1.5h2.5"/><path d="M10.6 11.2L13.8 8l-3.2-3.2"/><path d="M13.8 8H6.2"/></svg>
+          Sair
+        </div>
+      </div>
+  </aside>
+
+  <main style="flex:1;min-width:0;padding:26px 30px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-end;justify-content:space-between">
+      <div>
+        <h1 class="ser" style="font-size:30px;margin:0;line-height:1.05">Plano de trade</h1>
+        <div style="color:#A79C89;font-size:14px;margin-top:8px">3 setups no plano &middot; &uacute;ltima revis&atilde;o em <span class="num">12/08/2026</span></div>
+      </div>
+      <div style="display:flex;gap:9px">
+        <div class="btn">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6V2.4h7V6"/><rect x="2.4" y="6" width="11.2" height="5" rx="1.4"/><path d="M4.5 11h7v2.6h-7z"/></svg>
+          Imprimir
+        </div>
+        <div class="btn pri">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+          Editar plano
+        </div>
+      </div>
+    </div>
+
+    <!-- PRE-MERCADO -->
+    <div class="card" style="padding:22px 24px">
+      <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:20px">
+        <span class="num" style="color:#A99BFF;font-size:14px;font-weight:600">1</span>
+        <div class="ser" style="font-size:20px">Pr&eacute;-mercado</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:280px minmax(0,1fr) minmax(0,1fr);gap:28px">
+
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div>
+            <div class="klabel" style="margin-bottom:12px">Gerenciamento</div>
+            <div class="well" style="padding:15px 17px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between">
+                <div>
+                  <div class="num" style="font-size:13px;color:#A79C89">MLPT</div>
+                  <div style="font-size:11.5px;color:#7E7462;margin-top:3px">perda m&aacute;xima por trade</div>
+                </div>
+                <span class="num" style="font-size:21px;font-weight:600;color:#EC6C82">$150</span>
+              </div>
+              <div style="height:1px;background:rgba(255,238,208,0.10)"></div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between">
+                <div>
+                  <div class="num" style="font-size:13px;color:#A79C89">MLPD</div>
+                  <div style="font-size:11.5px;color:#7E7462;margin-top:3px">perda m&aacute;xima do dia</div>
+                </div>
+                <span class="num" style="font-size:21px;font-weight:600;color:#EC6C82">$300</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px;margin-top:10px;color:#7E7462;font-size:12px">
+              <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#A99BFF"></span>
+              vem da conta selecionada, n&atilde;o se digita aqui
+            </div>
+          </div>
+
+          <div>
+            <div class="klabel" style="margin-bottom:12px">Ativos</div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px">
+              <span class="chip num">MYM</span>
+              <span class="chip num">MES</span>
+              <span class="chip num">MCL</span>
+              <span class="chip num">MGC</span>
+              <span class="chip num">MNQ</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="klabel" style="margin-bottom:10px">Regras</div>
+          <div class="li"><span class="dot"></span><span>Janela operacional: <strong class="num" style="color:#F6F1E7">09h00 &agrave;s 12h00</strong>.</span></div>
+          <div class="li"><span class="dot"></span><span>M&iacute;nimo <strong class="num" style="color:#F6F1E7">2</strong> trades / m&aacute;ximo <strong class="num" style="color:#F6F1E7">5</strong> trades.</span></div>
+          <div class="li"><span class="dot"></span><span>Ap&oacute;s <strong class="num" style="color:#F6F1E7">2 loss seguidos</strong>: encerro o dia.</span></div>
+          <div class="li"><span class="dot"></span><span>N&atilde;o entro a menos de 5 minutos de not&iacute;cia relevante.</span></div>
+          <div class="li"><span class="dot"></span><span>Nunca arrisco mais que o MLPT. Se o stop t&eacute;cnico n&atilde;o cabe no MLPT, o trade n&atilde;o existe.</span></div>
+          <div class="li"><span class="dot"></span><span>S&oacute; entro em setup claro, a regi&atilde;o definida <strong style="color:#F6F1E7">antes</strong> do clique.</span></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <div>
+            <div class="klabel" style="margin-bottom:10px">Checklist de abertura</div>
+            <div class="li"><span class="box"></span><span>Marcar as regi&otilde;es do dia: topo/fundo anterior.</span></div>
+            <div class="li"><span class="box"></span><span>Abrir os Estudos do dia para preencher no p&oacute;s-sess&atilde;o.</span></div>
+          </div>
+          <div>
+            <div class="klabel" style="margin-bottom:10px">Checklist de fechamento</div>
+            <div class="li"><span class="box"></span><span>Cadastrar todos os trades na Perfomance logo ap&oacute;s a sess&atilde;o.</span></div>
+            <div class="li"><span class="box"></span><span><strong class="num" style="color:#F6F1E7">30</strong> backtests do setup que levou loss pela manh&atilde;.</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- EXECUCAO -->
+    <div style="display:flex;align-items:baseline;gap:12px;margin-top:4px">
+      <span class="num" style="color:#A99BFF;font-size:14px;font-weight:600">2</span>
+      <div class="ser" style="font-size:20px">Execu&ccedil;&atilde;o</div>
+      <div style="color:#7E7462;font-size:13.5px;margin-left:4px">um bloco por setup &mdash; cada um editado no pr&oacute;prio setup</div>
+    </div>
+
+    <div class="card" style="padding:20px 24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:15px;border-bottom:1px solid rgba(255,238,208,0.13)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="ser" style="font-size:21px">VBS / VSS</div>
+          <span class="chip" style="background:rgba(106,90,224,0.20);color:#A99BFF">412 backtests &middot; 68% </span>
+        </div>
+        <div style="display:flex;gap:11px;color:#7E7462">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:22px 26px">
+        <div class="fld">
+          <div class="klabel">Evento / gatilho</div>
+          <div class="ftxt">2 ou mais barras de respiro contra a tend&ecirc;ncia. Gatilho na viola&ccedil;&atilde;o da m&aacute;xima (VBS) / m&iacute;nima (VSS) do candle de respiro. Qualidade sobe com BT/TT e 180.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Adi&ccedil;&atilde;o</div>
+          <div class="ftxt">Somente em novo setup pr&oacute;ximo ao ponto de entrada, ou se for a favor do meu m&eacute;dio. Troca de cor. N&atilde;o adicionar quando corrigir mais de 50%.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Localiza&ccedil;&atilde;o</div>
+          <div class="ftxt">A favor da tend&ecirc;ncia. M&aacute;ximo 2 pernadas &mdash; n&atilde;o pego a 3&ordf; nem a 4&ordf;. Apoiado em suporte/resist&ecirc;ncia: m&eacute;dia, topo/fundo anterior.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Stop inicial</div>
+          <div class="ftxt">Abaixo do fundo do VBS / acima do topo do VSS. Double Deep: ajuste em 80% da retra&ccedil;&atilde;o. Stop grande demais: MLPT ou passo o trade.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Realiza&ccedil;&atilde;o de lucros</div>
+          <div class="ftxt">Pushes 1 ou 1/5. Nova m&aacute;xima / nova m&iacute;nima ap&oacute;s pullback. 80% da pernada anterior, regi&otilde;es de topo e fundo que podem fazer o pre&ccedil;o reagir.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Gest&atilde;o de stop</div>
+          <div class="ftxt">Stop inicial. Breakeven se o trade demorar muito. Piv&ocirc; ou double deep ap&oacute;s recuperar 80%.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:20px 24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:15px;border-bottom:1px solid rgba(255,238,208,0.13)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="ser" style="font-size:21px">TRAP</div>
+          <span class="chip" style="background:rgba(106,90,224,0.20);color:#A99BFF">96 backtests &middot; 71%</span>
+        </div>
+        <div style="display:flex;gap:11px;color:#7E7462">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:22px 26px">
+        <div class="fld">
+          <div class="klabel">Evento / gatilho</div>
+          <div class="ftxt">Rompimento violento de regi&atilde;o que &eacute; <strong style="color:#F6F1E7">imediatamente</strong> negado (1 a 3 barras). Confirma&ccedil;&atilde;o: 180, barra elefante de retorno, TT/BT na regi&atilde;o. Congest&atilde;o bem estabelecida ou final da tend&ecirc;ncia para pegar o retorno.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Adi&ccedil;&atilde;o</div>
+          <div class="ftxt">Adicionar ao formar um VBS/VSS depois da trap, em uma pernada clara. Outras situa&ccedil;&otilde;es sem adi&ccedil;&atilde;o.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Localiza&ccedil;&atilde;o</div>
+          <div class="ftxt">Em regi&atilde;o j&aacute; testada e relevante: topo/fundo anterior. Se a nega&ccedil;&atilde;o demorar, <strong style="color:#F6F1E7">n&atilde;o &eacute; TRAP</strong> &mdash; &eacute; um rompimento v&aacute;lido.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Stop inicial</div>
+          <div class="ftxt">Acima/abaixo da extremidade do falso rompimento (o pavio da armadilha). Acima ou abaixo da congest&atilde;o se houver uma. Barra muito ampla: n&atilde;o fazer.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Realiza&ccedil;&atilde;o de lucros</div>
+          <div class="ftxt">50% e 2/3 do movimento que criou a armadilha. Regi&atilde;o oposta da estrutura. Pushes 1.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Gest&atilde;o de stop</div>
+          <div class="ftxt">Stop inicial. Breakeven se o trade demorar muito. Realizando lucro em 1:1 ou 1,5:1.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:20px 24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:15px;border-bottom:1px solid rgba(255,238,208,0.13)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="ser" style="font-size:21px">BE de limpeza (CEB)</div>
+          <span class="chip" style="background:rgba(106,90,224,0.20);color:#A99BFF">142 backtests &middot; 68%</span>
+        </div>
+        <div style="display:flex;gap:11px;color:#7E7462">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.3 2.7a1.6 1.6 0 0 1 2.3 2.3L5.5 13 2 14l1-3.5z"/></svg>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:22px 26px">
+        <div class="fld">
+          <div class="klabel">Evento / gatilho</div>
+          <div class="ftxt">Barra elefante ampla, corpo grande, fechamento acima ou abaixo da extremidade. Se abrir numa extremidade e fechar na outra em uma vela s&oacute;, <strong style="color:#F6F1E7">n&atilde;o fazer</strong> &mdash; soco no topo ou fundo da congest&atilde;o &eacute; mais f&aacute;cil de devolver. Entrada por confirma&ccedil;&atilde;o.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Adi&ccedil;&atilde;o</div>
+          <div class="ftxt">Somente ap&oacute;s P1 em VBS/VSS.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Localiza&ccedil;&atilde;o</div>
+          <div class="ftxt">Posi&ccedil;&atilde;o 1, ap&oacute;s 5 ou mais barras pequenas, alinhada &agrave; tend&ecirc;ncia, apenas 2 a 3 vezes maior que as barras da congest&atilde;o. Barra excessiva n&atilde;o fazer.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Stop inicial</div>
+          <div class="ftxt">MLPT atr&aacute;s da congest&atilde;o.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Realiza&ccedil;&atilde;o de lucros</div>
+          <div class="ftxt">Parcial em 1 push. Suportes e resist&ecirc;ncias. Perdeu momentum, sair do trade &mdash; pode arredondar o pre&ccedil;o, tempo cura tudo.</div>
+        </div>
+        <div class="fld">
+          <div class="klabel">Gest&atilde;o de stop</div>
+          <div class="ftxt">Stop inicial. Breakeven se o trade demorar muito. Realizando lucro em 1:1 ou 1,5:1.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="well" style="padding:18px 22px;display:flex;gap:14px;align-items:flex-start">
+      <svg width="19" height="19" viewBox="0 0 16 16" fill="none" stroke="#A99BFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M4.5 3.4h7l2 2.6-5.5 6.6L2.5 6z"/><path d="M2.5 6h11"/></svg>
+      <div style="font-size:14.5px;line-height:1.6;color:#DCD3C2">
+        Uma boa opera&ccedil;&atilde;o pode dar loss e uma opera&ccedil;&atilde;o ruim pode dar gain. O que se avalia aqui &eacute; o <strong style="color:#A99BFF">processo</strong>: evento + localiza&ccedil;&atilde;o + risco + condu&ccedil;&atilde;o.
+      </div>
+    </div>
+
+  </main>
+</div>
+</x-dc>
+</body>
+</html>

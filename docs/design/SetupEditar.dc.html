@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#14120D 0%,#2C2718 100%);background-attachment:fixed;color:#F6F1E7;font-family:Inter,system-ui,-apple-system,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+    a{color:#A99BFF;text-decoration:none}
+    a:hover{color:#C0B6FF}
+    .num{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+    .ser{font-family:'Bricolage Grotesque',Inter,system-ui,sans-serif;font-weight:700;letter-spacing:-0.022em}
+    .side{background:rgba(0,0,0,0.16);width:236px;flex-shrink:0;border-right:1px solid rgba(255,238,208,0.10);padding:24px 14px;display:flex;flex-direction:column}
+    .brand{display:flex;align-items:center;gap:11px;padding:2px 10px 26px}
+    .nav{display:flex;flex-direction:column;gap:3px}
+    .nav-item{display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:8px;color:#A79C89;font-weight:500}
+    .nav-item.on{background:#6A5AE0;color:#FFFFFF;font-weight:600}
+    .klabel{font-size:11.5px;letter-spacing:0.10em;text-transform:uppercase;color:#A79C89;font-weight:600}
+    .card{background:#221E17;border:1px solid rgba(255,238,208,0.13);border-radius:12px}
+    .btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 17px;border-radius:9px;border:1px solid rgba(255,238,208,0.24);background:#2C2820;color:#DCD3C2;font-size:14.5px;font-weight:500;font-family:inherit}
+    .btn.pri{background:#6A5AE0;border-color:#6A5AE0;color:#FFFFFF;font-weight:600}
+    .inp{height:44px;border-radius:9px;border:1px solid rgba(255,238,208,0.26);background:#131009;color:#F6F1E7;padding:0 14px;display:flex;align-items:center;font-size:15px}
+    .ta{border-radius:9px;border:1px solid rgba(255,238,208,0.26);background:#131009;color:#DCD3C2;padding:12px 14px;font-size:14px;line-height:1.6;min-height:118px}
+    .fld{display:flex;flex-direction:column;gap:9px}
+  </style>
+</helmet>
+
+<div style="background:linear-gradient(180deg,#14120D 0%,#2C2718 100%);display:flex;min-height:1000px">
+
+  <aside class="side">
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="#A99BFF" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M13.6 8a5.6 5.6 0 1 1-1.95-4.25"/><path d="M13.8 2.3v3.3h-3.3"/></svg>
+      <span class="ser" style="font-size:19px;letter-spacing:0.20em;padding-left:0.22em">AION</span>
+    </div>
+    <nav class="nav">
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5A1.5 1.5 0 0 1 3.5 4h9A1.5 1.5 0 0 1 14 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5z"/><path d="M2 6.8h12"/><circle cx="11" cy="10.4" r="0.9"/></svg>
+        Conta
+      </div>
+      <div class="nav-item on">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l6 3-6 3-6-3 6-3z"/><path d="M2 8l6 3 6-3"/><path d="M2 11.2l6 3 6-3"/></svg>
+        Setup
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6 2.4h6.8A1.5 1.5 0 0 1 12.9 3.9v8.2a1.5 1.5 0 0 1-1.5 1.5H4.6a1.5 1.5 0 0 1-1.5-1.5V3.9a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M5.8 6h4.4M5.8 8.6h4.4M5.8 11.2h2.6"/></svg>
+        Plano
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v4.2L2.7 12A1.4 1.4 0 0 0 3.9 14h8.2a1.4 1.4 0 0 0 1.2-2L10 6.2V2"/><path d="M5 2h6"/><path d="M4.7 10.2h6.6"/></svg>
+        Backteste
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11l4-4 3 3 5-5"/><path d="M10 5h4v4"/></svg>
+        Perfomance
+      </div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="10" rx="1.6"/><path d="M2 10.6l3.2-3.2 2.6 2.6 2-2L14 11.2"/><circle cx="10.4" cy="5.9" r="1"/></svg>
+        Estudos
+      </div>
+    </nav>
+      <div style="margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,238,208,0.10);display:flex;flex-direction:column;gap:3px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 11px 9px">
+          <span style="color:#A79C89;font-size:13.5px">Tema</span>
+          <div style="display:flex;background:#131009;border:1px solid rgba(255,238,208,0.18);border-radius:8px;padding:2px;gap:2px">
+            <div style="padding:5px 10px;border-radius:6px;background:#6A5AE0;color:#FFFFFF;display:flex;align-items:center">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 9.4A5.8 5.8 0 0 1 6.6 2.6a5.8 5.8 0 1 0 6.8 6.8z"/></svg>
+            </div>
+            <div style="padding:5px 10px;border-radius:6px;color:#7E7462;display:flex;align-items:center">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.1"/><path d="M8 1.4v1.6M8 13v1.6M14.6 8H13M3 8H1.4M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1M12.7 12.7l-1.1-1.1M4.4 4.4L3.3 3.3"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="nav-item">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 13.6H3.9a1.5 1.5 0 0 1-1.5-1.5V3.9a1.5 1.5 0 0 1 1.5-1.5h2.5"/><path d="M10.6 11.2L13.8 8l-3.2-3.2"/><path d="M13.8 8H6.2"/></svg>
+          Sair
+        </div>
+      </div>
+  </aside>
+
+  <main style="flex:1;min-width:0;padding:26px 30px;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;align-items:flex-end;justify-content:space-between">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;color:#A79C89;font-size:14px;margin-bottom:7px">
+          <span>Setups</span>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>
+          <span style="color:#F6F1E7;font-weight:600">VBS / VSS</span>
+        </div>
+        <h1 class="ser" style="font-size:30px;margin:0;line-height:1.05">Editar setup</h1>
+      </div>
+      <div style="display:flex;gap:9px">
+        <div class="btn" style="border-color:rgba(236,108,130,0.5);color:#EC6C82">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6 4V2.7h4V4M4 4l.7 9.3h6.6L12 4"/></svg>
+          Remover
+        </div>
+        <div class="btn">Cancelar</div>
+        <div class="btn pri">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>
+          Salvar setup
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:392px minmax(0,1fr);gap:16px;align-items:start">
+
+      <div class="card" style="padding:20px 22px;display:flex;flex-direction:column;gap:18px">
+        <div class="klabel">Identifica&ccedil;&atilde;o</div>
+
+        <div class="fld">
+          <div style="color:#DCD3C2;font-size:14px">Nome curto</div>
+          <div class="inp">VBS / VSS</div>
+          <div style="color:#7E7462;font-size:12.5px">Aparece nos dropdowns, nas tabelas e no plano impresso.</div>
+        </div>
+
+        <div class="fld">
+          <div style="color:#DCD3C2;font-size:14px">Descri&ccedil;&atilde;o</div>
+          <div class="ta" style="min-height:96px">Duas ou mais barras de respiro contra a tend&ecirc;ncia, com gatilho na viola&ccedil;&atilde;o da extremidade do candle de respiro.</div>
+        </div>
+
+        <div class="fld">
+          <div style="color:#DCD3C2;font-size:14px">Imagem de refer&ecirc;ncia</div>
+          <div style="border:1px dashed rgba(255,238,208,0.28);border-radius:11px;background:#1A1710;padding:11px">
+            <div style="background:#131009;border-radius:8px;height:148px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+              <svg width="270" height="120" viewBox="0 0 270 120" fill="none">
+                <path d="M8,90 C60,84 110,68 150,44 C190,28 235,18 262,12" stroke="#A99BFF" stroke-width="1.4" opacity="0.55" fill="none"/>
+                <rect x="24" y="72" width="11" height="22" rx="2.5" fill="#EC6C82" opacity="0.65"/><rect x="28.8" y="63" width="1.6" height="40" fill="#EC6C82" opacity="0.65"/>
+                <rect x="52" y="66" width="11" height="18" rx="2.5" fill="#EC6C82" opacity="0.65"/><rect x="56.8" y="58" width="1.6" height="34" fill="#EC6C82" opacity="0.65"/>
+                <rect x="80" y="52" width="13" height="20" rx="2.5" fill="#9BF7CE"/><rect x="85.8" y="42" width="1.8" height="40" fill="#9BF7CE"/>
+                <rect x="110" y="38" width="11" height="18" rx="2.5" fill="#9BF7CE" opacity="0.65"/><rect x="114.8" y="30" width="1.6" height="34" fill="#9BF7CE" opacity="0.65"/>
+                <rect x="138" y="26" width="11" height="16" rx="2.5" fill="#9BF7CE" opacity="0.65"/><rect x="142.8" y="18" width="1.6" height="32" fill="#9BF7CE" opacity="0.65"/>
+                <path d="M86 92 L86 78" stroke="#A99BFF" stroke-width="2"/><path d="M81 83 L86 77 L91 83" stroke="#A99BFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:11px">
+              <span class="num" style="font-size:12.5px;color:#A79C89">vbs-exemplo.png &middot; 96 KB</span>
+              <span style="color:#EC6C82;font-size:13.5px">Remover</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:20px 24px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,238,208,0.13)">
+          <div>
+            <div class="ser" style="font-size:19px">Plano de execu&ccedil;&atilde;o</div>
+            <div style="color:#7E7462;font-size:13px;margin-top:6px">Estes seis campos formam a linha deste setup no Plano e na folha impressa.</div>
+          </div>
+          <a href="#" style="font-size:14px;white-space:nowrap">Ver no Plano &rarr;</a>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 22px">
+          <div class="fld">
+            <div class="klabel">Evento / gatilho</div>
+            <div class="ta">2 ou mais barras de respiro contra a tend&ecirc;ncia. Gatilho na viola&ccedil;&atilde;o da m&aacute;xima (VBS) / m&iacute;nima (VSS) do candle de respiro. Qualidade sobe com Tail e 180.</div>
+          </div>
+          <div class="fld">
+            <div class="klabel">Adi&ccedil;&atilde;o</div>
+            <div class="ta">Somente em novo setup pr&oacute;ximo ao ponto de entrada, ou se for a favor do meu m&eacute;dio. Troca de cor. N&atilde;o adicionar quando corrigir mais de 50%.</div>
+          </div>
+          <div class="fld">
+            <div class="klabel">Localiza&ccedil;&atilde;o</div>
+            <div class="ta">A favor da tend&ecirc;ncia. M&aacute;ximo 2 pernadas &mdash; n&atilde;o pego a 3&ordf; nem a 4&ordf;. Apoiado em suporte/resist&ecirc;ncia: m&eacute;dia, topo/fundo anterior.</div>
+          </div>
+          <div class="fld">
+            <div class="klabel">Stop inicial</div>
+            <div class="ta">Abaixo do fundo do VBS / acima do topo do VSS. Double Deep: ajuste em 80% da retra&ccedil;&atilde;o. Stop grande demais: MLPT ou passo o trade.</div>
+          </div>
+          <div class="fld">
+            <div class="klabel">Realiza&ccedil;&atilde;o de lucros</div>
+            <div class="ta">Pushes 1 ou 1/5. Nova m&aacute;xima / nova m&iacute;nima ap&oacute;s pullback. 80% da pernada anterior, regi&otilde;es de topo e fundo que podem fazer o pre&ccedil;o reagir.</div>
+          </div>
+          <div class="fld">
+            <div class="klabel">Gest&atilde;o de stop</div>
+            <div class="ta">Stop inicial. Breakeven se o trade demorar muito. Piv&ocirc; ou double deep ap&oacute;s recuperar 80%.</div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,238,208,0.13);display:flex;align-items:center;gap:12px;color:#7E7462;font-size:13px">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#A99BFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="8" cy="8" r="6.2"/><path d="M8 5.2v3.4M8 10.9v.1"/></svg>
+          Campo vazio simplesmente n&atilde;o aparece no plano &mdash; nem na tela, nem na impress&atilde;o.
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+</x-dc>
+</body>
+</html>
