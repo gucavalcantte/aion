@@ -16,7 +16,7 @@ import {
   statusDoResultado,
   stopEmDolar,
   tetoDeConfianca,
-} from "./metricas.ts";
+} from "./metricas";
 
 let falhas = 0;
 

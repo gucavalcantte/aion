@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# o modelo do env vai versionado; os valores reais nao
+!.env.local.example
