@@ -137,31 +137,33 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
   };
 }
 
+export type PontoDaCurva = { i: number; lucro: number; resultado: number; data: string };
+export type MarcaDeCaixa = { i: number; tipo: "Saque" | "Aporte"; valor: number; data: string };
+
 /**
- * A curva mostra o saldo real, com o degrau do saque. O drawdown é calculado à
- * parte, só sobre operações — ver metricas.ts.
+ * A curva é o LUCRO ACUMULADO das operações, começando em zero.
+ *
+ * Duas razões para não plotar o saldo: numa conta de $50.000 a variação de
+ * $12.000 vira uma linha quase reta, e o saque apareceria como despencada de
+ * $5.000 sem ter havido perda nenhuma. O saldo real fica no card acima; aqui
+ * saque e aporte entram como marca vertical, não como degrau.
  */
-function curvaDeCapital(saldoInicial: number, trades: Trade[], lancamentos: Lancamento[]) {
-  type Evento = { data: string; delta: number; tipo: "trade" | "saque" | "aporte" };
+function curvaDeCapital(_saldoInicial: number, trades: Trade[], lancamentos: Lancamento[]) {
+  let acumulado = 0;
+  const pontos: PontoDaCurva[] = trades.map((t, i) => {
+    acumulado += t.resultado;
+    return { i: i + 1, lucro: acumulado, resultado: t.resultado, data: t.data };
+  });
 
-  const eventos: Evento[] = [
-    ...trades.map((t) => ({ data: t.data, delta: t.resultado, tipo: "trade" as const })),
-    ...lancamentos.map((l) => ({
-      data: l.data,
-      delta: l.tipo === "Aporte" ? l.valor : -l.valor,
-      tipo: l.tipo === "Aporte" ? ("aporte" as const) : ("saque" as const),
-    })),
-  ].sort((a, b) => a.data.localeCompare(b.data));
+  const marcadores: MarcaDeCaixa[] = lancamentos.map((l) => ({
+    // posicionado no trade mais próximo na linha do tempo
+    i: trades.filter((t) => t.data <= l.data).length,
+    tipo: l.tipo,
+    valor: l.valor,
+    data: l.data,
+  }));
 
-  let saldo = saldoInicial;
-  const pontos: { data: string; saldo: number; tipo: string }[] = [
-    { data: trades[0]?.data ?? "", saldo, tipo: "inicio" },
-  ];
-  for (const e of eventos) {
-    saldo += e.delta;
-    pontos.push({ data: e.data, saldo, tipo: e.tipo });
-  }
-  return pontos;
+  return { pontos, marcadores };
 }
 
 function resultadoPorDia(trades: Trade[]) {

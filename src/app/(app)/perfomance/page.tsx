@@ -183,7 +183,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
             <p className="mt-1.5 text-[13px] text-ink-4">Saldo acumulado desde a abertura</p>
           </div>
           <div className="flex-1 rounded-[10px] border border-line-soft bg-well p-3">
-            <CurvaDeCapital pontos={curva} meta={conta.meta === null ? null : conta.saldo_inicial + conta.meta} />
+            <CurvaDeCapital pontos={curva.pontos} marcadores={curva.marcadores} meta={conta.meta} />
           </div>
         </section>
       </div>

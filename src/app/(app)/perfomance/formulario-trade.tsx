@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 
-import { ATIVOS, valorPonto, type Ativo } from "@/lib/ativos";
+import { ATIVOS, type Ativo } from "@/lib/ativos";
 import { moeda, VAZIO } from "@/lib/formato";
 import { riscoRetornoSugerido, statusDoResultado, stopEmDolar } from "@/lib/metricas";
 import { RISCO_RETORNO, TEMPOS_GRAFICOS } from "@/lib/opcoes";
@@ -11,7 +11,8 @@ import { salvarTrade, type EstadoTrade } from "./acoes";
 
 const INICIAL: EstadoTrade = {};
 
-const rotulo = "mb-[9px] flex items-center gap-1.5 text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3";
+const rotulo =
+  "mb-[9px] flex h-[15px] items-center gap-1.5 whitespace-nowrap text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3";
 const campo =
   "h-[44px] w-full rounded-[9px] border border-line-strong bg-input px-[14px] text-[15px] text-ink outline-none placeholder:text-ink-4 focus:border-accent";
 const calculado =
@@ -50,7 +51,6 @@ export function FormularioTrade({
   const r = num(resultado);
 
   const stopDolar = p !== null && c !== null && c > 0 ? stopEmDolar(p, ativo, c) : null;
-  const emPontos = r !== null && c !== null && c > 0 ? r / (valorPonto(ativo) * c) : null;
   const sugerido = r !== null && stopDolar ? riscoRetornoSugerido(r, stopDolar) : null;
 
   // O R:R chega pré-calculado; o usuário pode sobrescrever pelo dropdown.
@@ -175,11 +175,6 @@ export function FormularioTrade({
                   <span className={rotulo}><Ponto />Stop inicial</span>
                   <div className={calculado}>
                     <span className="num">{stopDolar === null ? VAZIO : moeda(stopDolar)}</span>
-                    {stopDolar !== null && (
-                      <span className="num text-[12.5px] text-ink-4">
-                        {pontos} × ${valorPonto(ativo)} × {contratos}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -197,14 +192,6 @@ export function FormularioTrade({
                   />
                 </label>
                 <div>
-                  <span className={rotulo}><Ponto />Resultado em pontos</span>
-                  <div className={calculado}>
-                    <span className="num">
-                      {emPontos === null ? VAZIO : emPontos.toFixed(2).replace(".", ",")}
-                    </span>
-                  </div>
-                </div>
-                <div>
                   <span className={rotulo}><Ponto />Status</span>
                   <div className={calculado}>
                     {r === null ? (
@@ -216,6 +203,7 @@ export function FormularioTrade({
                     )}
                   </div>
                 </div>
+                <div />
               </div>
 
               <div>
