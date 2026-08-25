@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import { ATIVOS } from "@/lib/ativos";
 import type { Plano } from "@/lib/dados/plano";
@@ -15,6 +15,7 @@ const INICIAL: EstadoPlano = {};
 const rotulo = "text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3";
 const campo =
   "h-[42px] w-full rounded-[9px] border border-line-strong bg-input px-[13px] text-[15px] text-ink outline-none focus:border-accent";
+const AVISO_SAIDA = "Você tem alterações não salvas neste plano. Sair sem salvar?";
 
 export function FormularioPlano({
   plano,
@@ -24,13 +25,33 @@ export function FormularioPlano({
   conta: { id: string; numero: string; mlpt: number; mlpd: number } | null;
 }) {
   const [estado, acao, enviando] = useActionState(salvarPlano, INICIAL);
+  const [sujo, setSujo] = useState(false);
+
+  // Fechar a aba ou recarregar com alterações não salvas também avisa.
+  useEffect(() => {
+    if (!sujo) return;
+    const aoSair = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", aoSair);
+    return () => window.removeEventListener("beforeunload", aoSair);
+  }, [sujo]);
+
+  // Qualquer edição de campo ou clique nos botões de lista (adicionar,
+  // remover, reordenar) marca o plano como sujo — só a navegação por link
+  // precisa ser interceptada, o próprio submit já sai da página.
+  function marcarSujo(e: React.SyntheticEvent) {
+    if ((e.target as HTMLElement).closest("button[type=button]")) setSujo(true);
+  }
+
+  function saindoSemSalvar(e: React.MouseEvent) {
+    if (sujo && !window.confirm(AVISO_SAIDA)) e.preventDefault();
+  }
 
   return (
-    <form action={acao}>
+    <form action={acao} onChangeCapture={() => setSujo(true)} onClickCapture={marcarSujo}>
       <header className="mb-[18px] flex items-end justify-between">
         <div>
           <p className="mb-[7px] flex items-center gap-2 text-[14px] text-ink-3">
-            <Link href="/plano">Plano</Link>
+            <Link href="/plano" onClick={saindoSemSalvar}>Plano</Link>
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M6 3l5 5-5 5" />
             </svg>
@@ -39,7 +60,11 @@ export function FormularioPlano({
           <h1 className="display text-[30px] leading-[1.05]">Pré-mercado</h1>
         </div>
         <div className="flex gap-2.5">
-          <Link href="/plano" className="flex h-10 items-center rounded-[9px] border border-line-strong bg-raised px-[17px] text-[14.5px] font-medium text-ink-2">
+          <Link
+            href="/plano"
+            onClick={saindoSemSalvar}
+            className="flex h-10 items-center rounded-[9px] border border-line-strong bg-raised px-[17px] text-[14.5px] font-medium text-ink-2"
+          >
             Cancelar
           </Link>
           <button type="submit" disabled={enviando} className="flex h-10 items-center gap-2 rounded-[9px] bg-accent px-[17px] text-[14.5px] font-semibold text-accent-ink disabled:opacity-60">
@@ -205,7 +230,7 @@ export function FormularioPlano({
                 Evento, adição, localização, stop, realização e gestão ficam dentro de cada setup.
               </p>
             </div>
-            <Link href="/setup" className="whitespace-nowrap text-[14px]">Ir para Setups →</Link>
+            <Link href="/setup" onClick={saindoSemSalvar} className="whitespace-nowrap text-[14px]">Ir para Setups →</Link>
           </section>
         </div>
       </div>

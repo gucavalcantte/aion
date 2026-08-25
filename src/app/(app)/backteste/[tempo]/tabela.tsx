@@ -50,8 +50,6 @@ const COLUNAS = [
 ];
 
 const LARGURA = COLUNAS.reduce((a, c) => a + c.largura, 0);
-const FIXA_1 = "sticky left-0 z-20";
-const FIXA_2 = "sticky left-[56px] z-20 shadow-[8px_0_12px_-8px_var(--sombra-fixa)]";
 
 type Setups = { id: string; nome: string }[];
 
@@ -65,66 +63,112 @@ export function TabelaBackteste({
   setups: Setups;
 }) {
   const [editando, setEditando] = useState<string | null>(null);
+  const [expandida, setExpandida] = useState(false);
+
+  useEffect(() => {
+    if (!expandida) return;
+    const corpo = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setExpandida(false);
+    };
+    window.addEventListener("keydown", aoTeclar);
+    return () => {
+      document.body.style.overflow = corpo;
+      window.removeEventListener("keydown", aoTeclar);
+    };
+  }, [expandida]);
+
+  const tabela = (
+    <table className="border-separate border-spacing-0" style={{ minWidth: LARGURA }}>
+      <colgroup>
+        {COLUNAS.map((c) => (
+          <col key={c.chave} style={{ width: c.largura }} />
+        ))}
+      </colgroup>
+      <thead>
+        <tr>
+          {COLUNAS.map((c) => (
+            <th
+              key={c.chave}
+              scope="col"
+              className={`${cabecalho} sticky top-0 z-10 border-b border-line-strong`}
+            >
+              {c.titulo}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        <LinhaEditavel formId="nova-linha" tempo={tempo} setups={setups} inicial={null} />
+
+        {linhas.map((linha, indice) => {
+          const numero = linhas.length - indice;
+          return editando === linha.id ? (
+            <LinhaEditavel
+              key={linha.id}
+              formId={`editar-${linha.id}`}
+              tempo={tempo}
+              setups={setups}
+              inicial={linha}
+              numero={numero}
+              aoFechar={() => setEditando(null)}
+            />
+          ) : (
+            <LinhaSalva
+              key={linha.id}
+              linha={linha}
+              numero={numero}
+              tempo={tempo}
+              setups={setups}
+              aoEditar={() => setEditando(linha.id)}
+            />
+          );
+        })}
+      </tbody>
+    </table>
+  );
 
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-card">
-      <div className="overflow-x-auto">
-        <table className="border-separate border-spacing-0" style={{ minWidth: LARGURA }}>
-          <colgroup>
-            {COLUNAS.map((c) => (
-              <col key={c.chave} style={{ width: c.largura }} />
-            ))}
-          </colgroup>
-          <thead>
-            <tr>
-              {COLUNAS.map((c, i) => (
-                <th
-                  key={c.chave}
-                  scope="col"
-                  className={
-                    cabecalho +
-                    " border-b border-line-strong" +
-                    (i === 0 ? " sticky left-0 z-30" : i === 1 ? " sticky left-[56px] z-30" : "")
-                  }
-                >
-                  {c.titulo}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <LinhaEditavel formId="nova-linha" tempo={tempo} setups={setups} inicial={null} />
-
-            {linhas.map((linha, indice) => {
-              const numero = linhas.length - indice;
-              return editando === linha.id ? (
-                <LinhaEditavel
-                  key={linha.id}
-                  formId={`editar-${linha.id}`}
-                  tempo={tempo}
-                  setups={setups}
-                  inicial={linha}
-                  numero={numero}
-                  aoFechar={() => setEditando(null)}
-                />
+    <div
+      className={
+        expandida
+          ? "fixed inset-0 z-50 flex flex-col bg-bg-a p-5"
+          : "overflow-hidden rounded-xl border border-line bg-card"
+      }
+    >
+      <div
+        className={
+          expandida
+            ? "flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-line bg-card"
+            : "contents"
+        }
+      >
+        <div className="flex items-center justify-end gap-3 border-b border-line px-[18px] py-[13px]">
+          <button
+            type="button"
+            onClick={() => setExpandida((v) => !v)}
+            className="flex h-8 items-center gap-2 rounded-lg border border-line-strong bg-raised px-3 text-[13px] font-medium text-ink-2 hover:text-ink"
+          >
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              {expandida ? (
+                <path d="M6.5 9.5L2 14M2 14h3.4M2 14v-3.4M9.5 6.5L14 2M14 2h-3.4M14 2v3.4" />
               ) : (
-                <LinhaSalva
-                  key={linha.id}
-                  linha={linha}
-                  numero={numero}
-                  tempo={tempo}
-                  setups={setups}
-                  aoEditar={() => setEditando(linha.id)}
-                />
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />
+              )}
+            </svg>
+            {expandida ? "Sair da tela cheia" : "Expandir"}
+          </button>
+        </div>
 
-      <p className="border-t border-line px-[18px] py-[13px] text-[13px] text-ink-4">
-        Número e Data ficam fixos ao rolar na horizontal · o lápis abre a linha para correção
-      </p>
+        <div className={expandida ? "flex-1 overflow-auto" : "overflow-x-auto"}>{tabela}</div>
+
+        <div className="border-t border-line px-[18px] py-[13px]">
+          <p className="text-[13px] text-ink-4">
+            {expandida ? "Esc fecha a tela cheia" : "O lápis abre a linha para correção"}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -197,7 +241,7 @@ function LinhaEditavel({
   return (
     <>
       <tr key={versao} className="[&>td]:border-b [&>td]:border-line-strong">
-        <td className={`${FIXA_1} ${td} border-l-[3px] border-l-accent`}>
+        <td className={`${td} border-l-[3px] border-l-accent`}>
           {editando ? (
             <span className="num text-[14px] text-accent-soft">{numero}</span>
           ) : (
@@ -209,7 +253,7 @@ function LinhaEditavel({
           )}
         </td>
 
-        <td className={`${FIXA_2} ${td}`}>
+        <td className={td}>
           <input
             ref={primeiro}
             form={formId}
@@ -381,8 +425,8 @@ function LinhaSalva({
 
   return (
     <tr>
-      <td className={`${td} num ${FIXA_1} text-ink-4`}>{numero}</td>
-      <td className={`${td} num ${FIXA_2}`}>{formatarData(linha.data)}</td>
+      <td className={`${td} num text-ink-4`}>{numero}</td>
+      <td className={`${td} num`}>{formatarData(linha.data)}</td>
       <td className={`${td} num font-semibold`}>{linha.ativo}</td>
       <td className={td}>{linha.periodo}</td>
       <td className={td}>

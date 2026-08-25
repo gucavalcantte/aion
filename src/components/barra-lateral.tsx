@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import { Marca } from "@/components/marca";
+import { Arco, Marca } from "@/components/marca";
 import { AlternadorDeTema } from "@/components/tema";
+
+const CHAVE_RECOLHIDA = "aion-menu-recolhido";
 
 const ITENS = [
   { href: "/conta", rotulo: "Conta", icone: <><path d="M2 5.5A1.5 1.5 0 0 1 3.5 4h9A1.5 1.5 0 0 1 14 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5z" /><path d="M2 6.8h12" /><circle cx="11" cy="10.4" r="0.9" /></> },
@@ -17,11 +20,37 @@ const ITENS = [
 
 export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
   const caminho = usePathname();
+  const [recolhida, setRecolhida] = useState(false);
+
+  useEffect(() => {
+    try {
+      setRecolhida(localStorage.getItem(CHAVE_RECOLHIDA) === "1");
+    } catch {
+      // navegação privada: fica sempre expandida
+    }
+  }, []);
+
+  function alternar() {
+    setRecolhida((atual) => {
+      const novo = !atual;
+      try {
+        localStorage.setItem(CHAVE_RECOLHIDA, novo ? "1" : "0");
+      } catch {
+        // navegação privada: a preferência vale só para esta sessão
+      }
+      return novo;
+    });
+  }
 
   return (
-    <aside className="flex w-[236px] shrink-0 flex-col border-r border-line-soft bg-tint px-[14px] py-6">
-      <div className="px-[10px] pb-[26px] pt-0.5">
-        <Marca />
+    <aside
+      className={
+        "flex shrink-0 flex-col border-r border-line-soft bg-tint py-6 transition-[width] duration-150 " +
+        (recolhida ? "w-[68px] px-[10px]" : "w-[236px] px-[14px]")
+      }
+    >
+      <div className={"flex items-center pb-[26px] pt-0.5 " + (recolhida ? "justify-center px-0" : "justify-between px-[10px]")}>
+        {recolhida ? <Arco tamanho={22} /> : <Marca />}
       </div>
 
       <nav className="flex flex-col gap-[3px]">
@@ -32,37 +61,73 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
               key={item.href}
               href={item.href}
               aria-current={ativo ? "page" : undefined}
+              title={recolhida ? item.rotulo : undefined}
               className={
-                "flex items-center gap-[11px] rounded-lg px-[11px] py-[10px] font-medium " +
+                "flex items-center gap-[11px] rounded-lg py-[10px] font-medium " +
+                (recolhida ? "justify-center px-0" : "px-[11px]") +
+                " " +
                 (ativo
                   ? "bg-accent font-semibold text-accent-ink"
                   : "text-ink-3 hover:bg-raised hover:text-ink-2")
               }
             >
-              <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0">
                 {item.icone}
               </svg>
-              {item.rotulo}
+              {!recolhida && item.rotulo}
             </Link>
           );
         })}
       </nav>
 
       <div className="mt-auto flex flex-col gap-[3px] border-t border-line-soft pt-4">
-        <AlternadorDeTema />
+        <AlternadorDeTema compacto={recolhida} />
         <form action={sair}>
           <button
             type="submit"
-            className="flex w-full items-center gap-[11px] rounded-lg px-[11px] py-[10px] font-medium text-ink-3 hover:bg-raised hover:text-ink-2"
+            title={recolhida ? "Sair" : undefined}
+            className={
+              "flex w-full items-center gap-[11px] rounded-lg py-[10px] font-medium text-ink-3 hover:bg-raised hover:text-ink-2 " +
+              (recolhida ? "justify-center px-0" : "px-[11px]")
+            }
           >
-            <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0">
               <path d="M6.4 13.6H3.9a1.5 1.5 0 0 1-1.5-1.5V3.9a1.5 1.5 0 0 1 1.5-1.5h2.5" />
               <path d="M10.6 11.2L13.8 8l-3.2-3.2" />
               <path d="M13.8 8H6.2" />
             </svg>
-            Sair
+            {!recolhida && "Sair"}
           </button>
         </form>
+
+        <button
+          type="button"
+          onClick={alternar}
+          title={recolhida ? "Expandir menu" : "Recolher menu"}
+          aria-label={recolhida ? "Expandir menu" : "Recolher menu"}
+          className={
+            "flex w-full items-center gap-[11px] rounded-lg py-[10px] font-medium text-ink-4 hover:bg-raised hover:text-ink-2 " +
+            (recolhida ? "justify-center px-0" : "px-[11px]")
+          }
+        >
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+            className="shrink-0"
+          >
+            <rect x="2" y="2.5" width="12" height="11" rx="1.8" />
+            <path d="M6.4 2.5v11" />
+            {recolhida ? <path d="M9.6 5.6l2 2.4-2 2.4" /> : <path d="M9.6 5.6l-2 2.4 2 2.4" />}
+          </svg>
+          {!recolhida && "Recolher"}
+        </button>
       </div>
     </aside>
   );
