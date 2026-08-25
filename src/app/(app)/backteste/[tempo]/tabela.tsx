@@ -5,7 +5,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { BotaoRemover } from "@/components/botao-remover";
 import { ATIVOS } from "@/lib/ativos";
 import type { Backteste } from "@/lib/dados/backtestes";
-import { data as formatarData, VAZIO } from "@/lib/formato";
+import { data as formatarData, moeda, VAZIO } from "@/lib/formato";
 import {
   ALINHAMENTOS,
   ENTRADAS,
@@ -436,7 +436,12 @@ function LinhaSalva({
       </td>
       <td className={td}>{setup}</td>
       <td className={td}>{linha.evento}</td>
-      <td className={`${td} num`}>{String(linha.tamanho_stop).replace(".", ",")}</td>
+      <td className={`${td} num`}>
+        <span className="flex items-center gap-1.5">
+          {String(linha.tamanho_stop).replace(".", ",")}
+          <ValorStopDolar ativo={linha.ativo} tamanhoStop={linha.tamanho_stop} />
+        </span>
+      </td>
       <td className={td}>{linha.entrada}</td>
       <td className={td}>{linha.m20}</td>
       <td className={td}>{linha.m200}</td>
@@ -478,6 +483,40 @@ function LinhaSalva({
         </div>
       </td>
     </tr>
+  );
+}
+
+const CONTRATOS = [1, 2, 3, 4, 5];
+
+/**
+ * Ícone de $ ao lado do stop: abre no hover/foco, sem clique, para consultar
+ * rápido quanto o stop vale em dólar por número de contratos.
+ */
+function ValorStopDolar({ ativo, tamanhoStop }: { ativo: string; tamanhoStop: number }) {
+  const valorPonto = ATIVOS.find((a) => a.codigo === ativo)?.valorPonto;
+  if (valorPonto === undefined || !Number.isFinite(tamanhoStop)) return null;
+
+  return (
+    <span className="group relative inline-flex">
+      <button
+        type="button"
+        aria-label="Valor do stop em dólar por número de contratos"
+        className="flex size-[17px] items-center justify-center rounded-full border border-line-strong text-[10px] font-bold leading-none text-ink-4 group-hover:border-accent-soft group-hover:text-accent-soft group-focus-visible:border-accent-soft group-focus-visible:text-accent-soft"
+      >
+        $
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute left-full top-1/2 z-20 ml-2 w-max -translate-y-1/2 rounded-lg border border-line-strong bg-raised px-3 py-2 opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+      >
+        {CONTRATOS.map((n) => (
+          <span key={n} className="num flex items-center justify-between gap-3 whitespace-nowrap text-[12.5px]">
+            <span className="text-ink-4">{n} {n === 1 ? "contrato" : "contratos"}</span>
+            <span className="ml-3 font-semibold text-ink">{moeda(tamanhoStop * valorPonto * n)}</span>
+          </span>
+        ))}
+      </span>
+    </span>
   );
 }
 
