@@ -46,6 +46,20 @@ export async function listarContas(): Promise<ContaComSaldo[]> {
   });
 }
 
+/** MLPT da conta padrão (ou da primeira cadastrada, na falta de uma padrão). */
+export async function mlptDaContaPadrao(): Promise<number | null> {
+  const supabase = await clienteServidor();
+  const { data, error } = await supabase
+    .from("contas")
+    .select("mlpt")
+    .order("is_padrao", { ascending: false })
+    .order("created_at")
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? n(data.mlpt) : null;
+}
+
 export async function buscarConta(id: string): Promise<Conta | null> {
   const supabase = await clienteServidor();
   const { data, error } = await supabase.from("contas").select("*").eq("id", id).maybeSingle();

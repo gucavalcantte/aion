@@ -129,7 +129,7 @@ export function FormularioTrade({
         onClose={() => aoFechar?.()}
         className="m-auto w-[952px] max-w-[calc(100vw-40px)] whitespace-normal rounded-[15px] border border-line-strong bg-card p-0 text-left text-ink backdrop:bg-black/75"
       >
-        <form action={acao}>
+        <form action={acao} autoComplete="off">
           <input type="hidden" name="conta_id" value={contaId} />
           {trade && <input type="hidden" name="id" value={trade.id} />}
 

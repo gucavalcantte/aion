@@ -47,7 +47,12 @@ export function FormularioPlano({
   }
 
   return (
-    <form action={acao} onChangeCapture={() => setSujo(true)} onClickCapture={marcarSujo}>
+    <form
+      action={acao}
+      autoComplete="off"
+      onChangeCapture={() => setSujo(true)}
+      onClickCapture={marcarSujo}
+    >
       <header className="mb-[18px] flex items-end justify-between">
         <div>
           <p className="mb-[7px] flex items-center gap-2 text-[14px] text-ink-3">

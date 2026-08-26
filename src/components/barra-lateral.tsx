@@ -49,8 +49,38 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
         (recolhida ? "w-[68px] px-[10px]" : "w-[236px] px-[14px]")
       }
     >
-      <div className={"flex items-center pb-[26px] pt-0.5 " + (recolhida ? "justify-center px-0" : "justify-between px-[10px]")}>
+      <div
+        className={
+          "flex pb-[26px] pt-0.5 " +
+          (recolhida ? "flex-col items-center gap-[10px] px-0" : "items-center justify-between px-[10px]")
+        }
+      >
         {recolhida ? <Arco tamanho={22} /> : <Marca />}
+
+        <button
+          type="button"
+          onClick={alternar}
+          title={recolhida ? "Expandir menu" : "Recolher menu"}
+          aria-label={recolhida ? "Expandir menu" : "Recolher menu"}
+          className="flex shrink-0 items-center justify-center rounded-lg p-[7px] text-ink-4 hover:bg-raised hover:text-ink-2"
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+            className="shrink-0"
+          >
+            <rect x="2" y="2.5" width="12" height="11" rx="1.8" />
+            <path d="M6.4 2.5v11" />
+            {recolhida ? <path d="M9.6 5.6l2 2.4-2 2.4" /> : <path d="M9.6 5.6l-2 2.4 2 2.4" />}
+          </svg>
+        </button>
       </div>
 
       <nav className="flex flex-col gap-[3px]">
@@ -99,35 +129,6 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
             {!recolhida && "Sair"}
           </button>
         </form>
-
-        <button
-          type="button"
-          onClick={alternar}
-          title={recolhida ? "Expandir menu" : "Recolher menu"}
-          aria-label={recolhida ? "Expandir menu" : "Recolher menu"}
-          className={
-            "flex w-full items-center gap-[11px] rounded-lg py-[10px] font-medium text-ink-4 hover:bg-raised hover:text-ink-2 " +
-            (recolhida ? "justify-center px-0" : "px-[11px]")
-          }
-        >
-          <svg
-            width="17"
-            height="17"
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-            className="shrink-0"
-          >
-            <rect x="2" y="2.5" width="12" height="11" rx="1.8" />
-            <path d="M6.4 2.5v11" />
-            {recolhida ? <path d="M9.6 5.6l2 2.4-2 2.4" /> : <path d="M9.6 5.6l-2 2.4 2 2.4" />}
-          </svg>
-          {!recolhida && "Recolher"}
-        </button>
       </div>
     </aside>
   );

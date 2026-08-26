@@ -36,7 +36,7 @@ export function FormularioLancamento({ contaId }: { contaId: string }) {
         ref={dialogo}
         className="m-auto w-[420px] max-w-[calc(100vw-32px)] rounded-xl border border-line-strong bg-card p-0 text-ink backdrop:bg-black/70"
       >
-        <form action={acao}>
+        <form action={acao} autoComplete="off">
           <input type="hidden" name="conta_id" value={contaId} />
 
           <div className="p-[26px]">

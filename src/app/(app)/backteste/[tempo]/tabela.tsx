@@ -57,10 +57,12 @@ export function TabelaBackteste({
   tempo,
   linhas,
   setups,
+  mlpt,
 }: {
   tempo: string;
   linhas: Backteste[];
   setups: Setups;
+  mlpt: number | null;
 }) {
   const [editando, setEditando] = useState<string | null>(null);
   const [expandida, setExpandida] = useState(false);
@@ -121,6 +123,7 @@ export function TabelaBackteste({
               numero={numero}
               tempo={tempo}
               setups={setups}
+              mlpt={mlpt}
               aoEditar={() => setEditando(linha.id)}
             />
           );
@@ -372,7 +375,7 @@ function LinhaEditavel({
       {/* O form vive fora das células: <form> não pode envolver <td>. */}
       <tr className="hidden">
         <td>
-          <form id={formId} action={acao}>
+          <form id={formId} action={acao} autoComplete="off">
             <input type="hidden" name="tempo_grafico" value={tempo} />
             {editando && <input type="hidden" name="id" value={inicial.id} />}
           </form>
@@ -410,12 +413,14 @@ function LinhaSalva({
   numero,
   tempo,
   setups,
+  mlpt,
   aoEditar,
 }: {
   linha: Backteste;
   numero: number;
   tempo: string;
   setups: Setups;
+  mlpt: number | null;
   aoEditar: () => void;
 }) {
   const setup = setups.find((s) => s.id === linha.setup_id)?.nome ?? VAZIO;
@@ -439,7 +444,7 @@ function LinhaSalva({
       <td className={`${td} num`}>
         <span className="flex items-center gap-1.5">
           {String(linha.tamanho_stop).replace(".", ",")}
-          <ValorStopDolar ativo={linha.ativo} tamanhoStop={linha.tamanho_stop} />
+          <ValorStopDolar ativo={linha.ativo} tamanhoStop={linha.tamanho_stop} mlpt={mlpt} />
         </span>
       </td>
       <td className={td}>{linha.entrada}</td>
@@ -460,7 +465,7 @@ function LinhaSalva({
       <td className={`${td} num font-semibold ${linha.risco_retorno >= 0 ? "text-gain" : "text-loss"}`}>
         {rotuloRiscoRetorno(linha.risco_retorno)}
       </td>
-      <td className={`${td} text-ink-4`}>{linha.notas || VAZIO}</td>
+      <td className={`${td} text-ink-4`}><Notas texto={linha.notas} /></td>
       <td className={td}>
         <div className="flex items-center justify-end gap-3">
           <button
@@ -486,21 +491,82 @@ function LinhaSalva({
   );
 }
 
-const CONTRATOS = [1, 2, 3, 4, 5];
+/** 250 da coluna menos os 12px de recuo de cada lado do `td`. */
+const LARGURA_NOTAS = 226;
+
+/**
+ * Nota longa não pode esticar a coluna: corta com reticências e abre inteira no
+ * hover. O `max-width` é o que segura a largura — numa tabela de layout
+ * automático, só `overflow: hidden` não impede o conteúdo de mandar na coluna.
+ *
+ * O balão só aparece quando o texto foi mesmo cortado. Medir na entrada do
+ * mouse evita repetir num balão o que já está visível na célula.
+ */
+function Notas({ texto }: { texto: string | null }) {
+  const [aberto, setAberto] = useState(false);
+
+  if (!texto) return <>{VAZIO}</>;
+
+  return (
+    <span className="relative block">
+      <span
+        onMouseEnter={(e) => setAberto(e.currentTarget.scrollWidth > e.currentTarget.clientWidth)}
+        onMouseLeave={() => setAberto(false)}
+        className="block truncate"
+        style={{ maxWidth: LARGURA_NOTAS }}
+      >
+        {texto}
+      </span>
+
+      {aberto && (
+        <span
+          role="tooltip"
+          // Abre para a esquerda, sobre as colunas já lidas: à direita não há
+          // espaço, e acima ou abaixo o balão seria cortado pela rolagem.
+          className="absolute right-full top-1/2 z-30 mr-2 w-max max-w-[340px] -translate-y-1/2 whitespace-normal break-words rounded-lg border border-line-strong bg-raised px-3 py-2 text-[12.5px] leading-[1.45] text-ink-2 shadow-lg"
+        >
+          {texto}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/**
+ * Contratos são inteiros — o stop raramente cabe exato no MLPT. Aceita passar
+ * até 20% do MLPT para não jogar fora orçamento de risco por causa de
+ * arredondamento (ver conversa com o usuário sobre a tooltip do stop).
+ */
+const MARGEM_MLPT = 1.2;
+
+function contratosIdeais(stopPorContrato: number, mlpt: number): number {
+  return Math.floor((mlpt * MARGEM_MLPT) / stopPorContrato);
+}
 
 /**
  * Ícone de $ ao lado do stop: abre no hover/foco, sem clique, para consultar
- * rápido quanto o stop vale em dólar por número de contratos.
+ * rápido a quantidade ideal de contratos dado o MLPT da conta padrão.
  */
-function ValorStopDolar({ ativo, tamanhoStop }: { ativo: string; tamanhoStop: number }) {
-  const valorPonto = ATIVOS.find((a) => a.codigo === ativo)?.valorPonto;
-  if (valorPonto === undefined || !Number.isFinite(tamanhoStop)) return null;
+function ValorStopDolar({
+  ativo,
+  tamanhoStop,
+  mlpt,
+}: {
+  ativo: string;
+  tamanhoStop: number;
+  mlpt: number | null;
+}) {
+  const dadosAtivo = ATIVOS.find((a) => a.codigo === ativo);
+  if (!dadosAtivo || !Number.isFinite(tamanhoStop) || !mlpt) return null;
+
+  const stopPorContrato = tamanhoStop * dadosAtivo.valorPonto;
+  const contratos = contratosIdeais(stopPorContrato, mlpt);
 
   return (
     <span className="group relative inline-flex">
       <button
         type="button"
-        aria-label="Valor do stop em dólar por número de contratos"
+        aria-label="Quantidade ideal de contratos para o MLPT da conta"
         className="flex size-[17px] items-center justify-center rounded-full border border-line-strong text-[10px] font-bold leading-none text-ink-4 group-hover:border-accent-soft group-hover:text-accent-soft group-focus-visible:border-accent-soft group-focus-visible:text-accent-soft"
       >
         $
@@ -509,12 +575,19 @@ function ValorStopDolar({ ativo, tamanhoStop }: { ativo: string; tamanhoStop: nu
         role="tooltip"
         className="pointer-events-none absolute left-full top-1/2 z-20 ml-2 w-max -translate-y-1/2 rounded-lg border border-line-strong bg-raised px-3 py-2 opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
       >
-        {CONTRATOS.map((n) => (
-          <span key={n} className="num flex items-center justify-between gap-3 whitespace-nowrap text-[12.5px]">
-            <span className="text-ink-4">{n} {n === 1 ? "contrato" : "contratos"}</span>
-            <span className="ml-3 font-semibold text-ink">{moeda(tamanhoStop * valorPonto * n)}</span>
+        <span className="num whitespace-nowrap text-[12.5px] text-ink-4">
+          {ativo} {String(tamanhoStop).replace(".", ",")} {dadosAtivo.unidade}
+        </span>
+        {contratos >= 1 ? (
+          <span className="num mt-1 flex items-center justify-between gap-3 whitespace-nowrap text-[12.5px]">
+            <span className="text-ink-4">{contratos} {contratos === 1 ? "contrato" : "contratos"}</span>
+            <span className="ml-3 font-semibold text-ink">{moeda(stopPorContrato * contratos)}</span>
           </span>
-        ))}
+        ) : (
+          <span className="mt-1 block whitespace-nowrap text-[12.5px] text-loss">
+            Stop passa do MLPT com 1 contrato só
+          </span>
+        )}
       </span>
     </span>
   );

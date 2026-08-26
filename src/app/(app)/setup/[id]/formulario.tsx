@@ -40,7 +40,7 @@ export function FormularioSetup({ setup }: { setup: SetupEmEdicao }) {
   }
 
   return (
-    <form action={acao}>
+    <form action={acao} autoComplete="off">
       <input type="hidden" name="id" defaultValue={setup?.id ?? ""} />
       <input type="hidden" name="remover_imagem" value={removida ? "1" : "0"} />
 

@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 import { credenciaisSupabase } from "./ambiente";
+import { fetchTolerante } from "./rede";
 
 /**
  * Cliente para Server Components e Server Actions.
@@ -15,6 +16,7 @@ export async function clienteServidor() {
   const { url, chave } = credenciaisSupabase();
 
   return createServerClient(url, chave, {
+    global: { fetch: fetchTolerante },
     cookies: {
       getAll() {
         return cookieStore.getAll();

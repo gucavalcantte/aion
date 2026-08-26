@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { credenciaisSupabase } from "@/lib/supabase/ambiente";
+import { fetchTolerante } from "@/lib/supabase/rede";
 
 const PUBLICAS = ["/login", "/api/manter-ativo"];
 
@@ -10,6 +11,7 @@ export async function proxy(request: NextRequest) {
   let resposta = NextResponse.next({ request });
 
   const supabase = createServerClient(url, chave, {
+    global: { fetch: fetchTolerante },
     cookies: {
       getAll() {
         return request.cookies.getAll();

@@ -70,7 +70,7 @@ export function FormularioEstudo({
         onClose={() => aoFechar?.()}
         className="m-auto w-[952px] max-w-[calc(100vw-40px)] rounded-[15px] border border-line-strong bg-card p-0 text-ink backdrop:bg-black/75"
       >
-        <form action={acao}>
+        <form action={acao} autoComplete="off">
           <input type="hidden" name="id" defaultValue={estudo?.id ?? ""} />
 
           <header className="flex items-center justify-between border-b border-line px-[26px] py-[22px]">

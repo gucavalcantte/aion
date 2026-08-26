@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { DIMENSOES, type Dimensao } from "@/lib/analise";
 import { ATIVOS } from "@/lib/ativos";
 import { listarBacktestes, totalDoTempo } from "@/lib/dados/backtestes";
+import { mlptDaContaPadrao } from "@/lib/dados/contas";
 import { listarSetupsSimples } from "@/lib/dados/setups";
 import { emR, inteiro, percentual } from "@/lib/formato";
 import { ehTempoGrafico } from "@/lib/opcoes";
@@ -31,10 +32,11 @@ export default async function PaginaTempo({
   const temFiltro = Boolean(filtros.setup || filtros.ativo);
   const dimensao = (DIMENSOES.find((d) => d.chave === dim)?.chave ?? "localizacao") as Dimensao;
 
-  const [{ linhas, resumo }, setups, total] = await Promise.all([
+  const [{ linhas, resumo }, setups, total, mlpt] = await Promise.all([
     listarBacktestes(tempo, filtros),
     listarSetupsSimples(),
     totalDoTempo(tempo),
+    mlptDaContaPadrao(),
   ]);
 
   const nomeDoSetup = setups.find((s) => s.id === filtros.setup)?.nome;
@@ -101,7 +103,7 @@ export default async function PaginaTempo({
             )}
           </div>
 
-          <TabelaBackteste tempo={tempo} linhas={linhas} setups={setups} />
+          <TabelaBackteste tempo={tempo} linhas={linhas} setups={setups} mlpt={mlpt} />
 
           <div id="contexto" className="mt-5 scroll-mt-6">
             <Contextos linhas={linhas} tempo={tempo} dimensao={dimensao} filtros={filtros} />

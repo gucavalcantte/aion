@@ -20,6 +20,7 @@ export function FormularioConta({ conta }: { conta: Conta | null }) {
   return (
     <form
       action={acao}
+      autoComplete="off"
       key={conta?.id ?? "nova"}
       className="w-[352px] shrink-0 rounded-xl border border-line bg-card p-[22px]"
     >
