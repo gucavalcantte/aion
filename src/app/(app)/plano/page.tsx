@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import type { Moeda } from "@/lib/ativos";
 import { CAMPOS_DE_EXECUCAO, carregarPlano, type SetupDoPlano } from "@/lib/dados/plano";
 import { data as fData, hora, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
 
@@ -73,9 +74,9 @@ export default async function PaginaPlano({ searchParams }: PageProps<"/plano">)
             <div>
               <Rotulo>Gerenciamento</Rotulo>
               <div className="mt-3 flex flex-col gap-3.5 rounded-[10px] border border-line-soft bg-well p-[17px]">
-                <Limite titulo="MLPT" descricao="perda máxima por trade" valor={conta?.mlpt} />
+                <Limite titulo="MLPT" descricao="perda máxima por trade" valor={conta?.mlpt} moedaConta={conta?.moeda ?? "USD"} />
                 <span className="h-px bg-line" />
-                <Limite titulo="MLPD" descricao="perda máxima do dia" valor={conta?.mlpd} />
+                <Limite titulo="MLPD" descricao="perda máxima do dia" valor={conta?.mlpd} moedaConta={conta?.moeda ?? "USD"} />
               </div>
               <p className="mt-2.5 flex items-center gap-2 text-[12px] text-ink-4">
                 <span className="inline-block size-[5px] rounded-full bg-accent-soft" />
@@ -252,7 +253,17 @@ function Caixa({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Limite({ titulo, descricao, valor }: { titulo: string; descricao: string; valor?: number }) {
+function Limite({
+  titulo,
+  descricao,
+  valor,
+  moedaConta,
+}: {
+  titulo: string;
+  descricao: string;
+  valor?: number;
+  moedaConta: Moeda;
+}) {
   return (
     <span className="flex items-baseline justify-between">
       <span>
@@ -260,7 +271,7 @@ function Limite({ titulo, descricao, valor }: { titulo: string; descricao: strin
         <span className="mt-0.5 block text-[11.5px] text-ink-4">{descricao}</span>
       </span>
       <span className="num text-[21px] font-semibold text-loss">
-        {valor === undefined ? VAZIO : moeda(valor).replace(",00", "")}
+        {valor === undefined ? VAZIO : moeda(valor, moedaConta).replace(",00", "")}
       </span>
     </span>
   );

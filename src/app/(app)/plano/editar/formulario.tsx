@@ -22,7 +22,7 @@ export function FormularioPlano({
   conta,
 }: {
   plano: Plano | null;
-  conta: { id: string; numero: string; mlpt: number; mlpd: number } | null;
+  conta: { id: string; numero: string; moeda: "USD" | "BRL"; mlpt: number; mlpd: number } | null;
 }) {
   const [estado, acao, enviando] = useActionState(salvarPlano, INICIAL);
   const [sujo, setSujo] = useState(false);
@@ -104,14 +104,14 @@ export function FormularioPlano({
               <span className="flex items-baseline justify-between">
                 <span className="num text-[13.5px] text-ink-3">MLPT · por trade</span>
                 <span className="num text-[20px] font-semibold text-loss">
-                  {conta ? moeda(conta.mlpt).replace(",00", "") : "—"}
+                  {conta ? moeda(conta.mlpt, conta.moeda).replace(",00", "") : "—"}
                 </span>
               </span>
               <span className="h-px bg-line" />
               <span className="flex items-baseline justify-between">
                 <span className="num text-[13.5px] text-ink-3">MLPD · por dia</span>
                 <span className="num text-[20px] font-semibold text-loss">
-                  {conta ? moeda(conta.mlpd).replace(",00", "") : "—"}
+                  {conta ? moeda(conta.mlpd, conta.moeda).replace(",00", "") : "—"}
                 </span>
               </span>
             </div>

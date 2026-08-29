@@ -1,4 +1,5 @@
 import { Arco } from "@/components/marca";
+import type { Moeda } from "@/lib/ativos";
 import { CAMPOS_DE_EXECUCAO, carregarPlano } from "@/lib/dados/plano";
 import { data as fData, hora, moeda } from "@/lib/formato";
 
@@ -53,8 +54,8 @@ export default async function ImprimirPlano({ searchParams }: PageProps<"/imprim
 
             <Sub>Gerenciamento</Sub>
             <div className="flex gap-2">
-              <Limite titulo="MLPT · por trade" valor={conta?.mlpt} />
-              <Limite titulo="MLPD · por dia" valor={conta?.mlpd} />
+              <Limite titulo="MLPT · por trade" valor={conta?.mlpt} moedaConta={conta?.moeda ?? "USD"} />
+              <Limite titulo="MLPD · por dia" valor={conta?.mlpd} moedaConta={conta?.moeda ?? "USD"} />
             </div>
 
             {plano?.ativos && plano.ativos.length > 0 && (
@@ -180,12 +181,12 @@ function Caixa({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Limite({ titulo, valor }: { titulo: string; valor?: number }) {
+function Limite({ titulo, valor, moedaConta }: { titulo: string; valor?: number; moedaConta: Moeda }) {
   return (
     <span className="flex-1 rounded-[4px] border-[0.5px] border-[#c9c8c0] px-[9px] py-[7px]">
       <span className="num block text-[7.6px] text-[#6b6b63]">{titulo}</span>
       <span className="num mt-0.5 block text-[16px] font-semibold text-[#b3243c]">
-        {valor === undefined ? "—" : moeda(valor).replace(",00", "")}
+        {valor === undefined ? "—" : moeda(valor, moedaConta).replace(",00", "")}
       </span>
     </span>
   );
