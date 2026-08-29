@@ -581,7 +581,7 @@ function ValorStopDolar({
         {contratos >= 1 ? (
           <span className="num mt-1 flex items-center justify-between gap-3 whitespace-nowrap text-[12.5px]">
             <span className="text-ink-4">{contratos} {contratos === 1 ? "contrato" : "contratos"}</span>
-            <span className="ml-3 font-semibold text-ink">{moeda(stopPorContrato * contratos)}</span>
+            <span className="ml-3 font-semibold text-ink">{moeda(stopPorContrato * contratos, dadosAtivo.moeda)}</span>
           </span>
         ) : (
           <span className="mt-1 block whitespace-nowrap text-[12.5px] text-loss">
