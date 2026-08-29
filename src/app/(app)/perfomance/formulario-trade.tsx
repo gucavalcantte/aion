@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 
-import { ATIVOS, type Ativo } from "@/lib/ativos";
+import { ATIVOS, type Ativo, type Moeda } from "@/lib/ativos";
 import { moeda, VAZIO } from "@/lib/formato";
 import { riscoRetornoSugerido, statusDoResultado, stopEmDolar } from "@/lib/metricas";
 import { RISCO_RETORNO, TEMPOS_GRAFICOS } from "@/lib/opcoes";
@@ -43,20 +43,23 @@ export type TradeParaEdicao = {
 export function FormularioTrade({
   contaId,
   setups,
+  moedaConta,
   trade,
   aoFechar,
 }: {
   contaId: string;
   setups: { id: string; nome: string }[];
+  moedaConta: Moeda;
   /** Presente = corrigindo um trade já salvo. */
   trade?: TradeParaEdicao;
   aoFechar?: () => void;
 }) {
   const editando = Boolean(trade);
+  const ativosPermitidos = ATIVOS.filter((a) => a.moeda === moedaConta);
   const dialogo = useRef<HTMLDialogElement>(null);
   const [estado, acao, enviando] = useActionState(salvarTrade, INICIAL);
 
-  const [ativo, setAtivo] = useState<Ativo>(trade?.ativo ?? "MNQ");
+  const [ativo, setAtivo] = useState<Ativo>(trade?.ativo ?? ativosPermitidos[0].codigo);
   const [pontos, setPontos] = useState(trade ? String(trade.pontos_stop) : "");
   const [contratos, setContratos] = useState(trade ? String(trade.contratos) : "");
   const [resultado, setResultado] = useState(trade ? String(trade.resultado) : "");
@@ -162,7 +165,7 @@ export function FormularioTrade({
               <div>
                 <span className={rotulo}>Ativo</span>
                 <div className="flex flex-wrap gap-[7px]">
-                  {ATIVOS.map((a) => (
+                  {ativosPermitidos.map((a) => (
                     <label key={a.codigo}>
                       <input
                         type="radio"
@@ -216,14 +219,14 @@ export function FormularioTrade({
                 <div>
                   <span className={rotulo}><Ponto />Stop inicial</span>
                   <div className={calculado}>
-                    <span className="num">{stopDolar === null ? VAZIO : moeda(stopDolar)}</span>
+                    <span className="num">{stopDolar === null ? VAZIO : moeda(stopDolar, moedaConta)}</span>
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <label>
-                  <span className={rotulo}>Resultado (USD)</span>
+                  <span className={rotulo}>Resultado ({moedaConta})</span>
                   <input
                     name="resultado"
                     inputMode="decimal"
