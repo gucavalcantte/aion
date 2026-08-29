@@ -11,10 +11,10 @@ Estudar setups de day trade e medir estatística, acompanhar a performance real
 dos trades, e comparar o que foi estudado (backteste) com o que está sendo
 executado de verdade (perfomance).
 
-**Dois usuários** (o dono e a esposa), uso pessoal, **desktop apenas**.
+**Três usuários** (o dono, a esposa e um convidado em teste), uso pessoal, **desktop apenas**.
 
-**Os dados são totalmente separados entre os dois.** Setups, contas, backtestes e
-trades pertencem a um `user_id` e nunca aparecem para o outro. Nada é
+**Os dados são totalmente separados entre os três.** Setups, contas, backtestes e
+trades pertencem a um `user_id` e nunca aparecem para os outros. Nada é
 compartilhado — nem os setups. Toda consulta filtra por `user_id`.
 
 ## 2. Stack e decisões já tomadas
@@ -26,10 +26,10 @@ compartilhado — nem os setups. Toda consulta filtra por `user_id`.
   (Server Components / Server Actions), com a chave do Supabase **server-only**
   (sem prefixo `NEXT_PUBLIC_`), então nada vaza pelo bundle.
 
-  **O que mudou:** com dois usuários no mesmo banco, a separação entre os dados
+  **O que mudou:** com três usuários no mesmo banco, a separação entre os dados
   deixou de depender só do servidor e passou a depender de o código lembrar de
   filtrar por `user_id` em **toda** consulta. Um `select` sem filtro e um usuário vê
-  os dados do outro. Ligar RLS custa ~8 policies feitas uma vez e transfere essa
+  os dados de outro. Ligar RLS custa ~8 policies feitas uma vez e transfere essa
   garantia para o banco. **Perguntar ao usuário antes de começar a Fase 1.**
 - **Banco começa zerado** — nenhuma migração do Bubble.
 - Projeto Supabase Free pausa após 7 dias sem uso, então um **Vercel Cron semanal**
@@ -41,7 +41,7 @@ compartilhado — nem os setups. Toda consulta filtra por `user_id`.
 
 | Enum | Valores |
 |---|---|
-| `ativo` | MES, MYM, MNQ, MGC, MCL, MBT |
+| `ativo` | MES, MYM, MNQ, MGC, MCL, MBT, WIN |
 | `tempo_grafico` | 1m, 2m, 3m, 5m, 15m, 60m, 1D |
 | `periodo` | Manhã, Tarde, Noite |
 | `operacao` | Compra, Venda |
@@ -56,17 +56,25 @@ compartilhado — nem os setups. Toda consulta filtra por `user_id`.
 
 ### 3.2 Tabela de ativos (constante da aplicação, não editável pelo usuário)
 
-| Código | Nome | Valor do ponto (USD) | Rótulo da unidade |
-|---|---|---|---|
-| MES | S&P | 5,00 | pontos |
-| MYM | Dow | 0,50 | pontos |
-| MNQ | Nasdaq | 2,00 | pontos |
-| MGC | Gold | 10,00 | dólares |
-| MCL | Oil | 100,00 | **%** |
-| MBT | Bitcoin | 0,10 | dólares |
+| Código | Nome | Valor do ponto (na moeda do ativo) | Moeda | Rótulo da unidade |
+|---|---|---|---|---|
+| MES | S&P | 5,00 | USD | pontos |
+| MYM | Dow | 0,50 | USD | pontos |
+| MNQ | Nasdaq | 2,00 | USD | pontos |
+| MGC | Gold | 10,00 | USD | dólares |
+| MCL | Oil | 100,00 | USD | **%** |
+| MBT | Bitcoin | 0,10 | USD | dólares |
+| WIN | Mini Índice | 0,20 | BRL | pontos |
 
 O rótulo da unidade muda o label do campo de stop conforme o ativo escolhido.
 MCL é pensado em % pelo usuário: 1% = 1,00 de movimento = $100 por contrato.
+
+**Moeda por ativo, sem conversão.** Os campos derivados de `valor_ponto`
+(`stop_dolar` em `trades`, MLPT/MLPD na conta, etc.) herdam a moeda do próprio
+ativo — WIN produz valores em R$, os demais em US$. O app não converte entre
+moedas; o nome dos campos (`stop_dolar`, "em USD") é histórico de quando só
+havia ativos em dólar e deve ser lido como "na moeda do ativo/conta", não
+literalmente USD.
 
 ### 3.3 Risco/retorno
 
@@ -86,6 +94,9 @@ Todas as tabelas têm `id`, `user_id`, `created_at`.
 ### `contas`
 - `numero` (text) — identificador da conta
 - `tipo_conta` (enum)
+- `moeda` (enum `USD` | `BRL`) — moeda de exibição da conta. Não converte:
+  uma conta em BRL deveria operar só ativos nativos em BRL (hoje, só WIN).
+  Default `USD` para não quebrar contas já cadastradas.
 - `saldo_inicial` (numeric) — **saldo atual é sempre calculado**, nunca digitado
 - `meta` (numeric, **nullable**) — lucro acumulado necessário para liberar o saque.
   Nulo = conta sem meta (simulador, por exemplo)
@@ -211,13 +222,13 @@ Tela cheia com o degradê de fundo, marca AION centralizada (arco no acento, nom
 `letter-spacing` largo, tagline "ciclos · tempo · consistência") e um card de 428px
 com e-mail, senha, "manter conectado" e o botão Entrar.
 
-**Não existe "criar conta".** São dois usuários e as contas são criadas manualmente
+**Não existe "criar conta".** São três usuários e as contas são criadas manualmente
 no painel do Supabase. O rodapé diz isso explicitamente. Autenticação via Supabase
 Auth (e-mail + senha). Logout volta para esta tela.
 
 ### 5.1 Conta
 
-CRUD simples: número, tipo, saldo inicial, MLPT, marcar como padrão.
+CRUD simples: número, tipo, moeda, saldo inicial, MLPT, marcar como padrão.
 Ações: editar, remover. Sem filtros.
 
 ### 5.2 Backteste
