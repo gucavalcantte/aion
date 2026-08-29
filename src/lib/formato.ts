@@ -1,3 +1,5 @@
+import type { Moeda } from "./ativos";
+
 /** Nulo vira travessão. Nunca NaN, nunca 0% onde não há dado. */
 export const VAZIO = "—";
 
@@ -8,10 +10,17 @@ const moedaBR = new Intl.NumberFormat("pt-BR", {
 
 const inteiroBR = new Intl.NumberFormat("pt-BR");
 
-export function moeda(valor: number | null | undefined, comSinal = false) {
+const SIMBOLO: Record<Moeda, string> = { USD: "$", BRL: "R$" };
+
+/** Símbolo de moeda isolado — usado onde o valor já vem formatado por fora (eixos de gráfico). */
+export function simboloDaMoeda(moedaConta: Moeda): string {
+  return SIMBOLO[moedaConta];
+}
+
+export function moeda(valor: number | null | undefined, moedaConta: Moeda, comSinal = false) {
   if (valor === null || valor === undefined || !Number.isFinite(valor)) return VAZIO;
   const sinal = comSinal && valor > 0 ? "+" : valor < 0 ? "-" : "";
-  return `${sinal}$${moedaBR.format(Math.abs(valor))}`;
+  return `${sinal}${SIMBOLO[moedaConta]}${moedaBR.format(Math.abs(valor))}`;
 }
 
 export function inteiro(valor: number | null | undefined) {

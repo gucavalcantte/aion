@@ -1,4 +1,4 @@
-import type { Ativo } from "./ativos";
+import type { Ativo, Moeda } from "./ativos";
 
 export type TempoGrafico = "1m" | "2m" | "3m" | "5m" | "15m" | "60m" | "1D";
 export type TipoConta = "Remunerada" | "Simulador";
@@ -9,6 +9,7 @@ export type Conta = {
   created_at: string;
   numero: string;
   tipo_conta: TipoConta;
+  moeda: Moeda;
   saldo_inicial: number;
   meta: number | null;
   mlpt: number;

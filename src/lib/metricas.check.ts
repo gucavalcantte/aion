@@ -18,6 +18,7 @@ import {
   tetoDeConfianca,
 } from "./metricas";
 import { moedaDoAtivo, valorPonto } from "./ativos";
+import { moeda } from "./formato";
 
 let falhas = 0;
 
@@ -88,6 +89,12 @@ eq("teto de 2/7  (28,6%)", r2(tetoDeConfianca(2, 7)), 64.1);
 eq("valor do ponto do WIN", valorPonto("WIN"), 0.2);
 eq("moeda nativa do WIN", moedaDoAtivo("WIN"), "BRL");
 eq("moeda nativa do MES", moedaDoAtivo("MES"), "USD");
+
+// moeda() exige a moeda — símbolo muda, formatação decimal não
+eq("moeda em dólar", moeda(1234.5, "USD"), "$1.234,50");
+eq("moeda em real", moeda(1234.5, "BRL"), "R$1.234,50");
+eq("moeda negativa com sinal", moeda(-50, "USD", true), "-$50,00");
+eq("moeda vazia", moeda(null, "USD"), "—");
 
 console.log(falhas === 0 ? "\ntudo certo" : `\n${falhas} falha(s)`);
 if (falhas > 0) process.exit(1);
