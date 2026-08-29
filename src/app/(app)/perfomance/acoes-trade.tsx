@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { BotaoRemover } from "@/components/botao-remover";
+import type { Moeda } from "@/lib/ativos";
 import { data as fData, moeda } from "@/lib/formato";
 
 import { removerTrade } from "./acoes";
@@ -13,10 +14,12 @@ export function AcoesDoTrade({
   trade,
   contaId,
   setups,
+  moedaConta,
 }: {
   trade: TradeParaEdicao;
   contaId: string;
   setups: { id: string; nome: string }[];
+  moedaConta: Moeda;
 }) {
   const [editando, setEditando] = useState(false);
 
@@ -38,7 +41,7 @@ export function AcoesDoTrade({
         campos={{ id: trade.id }}
         rotulo={`Remover trade de ${fData(trade.data)}`}
         titulo="Remover este trade?"
-        descricao={`${trade.ativo} · ${fData(trade.data)} · ${moeda(trade.resultado, true)}. O saldo da conta e todas as estatísticas mudam junto.`}
+        descricao={`${trade.ativo} · ${fData(trade.data)} · ${moeda(trade.resultado, moedaConta, true)}. O saldo da conta e todas as estatísticas mudam junto.`}
       />
 
       {editando && (
@@ -46,6 +49,7 @@ export function AcoesDoTrade({
           contaId={contaId}
           setups={setups}
           trade={trade}
+          moedaConta={moedaConta}
           aoFechar={() => setEditando(false)}
         />
       )}

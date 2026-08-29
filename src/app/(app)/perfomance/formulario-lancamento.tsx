@@ -2,6 +2,8 @@
 
 import { useActionState, useEffect, useRef } from "react";
 
+import type { Moeda } from "@/lib/ativos";
+
 import { salvarLancamento, type EstadoLancamento } from "./acoes";
 
 const INICIAL: EstadoLancamento = {};
@@ -10,7 +12,7 @@ const rotulo = "mb-[9px] block text-[11.5px] font-semibold uppercase tracking-[0
 const campo =
   "h-[42px] w-full rounded-[9px] border border-line-strong bg-input px-[13px] text-[15px] text-ink outline-none placeholder:text-ink-4 focus:border-accent";
 
-export function FormularioLancamento({ contaId }: { contaId: string }) {
+export function FormularioLancamento({ contaId, moedaConta }: { contaId: string; moedaConta: Moeda }) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [estado, acao, enviando] = useActionState(salvarLancamento, INICIAL);
 
@@ -66,7 +68,7 @@ export function FormularioLancamento({ contaId }: { contaId: string }) {
                 <input name="data" type="date" defaultValue={new Date().toISOString().slice(0, 10)} className={`${campo} num`} />
               </label>
               <label>
-                <span className={rotulo}>Valor (USD)</span>
+                <span className={rotulo}>Valor ({moedaConta})</span>
                 <input name="valor" inputMode="decimal" placeholder="5000,00" className={`${campo} num`} />
               </label>
             </div>

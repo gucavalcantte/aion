@@ -61,8 +61,8 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
         <div className="flex gap-2.5">
           <SeletorConta contas={contas} atual={conta.id} mes={mes} />
           <SeletorMes mes={mes} contaId={conta.id} />
-          <FormularioLancamento contaId={conta.id} />
-          <FormularioTrade contaId={conta.id} setups={setups} />
+          <FormularioLancamento contaId={conta.id} moedaConta={conta.moeda} />
+          <FormularioTrade contaId={conta.id} setups={setups} moedaConta={conta.moeda} />
         </div>
       </header>
 
@@ -73,11 +73,11 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
         <div className="col-span-2 rounded-xl border border-line bg-card px-[22px] py-[18px]">
           <p className="text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3">Saldo atual</p>
           <p className={`num mt-2.5 text-[40px] font-semibold leading-none tracking-[-0.035em] ${lucro > 0 ? "text-gain" : lucro < 0 ? "text-loss" : ""}`}>
-            {moeda(resumo.saldo)}
+            {moeda(resumo.saldo, conta.moeda)}
           </p>
           <p className="mt-3 flex items-center gap-2.5">
             <span className={`inline-flex h-[23px] items-center rounded-md px-[9px] text-[13px] font-semibold ${resumo.noMes >= 0 ? "bg-gain-bg text-gain" : "bg-loss-bg text-loss"}`}>
-              {moeda(resumo.noMes, true)}
+              {moeda(resumo.noMes, conta.moeda, true)}
             </span>
             <span className="text-[13.5px] text-ink-3">
               em {MESES[mesNum - 1]}
@@ -93,13 +93,13 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
             <>
               <p className="mt-2.5 flex items-baseline gap-2">
                 <span className="num text-[27px] font-semibold tracking-[-0.03em] text-accent-soft">
-                  {moeda(resumo.meta.falta)}
+                  {moeda(resumo.meta.falta, conta.moeda)}
                 </span>
                 <span className="text-[14px] text-ink-2">para liberar</span>
               </p>
               <Barra percentual={resumo.meta.percentual} cor="bg-accent" />
               <div className="mt-2 flex justify-between text-[12px] text-ink-4">
-                <span className="num">{moeda(resumo.meta.lucro, true)} de {moeda(conta.meta)}</span>
+                <span className="num">{moeda(resumo.meta.lucro, conta.moeda, true)} de {moeda(conta.meta, conta.moeda)}</span>
                 <span className="num">{percentual(Math.max(0, resumo.meta.percentual))}</span>
               </div>
             </>
@@ -108,10 +108,10 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
         <Cartao titulo="Drawdown do pico">
           <p className={`num mt-2.5 text-[27px] font-semibold tracking-[-0.03em] ${resumo.drawdown.atual > 0 ? "text-loss" : "text-ink-2"}`}>
-            {resumo.drawdown.atual > 0 ? `-${moeda(resumo.drawdown.atual)}` : moeda(0)}
+            {resumo.drawdown.atual > 0 ? `-${moeda(resumo.drawdown.atual, conta.moeda)}` : moeda(0, conta.moeda)}
           </p>
           <p className="mt-3 text-[12.5px] text-ink-4">
-            máximo já visto: <span className="num text-ink-3">{moeda(resumo.drawdown.maximo)}</span>
+            máximo já visto: <span className="num text-ink-3">{moeda(resumo.drawdown.maximo, conta.moeda)}</span>
           </p>
           <p className="mt-1.5 text-[12px] text-ink-4">saque e aporte ficam de fora</p>
         </Cartao>
@@ -136,9 +136,9 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
         <div className="rounded-xl border border-line bg-card px-5 py-4">
           <p className="text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3">Ganho / perda médios</p>
           <p className="mt-2.5 flex items-baseline gap-2.5">
-            <span className="num text-[22px] font-semibold tracking-[-0.03em] text-gain">{moeda(resumo.mediaGanho, true)}</span>
+            <span className="num text-[22px] font-semibold tracking-[-0.03em] text-gain">{moeda(resumo.mediaGanho, conta.moeda, true)}</span>
             <span className="text-ink-4">/</span>
-            <span className="num text-[22px] font-semibold tracking-[-0.03em] text-loss">{moeda(resumo.mediaPerda)}</span>
+            <span className="num text-[22px] font-semibold tracking-[-0.03em] text-loss">{moeda(resumo.mediaPerda, conta.moeda)}</span>
           </p>
         </div>
         <div className="rounded-xl border border-line bg-card px-5 py-4">
@@ -178,7 +178,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
               {MESES[mesNum - 1]} de {ano} · só dias úteis
             </p>
           </div>
-          <CalendarioDeConsistencia mes={mes} porDia={porDia} />
+          <CalendarioDeConsistencia mes={mes} porDia={porDia} moedaConta={conta.moeda} />
         </section>
 
         <section className="flex flex-col rounded-xl border border-line bg-card p-[22px]">
@@ -187,7 +187,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
             <p className="mt-1.5 text-[13px] text-ink-4">Saldo acumulado desde a abertura</p>
           </div>
           <div className="flex-1 rounded-[10px] border border-line-soft bg-well p-3">
-            <CurvaDeCapital pontos={curva.pontos} marcadores={curva.marcadores} meta={conta.meta} />
+            <CurvaDeCapital pontos={curva.pontos} marcadores={curva.marcadores} meta={conta.meta} moedaConta={conta.moeda} />
           </div>
         </section>
       </div>
@@ -201,13 +201,14 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           </div>
           <p className="flex items-center gap-2 text-[12.5px] text-ink-3">
             <svg width="22" height="6" aria-hidden><line x1="0" y1="3" x2="22" y2="3" stroke="var(--ref)" strokeWidth="1.5" strokeDasharray="3 3" /></svg>
-            MLPT {moeda(conta.mlpt)}
+            MLPT {moeda(conta.mlpt, conta.moeda)}
           </p>
         </div>
         <div className="rounded-[10px] border border-line-soft bg-well p-3">
           <ResultadoPorOperacao
             trades={[...listagem].reverse().map((t) => ({ resultado: t.resultado, data: fData(t.data) }))}
             mlpt={conta.mlpt}
+            moedaConta={conta.moeda}
             largura={1120}
           />
         </div>
@@ -254,9 +255,9 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
                       <td className={td}>{setup}</td>
                       <td className={`${td} num text-right`}>{t.contratos}</td>
                       <td className={`${td} num text-right`}>{String(t.pontos_stop).replace(".", ",")}</td>
-                      <td className={`${td} num text-right text-ink-3`}>{moeda(t.stop_dolar)}</td>
+                      <td className={`${td} num text-right text-ink-3`}>{moeda(t.stop_dolar, conta.moeda)}</td>
                       <td className={`${td} num text-right font-semibold ${t.resultado > 0 ? "text-gain" : t.resultado < 0 ? "text-loss" : "text-ink-3"}`}>
-                        {moeda(t.resultado, true)}
+                        {moeda(t.resultado, conta.moeda, true)}
                       </td>
                       <td className={`${td} num text-right text-ink-3`}>
                         {t.resultado_pontos === null ? VAZIO : t.resultado_pontos.toFixed(2).replace(".", ",")}
@@ -277,6 +278,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
                           trade={{ ...t, imagem: null }}
                           contaId={conta.id}
                           setups={setups}
+                          moedaConta={conta.moeda}
                         />
                       </td>
                     </tr>
@@ -303,7 +305,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
                 </span>
                 <span className="num text-[14px] text-ink-3">{fData(l.data)}</span>
                 <span className={`num text-[16px] font-semibold ${l.tipo === "Aporte" ? "text-gain" : "text-ink"}`}>
-                  {l.tipo === "Aporte" ? moeda(l.valor, true) : `-${moeda(l.valor)}`}
+                  {l.tipo === "Aporte" ? moeda(l.valor, conta.moeda, true) : `-${moeda(l.valor, conta.moeda)}`}
                 </span>
                 {l.observacao && <span className="text-[13.5px] text-ink-4">{l.observacao}</span>}
                 <span className="ml-auto">
