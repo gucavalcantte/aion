@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import type { Conta } from "@/lib/tipos";
 
@@ -16,6 +16,7 @@ const campo =
 export function FormularioConta({ conta }: { conta: Conta | null }) {
   const [estado, acao, enviando] = useActionState(salvarConta, INICIAL);
   const editando = Boolean(conta);
+  const [moedaSelecionada, setMoedaSelecionada] = useState<"USD" | "BRL">(conta?.moeda ?? "USD");
 
   return (
     <form
@@ -61,8 +62,29 @@ export function FormularioConta({ conta }: { conta: Conta | null }) {
           </div>
         </fieldset>
 
+        <fieldset>
+          <legend className={rotulo}>Moeda da conta</legend>
+          <div className="flex gap-1 rounded-[9px] border border-line-strong bg-input p-[3px]">
+            {(["USD", "BRL"] as const).map((m) => (
+              <label key={m} className="flex-1">
+                <input
+                  type="radio"
+                  name="moeda"
+                  value={m}
+                  checked={moedaSelecionada === m}
+                  onChange={() => setMoedaSelecionada(m)}
+                  className="peer sr-only"
+                />
+                <span className="block cursor-pointer rounded-md py-[7px] text-center text-[14.5px] font-medium text-ink-3 peer-checked:bg-raised peer-checked:text-ink">
+                  {m === "USD" ? "Dólar" : "Real"}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
         <div>
-          <label className={rotulo} htmlFor="saldo_inicial">Saldo inicial (USD)</label>
+          <label className={rotulo} htmlFor="saldo_inicial">Saldo inicial ({moedaSelecionada})</label>
           <input id="saldo_inicial" name="saldo_inicial" inputMode="decimal" defaultValue={conta ? String(conta.saldo_inicial) : ""} placeholder="50000,00" className={`${campo} num`} />
           <p className="mt-2 text-[12px] leading-relaxed text-ink-4">
             O saldo atual não é digitado — é sempre saldo inicial + trades − saques + aportes.
@@ -70,7 +92,7 @@ export function FormularioConta({ conta }: { conta: Conta | null }) {
         </div>
 
         <div>
-          <label className={`${rotulo} !text-accent-soft`} htmlFor="meta">Meta para saque (USD)</label>
+          <label className={`${rotulo} !text-accent-soft`} htmlFor="meta">Meta para saque ({moedaSelecionada})</label>
           <input id="meta" name="meta" inputMode="decimal" defaultValue={conta?.meta != null ? String(conta.meta) : ""} placeholder="deixe vazio se não tem meta" className={`${campo} num border-accent/50`} />
           <p className="mt-2 text-[12px] leading-relaxed text-ink-4">
             Lucro acumulado necessário para liberar o saque.
@@ -79,11 +101,11 @@ export function FormularioConta({ conta }: { conta: Conta | null }) {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={rotulo} htmlFor="mlpt">MLPT (USD)</label>
+            <label className={rotulo} htmlFor="mlpt">MLPT ({moedaSelecionada})</label>
             <input id="mlpt" name="mlpt" inputMode="decimal" defaultValue={conta ? String(conta.mlpt) : ""} placeholder="150" className={`${campo} num`} />
           </div>
           <div>
-            <label className={rotulo} htmlFor="mlpd">MLPD (USD)</label>
+            <label className={rotulo} htmlFor="mlpd">MLPD ({moedaSelecionada})</label>
             <input id="mlpd" name="mlpd" inputMode="decimal" defaultValue={conta ? String(conta.mlpd) : ""} placeholder="300" className={`${campo} num`} />
           </div>
         </div>

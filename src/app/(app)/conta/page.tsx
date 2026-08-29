@@ -76,6 +76,9 @@ function CartaoConta({ conta }: { conta: ContaComSaldo }) {
           <span className="inline-flex h-[23px] items-center rounded-md bg-raised px-[9px] text-[12.5px] font-semibold text-ink-3">
             {conta.tipo_conta}
           </span>
+          <span className="inline-flex h-[23px] items-center rounded-md bg-raised px-[9px] text-[12.5px] font-semibold text-ink-3">
+            {conta.moeda}
+          </span>
           {conta.is_padrao && (
             <span className="inline-flex h-[23px] items-center rounded-md bg-accent px-[9px] text-[12.5px] font-semibold text-accent-ink">
               Padrão
@@ -100,11 +103,11 @@ function CartaoConta({ conta }: { conta: ContaComSaldo }) {
       </div>
 
       <div className="mb-5 grid grid-cols-5 gap-4">
-        <Metrica titulo="Saldo inicial" valor={moeda(conta.saldo_inicial)} />
-        <Metrica titulo="Saldo atual" valor={moeda(conta.saldo_atual)} cor={corSaldo} destaque />
-        <Metrica titulo="Meta para saque" valor={conta.meta === null ? VAZIO : moeda(conta.meta)} />
-        <Metrica titulo="Risco por trade" valor={moeda(conta.mlpt)} />
-        <Metrica titulo="Perda máx. do dia" valor={moeda(conta.mlpd)} />
+        <Metrica titulo="Saldo inicial" valor={moeda(conta.saldo_inicial, conta.moeda)} />
+        <Metrica titulo="Saldo atual" valor={moeda(conta.saldo_atual, conta.moeda)} cor={corSaldo} destaque />
+        <Metrica titulo="Meta para saque" valor={conta.meta === null ? VAZIO : moeda(conta.meta, conta.moeda)} />
+        <Metrica titulo="Risco por trade" valor={moeda(conta.mlpt, conta.moeda)} />
+        <Metrica titulo="Perda máx. do dia" valor={moeda(conta.mlpd, conta.moeda)} />
       </div>
 
       {conta.progresso && (
@@ -113,9 +116,9 @@ function CartaoConta({ conta }: { conta: ContaComSaldo }) {
             <span className="text-[14px] text-ink-2">Progresso até o saque</span>
             <span>
               <span className={`num text-[16px] font-semibold ${conta.progresso.lucro >= 0 ? "text-accent-soft" : "text-loss"}`}>
-                {moeda(conta.progresso.lucro, true)}
+                {moeda(conta.progresso.lucro, conta.moeda, true)}
               </span>
-              <span className="num ml-1.5 text-[13px] text-ink-4">de {moeda(conta.meta)}</span>
+              <span className="num ml-1.5 text-[13px] text-ink-4">de {moeda(conta.meta, conta.moeda)}</span>
             </span>
           </div>
           <div className="h-[7px] overflow-hidden rounded-[4px] bg-track">
@@ -132,7 +135,7 @@ function CartaoConta({ conta }: { conta: ContaComSaldo }) {
                 {percentual(conta.progresso.percentual)} da meta
               </span>
             )}
-            <span className="num text-ink-3">faltam {moeda(conta.progresso.falta)}</span>
+            <span className="num text-ink-3">faltam {moeda(conta.progresso.falta, conta.moeda)}</span>
           </div>
         </div>
       )}
