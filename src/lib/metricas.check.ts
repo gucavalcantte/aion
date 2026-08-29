@@ -17,6 +17,7 @@ import {
   stopEmDolar,
   tetoDeConfianca,
 } from "./metricas";
+import { moedaDoAtivo, valorPonto } from "./ativos";
 
 let falhas = 0;
 
@@ -82,6 +83,11 @@ eq("piso de 7/9  (77,8%)", r2(pisoDeConfianca(7, 9)), 45.3);
 eq("teto de 2/12 (16,7%)", r2(tetoDeConfianca(2, 12)), 44.8);
 eq("teto de 2/8  (25,0%)", r2(tetoDeConfianca(2, 8)), 59.1);
 eq("teto de 2/7  (28,6%)", r2(tetoDeConfianca(2, 7)), 64.1);
+
+// WIN entrou como ativo em BRL — os outros seis continuam em USD
+eq("valor do ponto do WIN", valorPonto("WIN"), 0.2);
+eq("moeda nativa do WIN", moedaDoAtivo("WIN"), "BRL");
+eq("moeda nativa do MES", moedaDoAtivo("MES"), "USD");
 
 console.log(falhas === 0 ? "\ntudo certo" : `\n${falhas} falha(s)`);
 if (falhas > 0) process.exit(1);
