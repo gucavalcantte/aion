@@ -119,16 +119,20 @@ Dois pontos:
    selecionada. Evita lançar WIN numa conta em dólar (ou vice-versa) e o
    `resultado`/`stop_dolar` saírem calculados num valor que mistura pontos
    de uma moeda com limite de outra.
-2. **`mlptDaContaPadrao()`** (`lib/dados/contas.ts`): hoje devolve só o
-   número do MLPT. Passa a devolver `{ mlpt, moeda }`. O tooltip de
-   contratos ideais no Backteste já mistura esse MLPT com o
-   `valor_do_ponto` do ativo sendo backtestado — problema pré-existente que
-   fica visível (e correto) assim que os dois lados carregam moeda: se a
-   conta padrão do usuário for BRL e ele backtestar MES, o tooltip mostra
-   `R$` ao lado de um ativo em dólar, sinalizando a inconsistência em vez
-   de escondê-la atrás de um `$` genérico. Não é bloqueado — o Backteste não
-   tem conceito de "conta selecionada", só existe conta padrão de fundo
-   para esse cálculo auxiliar.
+2. **Tooltip de contratos ideais no Backteste** (`ValorStopDolar` em
+   `backteste/[tempo]/tabela.tsx`): usa a moeda do **ativo sendo
+   backtestado** (`dadosAtivo.moeda`, já disponível ali), não a moeda da
+   conta padrão que fornece o `mlpt` — `mlptDaContaPadrao()` continua
+   devolvendo só o número, sem mudança de assinatura. O valor mostrado
+   (`stopPorContrato * contratos`) é inteiramente calculado a partir do
+   `valor_do_ponto` do ativo, então algebricamente já está na moeda dele,
+   independente de qual moeda o MLPT usado no cálculo tinha. Isso deixa
+   visível — em vez de esconder atrás de um `$` genérico — a situação
+   pré-existente de alguém backtestar um ativo em moeda diferente da conta
+   padrão (ex.: conta padrão BRL, backtestando MES): o tooltip mostra a
+   moeda do ativo, não bloqueia nada. Não há conceito de "conta
+   selecionada" no Backteste, só a conta padrão de fundo para esse cálculo
+   auxiliar.
 
 ## CLAUDE.md — dois arquivos, ambos precisam mudar
 
