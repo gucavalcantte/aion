@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Ativo } from "@/lib/ativos";
+import type { Ativo, Moeda } from "@/lib/ativos";
 import { clienteServidor } from "@/lib/supabase/servidor";
 import type { Conta } from "@/lib/tipos";
 
@@ -69,6 +69,7 @@ export async function carregarPlano(contaId?: string) {
     meta: c.meta === null ? null : n(c.meta),
     mlpt: n(c.mlpt),
     mlpd: n(c.mlpd),
+    moeda: (c.moeda ?? "USD") as Moeda,
   })) as Conta[];
 
   const conta = contas.find((c) => c.id === contaId) ?? contas[0] ?? null;

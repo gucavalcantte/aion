@@ -5,7 +5,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { BotaoRemover } from "@/components/botao-remover";
 import { ATIVOS } from "@/lib/ativos";
 import type { Backteste } from "@/lib/dados/backtestes";
-import { data as formatarData, moeda, VAZIO } from "@/lib/formato";
+import { data as formatarData, moeda, simboloDaMoeda, VAZIO } from "@/lib/formato";
 import {
   ALINHAMENTOS,
   ENTRADAS,
@@ -569,7 +569,7 @@ function ValorStopDolar({
         aria-label="Quantidade ideal de contratos para o MLPT da conta"
         className="flex size-[17px] items-center justify-center rounded-full border border-line-strong text-[10px] font-bold leading-none text-ink-4 group-hover:border-accent-soft group-hover:text-accent-soft group-focus-visible:border-accent-soft group-focus-visible:text-accent-soft"
       >
-        $
+        {simboloDaMoeda(dadosAtivo.moeda)}
       </button>
       <span
         role="tooltip"

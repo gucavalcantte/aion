@@ -13,7 +13,7 @@
 -- =============================================================================
 
 -- ETAPA 1 -----------------------------------------------------------------
-alter type ativo add value 'WIN';
+alter type ativo add value if not exists 'WIN';
 
 -- ETAPA 2 -----------------------------------------------------------------
 create or replace function public.valor_do_ponto(a ativo)
@@ -33,7 +33,11 @@ as $$
   end
 $$;
 
-create type moeda_conta as enum ('USD', 'BRL');
+do $$ begin
+  create type moeda_conta as enum ('USD', 'BRL');
+exception
+  when duplicate_object then null;
+end $$;
 
 alter table public.contas
-  add column moeda moeda_conta not null default 'USD';
+  add column if not exists moeda moeda_conta not null default 'USD';

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 
-import { ATIVOS } from "@/lib/ativos";
+import { ATIVOS, type Moeda } from "@/lib/ativos";
 import type { Plano } from "@/lib/dados/plano";
 import { moeda } from "@/lib/formato";
 
@@ -22,7 +22,7 @@ export function FormularioPlano({
   conta,
 }: {
   plano: Plano | null;
-  conta: { id: string; numero: string; moeda: "USD" | "BRL"; mlpt: number; mlpd: number } | null;
+  conta: { id: string; numero: string; moeda: Moeda; mlpt: number; mlpd: number } | null;
 }) {
   const [estado, acao, enviando] = useActionState(salvarPlano, INICIAL);
   const [sujo, setSujo] = useState(false);

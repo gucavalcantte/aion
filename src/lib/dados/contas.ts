@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { Moeda } from "@/lib/ativos";
 import { progressoDaMeta, saldoAtual } from "@/lib/metricas";
 import { clienteServidor } from "@/lib/supabase/servidor";
 import type { Conta, ContaComSaldo } from "@/lib/tipos";
@@ -39,6 +40,7 @@ export async function listarContas(): Promise<ContaComSaldo[]> {
       meta: conta.meta === null ? null : n(conta.meta),
       mlpt: n(conta.mlpt),
       mlpd: n(conta.mlpd),
+      moeda: (conta.moeda ?? "USD") as Moeda,
       saldo_atual: saldo,
       trades: resultados.length,
       progresso: progressoDaMeta(saldo, n(conta.saldo_inicial), conta.meta === null ? null : n(conta.meta)),
@@ -64,5 +66,6 @@ export async function buscarConta(id: string): Promise<Conta | null> {
   const supabase = await clienteServidor();
   const { data, error } = await supabase.from("contas").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
-  return data as Conta | null;
+  if (!data) return null;
+  return { ...data, moeda: (data.moeda ?? "USD") as Moeda } as Conta;
 }

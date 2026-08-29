@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Ativo } from "@/lib/ativos";
+import type { Ativo, Moeda } from "@/lib/ativos";
 import {
   assertividade,
   drawdownDoPico,
@@ -58,6 +58,7 @@ export async function contasParaSeletor() {
     meta: c.meta === null ? null : n(c.meta),
     mlpt: n(c.mlpt),
     mlpd: n(c.mlpd),
+    moeda: (c.moeda ?? "USD") as Moeda,
   })) as Conta[];
 }
 

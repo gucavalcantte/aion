@@ -96,7 +96,9 @@ Todas as tabelas têm `id`, `user_id`, `created_at`.
 - `tipo_conta` (enum)
 - `moeda` (enum `USD` | `BRL`) — moeda de exibição da conta. Não converte:
   uma conta em BRL deveria operar só ativos nativos em BRL (hoje, só WIN).
-  Default `USD` para não quebrar contas já cadastradas.
+  Default `USD` para não quebrar contas já cadastradas. No formulário de trade
+  (Perfomance), o seletor de ativo filtra pela moeda da conta escolhida — uma
+  conta em USD nunca oferece WIN, e uma conta em BRL só oferece WIN.
 - `saldo_inicial` (numeric) — **saldo atual é sempre calculado**, nunca digitado
 - `meta` (numeric, **nullable**) — lucro acumulado necessário para liberar o saque.
   Nulo = conta sem meta (simulador, por exemplo)

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
+import type { Moeda } from "@/lib/ativos";
 import type { Conta } from "@/lib/tipos";
 
 import { salvarConta, type EstadoConta } from "./acoes";
@@ -16,7 +17,7 @@ const campo =
 export function FormularioConta({ conta }: { conta: Conta | null }) {
   const [estado, acao, enviando] = useActionState(salvarConta, INICIAL);
   const editando = Boolean(conta);
-  const [moedaSelecionada, setMoedaSelecionada] = useState<"USD" | "BRL">(conta?.moeda ?? "USD");
+  const [moedaSelecionada, setMoedaSelecionada] = useState<Moeda>(conta?.moeda ?? "USD");
 
   return (
     <form

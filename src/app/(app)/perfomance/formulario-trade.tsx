@@ -55,11 +55,11 @@ export function FormularioTrade({
   aoFechar?: () => void;
 }) {
   const editando = Boolean(trade);
-  const ativosPermitidos = ATIVOS.filter((a) => a.moeda === moedaConta);
+  const ativosPermitidos = ATIVOS.filter((a) => a.moeda === moedaConta || a.codigo === trade?.ativo);
   const dialogo = useRef<HTMLDialogElement>(null);
   const [estado, acao, enviando] = useActionState(salvarTrade, INICIAL);
 
-  const [ativo, setAtivo] = useState<Ativo>(trade?.ativo ?? ativosPermitidos[0].codigo);
+  const [ativo, setAtivo] = useState<Ativo>(trade?.ativo ?? ativosPermitidos[0]?.codigo ?? "MNQ");
   const [pontos, setPontos] = useState(trade ? String(trade.pontos_stop) : "");
   const [contratos, setContratos] = useState(trade ? String(trade.contratos) : "");
   const [resultado, setResultado] = useState(trade ? String(trade.resultado) : "");
