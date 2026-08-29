@@ -1,4 +1,5 @@
-import { moeda } from "@/lib/formato";
+import { moeda, simboloDaMoeda } from "@/lib/formato";
+import type { Moeda } from "@/lib/ativos";
 
 /**
  * O mês em grade de dias úteis. Cada dia tingido pelo resultado — perda ←
@@ -8,10 +9,12 @@ import { moeda } from "@/lib/formato";
 export function CalendarioDeConsistencia({
   mes,
   porDia,
+  moedaConta,
 }: {
   /** "2026-08" */
   mes: string;
   porDia: Map<string, { resultado: number; trades: number }>;
+  moedaConta: Moeda;
 }) {
   const [ano, mesNum] = mes.split("-").map(Number);
   const ultimoDia = new Date(ano, mesNum, 0).getDate();
@@ -79,7 +82,7 @@ export function CalendarioDeConsistencia({
                     (registro.resultado > 0 ? "text-gain" : registro.resultado < 0 ? "text-loss" : "text-ink-3")
                   }
                 >
-                  {registro.resultado === 0 ? "$0" : moeda(registro.resultado, true).replace(",00", "")}
+                  {registro.resultado === 0 ? `${simboloDaMoeda(moedaConta)}0` : moeda(registro.resultado, moedaConta, true).replace(",00", "")}
                 </span>
               ) : (
                 <span className="text-[12px] text-ink-4">{iso === hoje ? "hoje" : ""}</span>
@@ -102,7 +105,7 @@ export function CalendarioDeConsistencia({
           {comOperacao > 0 && (
             <>
               {" · "}
-              <span className={`num ${total >= 0 ? "text-gain" : "text-loss"}`}>{moeda(total, true)}</span>
+              <span className={`num ${total >= 0 ? "text-gain" : "text-loss"}`}>{moeda(total, moedaConta, true)}</span>
             </>
           )}
         </span>

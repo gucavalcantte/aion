@@ -1,5 +1,6 @@
 import type { MarcaDeCaixa, PontoDaCurva } from "@/lib/dados/trades";
-import { moeda } from "@/lib/formato";
+import { moeda, simboloDaMoeda } from "@/lib/formato";
+import type { Moeda } from "@/lib/ativos";
 
 /**
  * SVG puro, renderizado no servidor. Sem biblioteca de charts: são duas formas
@@ -28,11 +29,11 @@ function marcasDoEixo(min: number, max: number, quantidade = 5) {
   return Array.from({ length: quantidade }, (_, i) => min + passo * i);
 }
 
-function curto(v: number) {
+function curto(v: number, simbolo: string) {
   const abs = Math.abs(v);
-  if (abs >= 10000) return `${v < 0 ? "-" : ""}$${Math.round(abs / 1000)}k`;
-  if (abs >= 1000) return `${v < 0 ? "-" : ""}$${(abs / 1000).toFixed(1).replace(".", ",")}k`;
-  return `${v < 0 ? "-" : ""}$${Math.round(abs)}`;
+  if (abs >= 10000) return `${v < 0 ? "-" : ""}${simbolo}${Math.round(abs / 1000)}k`;
+  if (abs >= 1000) return `${v < 0 ? "-" : ""}${simbolo}${(abs / 1000).toFixed(1).replace(".", ",")}k`;
+  return `${v < 0 ? "-" : ""}${simbolo}${Math.round(abs)}`;
 }
 
 /** Rótulos do eixo X sem amontoar: mostra no máximo ~12. */
@@ -71,15 +72,19 @@ export function CurvaDeCapital({
   pontos,
   marcadores,
   meta,
+  moedaConta,
   largura = 560,
 }: {
   pontos: PontoDaCurva[];
   marcadores: MarcaDeCaixa[];
   /** Meta em lucro acumulado, não em saldo. */
   meta: number | null;
+  moedaConta: Moeda;
   largura?: number;
 }) {
   if (pontos.length < 2) return <Vazio texto="A curva aparece a partir do segundo trade." />;
+
+  const simbolo = simboloDaMoeda(moedaConta);
 
   const valores = pontos.map((p) => p.lucro);
   if (meta !== null) valores.push(meta);
@@ -123,7 +128,7 @@ export function CurvaDeCapital({
           <g key={i}>
             <line x1={ESQ} y1={y(v)} x2={largura - DIR} y2={y(v)} stroke="var(--line-soft)" strokeWidth="1" />
             <text x={ESQ - 8} y={y(v) + 4} textAnchor="end" fontSize="11.5" fill="var(--ink-4)" className="num">
-              {curto(v)}
+              {curto(v, simbolo)}
             </text>
           </g>
         ))}
@@ -153,7 +158,7 @@ export function CurvaDeCapital({
             r={pontos.length > 80 ? 1.8 : 2.8}
             fill={p.resultado > 0 ? "var(--gain)" : p.resultado < 0 ? "var(--loss)" : "var(--neutral)"}
           >
-            <title>{`#${p.i} · ${p.data} · ${moeda(p.resultado, true)} · acumulado ${moeda(p.lucro, true)}`}</title>
+            <title>{`#${p.i} · ${p.data} · ${moeda(p.resultado, moedaConta, true)} · acumulado ${moeda(p.lucro, moedaConta, true)}`}</title>
           </circle>
         ))}
 
@@ -161,7 +166,7 @@ export function CurvaDeCapital({
         {marcadores.map((m, i) => (
           <g key={i}>
             <line x1={x(Math.max(1, m.i))} y1={TOPO} x2={x(Math.max(1, m.i))} y2={BASE} stroke="var(--ink-3)" strokeWidth="1" strokeDasharray="2 3" opacity="0.7">
-              <title>{`${m.tipo} de ${moeda(m.valor)} em ${m.data}`}</title>
+              <title>{`${m.tipo} de ${moeda(m.valor, moedaConta)} em ${m.data}`}</title>
             </line>
             <text x={x(Math.max(1, m.i))} y={TOPO - 5} textAnchor="middle" fontSize="10" fill="var(--ink-3)">
               {m.tipo === "Saque" ? "saque" : "aporte"}
@@ -184,13 +189,17 @@ export function CurvaDeCapital({
 export function ResultadoPorOperacao({
   trades,
   mlpt,
+  moedaConta,
   largura = 1100,
 }: {
   trades: { resultado: number; data: string }[];
   mlpt: number;
+  moedaConta: Moeda;
   largura?: number;
 }) {
   if (trades.length === 0) return <Vazio texto="Cada barra é um trade. Registre o primeiro." />;
+
+  const simbolo = simboloDaMoeda(moedaConta);
 
   const valores = trades.map((t) => t.resultado);
   const { min, max } = escala([...valores, mlpt, -mlpt]);
@@ -206,7 +215,7 @@ export function ResultadoPorOperacao({
         itens={[
           { cor: "var(--gain)", texto: "Gain" },
           { cor: "var(--loss)", texto: "Loss" },
-          { cor: "var(--ref)", texto: `Limite MLPT ${moeda(mlpt)}`, tracejado: true },
+          { cor: "var(--ref)", texto: `Limite MLPT ${moeda(mlpt, moedaConta)}`, tracejado: true },
         ]}
       />
       <svg viewBox={`0 0 ${largura} ${ALTURA}`} className="block h-auto w-full" role="img" aria-label="Resultado por operação">
@@ -214,7 +223,7 @@ export function ResultadoPorOperacao({
           <g key={i}>
             <line x1={ESQ} y1={y(v)} x2={largura - DIR} y2={y(v)} stroke="var(--line-soft)" strokeWidth="1" />
             <text x={ESQ - 8} y={y(v) + 4} textAnchor="end" fontSize="11.5" fill="var(--ink-4)" className="num">
-              {curto(v)}
+              {curto(v, simbolo)}
             </text>
           </g>
         ))}
@@ -240,7 +249,7 @@ export function ResultadoPorOperacao({
               rx="2.5"
               fill={t.resultado > 0 ? "var(--gain)" : t.resultado < 0 ? "var(--loss)" : "var(--neutral)"}
             >
-              <title>{`#${i + 1} · ${t.data} · ${moeda(t.resultado, true)}`}</title>
+              <title>{`#${i + 1} · ${t.data} · ${moeda(t.resultado, moedaConta, true)}`}</title>
             </rect>
           );
         })}
