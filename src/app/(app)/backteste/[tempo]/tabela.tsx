@@ -31,7 +31,7 @@ const cabecalho =
 /** Larguras fixas: sem elas as colunas dançam quando o conteúdo muda. */
 const COLUNAS = [
   { chave: "num", titulo: "#", largura: 56 },
-  { chave: "data", titulo: "Data", largura: 172 },
+  { chave: "data", titulo: "Data", largura: 205 },
   { chave: "ativo", titulo: "Ativo", largura: 150 },
   { chave: "periodo", titulo: "Período", largura: 190 },
   { chave: "operacao", titulo: "Operação", largura: 160 },
@@ -431,7 +431,14 @@ function LinhaSalva({
   return (
     <tr>
       <td className={`${td} num text-ink-4`}>{numero}</td>
-      <td className={`${td} num`}>{formatarData(linha.data)}</td>
+      <td className={`${td} num`}>
+        <span className="flex items-center gap-1.5">
+          {formatarData(linha.data)}
+          <span className="num inline-flex h-[19px] items-center rounded-md border border-line-strong bg-raised px-[6px] text-[11px] font-semibold text-ink-3">
+            {linha.tempo_grafico}
+          </span>
+        </span>
+      </td>
       <td className={`${td} num font-semibold`}>{linha.ativo}</td>
       <td className={td}>{linha.periodo}</td>
       <td className={td}>

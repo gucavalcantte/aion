@@ -7,7 +7,7 @@ import { listarBacktestes, totalDoTempo } from "@/lib/dados/backtestes";
 import { mlptDaContaPadrao } from "@/lib/dados/contas";
 import { listarSetupsSimples } from "@/lib/dados/setups";
 import { emR, inteiro, percentual } from "@/lib/formato";
-import { ehTempoGrafico } from "@/lib/opcoes";
+import { ehTempoGrafico, OPERACOES } from "@/lib/opcoes";
 
 import { Contextos } from "./contextos";
 import { TabelaBackteste } from "./tabela";
@@ -22,14 +22,15 @@ export default async function PaginaTempo({
   const tempo = decodeURIComponent(bruto);
   if (!ehTempoGrafico(tempo)) notFound();
 
-  const { setup, ativo, dim } = await searchParams;
+  const { setup, ativo, operacao, dim } = await searchParams;
 
   // Os filtros valem para a tela inteira: cards do topo, tabela e análise.
   const filtros = {
     setup: typeof setup === "string" && setup !== "" ? setup : undefined,
     ativo: typeof ativo === "string" && ativo !== "" ? ativo : undefined,
+    operacao: typeof operacao === "string" && operacao !== "" ? operacao : undefined,
   };
-  const temFiltro = Boolean(filtros.setup || filtros.ativo);
+  const temFiltro = Boolean(filtros.setup || filtros.ativo || filtros.operacao);
   const dimensao = (DIMENSOES.find((d) => d.chave === dim)?.chave ?? "localizacao") as Dimensao;
 
   const [{ linhas, resumo }, setups, total, mlpt] = await Promise.all([
@@ -98,7 +99,7 @@ export default async function PaginaTempo({
               <p className="text-[14px] text-ink-4">
                 <span className="num">{resumo.registros}</span> de{" "}
                 <span className="num">{total}</span> registros
-                {[nomeDoSetup, filtros.ativo].filter(Boolean).map((r) => ` · ${r}`).join("")}
+                {[nomeDoSetup, filtros.ativo, filtros.operacao].filter(Boolean).map((r) => ` · ${r}`).join("")}
               </p>
             )}
           </div>
@@ -122,7 +123,7 @@ function Filtros({
 }: {
   tempo: string;
   setups: { id: string; nome: string }[];
-  atual: { setup?: string; ativo?: string };
+  atual: { setup?: string; ativo?: string; operacao?: string };
   dim?: string;
 }) {
   const estilo = (aceso: boolean) =>
@@ -157,6 +158,19 @@ function Filtros({
         <option value="">Todos os ativos</option>
         {ATIVOS.map((a) => (
           <option key={a.codigo} value={a.codigo}>{a.codigo} · {a.nome}</option>
+        ))}
+      </select>
+
+      <label htmlFor="filtro-operacao" className="sr-only">Filtrar por operação</label>
+      <select
+        id="filtro-operacao"
+        name="operacao"
+        defaultValue={atual.operacao ?? ""}
+        className={estilo(Boolean(atual.operacao))}
+      >
+        <option value="">Todas as operações</option>
+        {OPERACOES.map((o) => (
+          <option key={o} value={o}>{o}</option>
         ))}
       </select>
 

@@ -14,7 +14,10 @@ const texto = (d: FormData, campo: string) => {
 function decimal(valor: FormDataEntryValue | null): number | null {
   const t = String(valor ?? "").trim();
   if (!t) return null;
-  const n = Number(t.replace(/\./g, "").replace(",", "."));
+  // Só remove "." quando é separador de milhar (seguido de 3 dígitos). Um
+  // "." de ponto decimal — como em "0.66", vindo do <option value> do
+  // risco_retorno — precisa sobreviver, senão "0.66" vira "066" → 66.
+  const n = Number(t.replace(/\.(?=\d{3}\b)/g, "").replace(",", "."));
   return Number.isFinite(n) ? n : null;
 }
 
