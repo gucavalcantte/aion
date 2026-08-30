@@ -22,8 +22,12 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
   const caminho = usePathname();
   const [recolhida, setRecolhida] = useState(false);
 
+  // Igual ao tema: o servidor não conhece o localStorage, então o padrão SSR-safe
+  // é "expandida" e a correção acontece depois do mount, para não gerar erro de
+  // hidratação lendo localStorage direto no useState.
   useEffect(() => {
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ver comentário acima
       setRecolhida(localStorage.getItem(CHAVE_RECOLHIDA) === "1");
     } catch {
       // navegação privada: fica sempre expandida

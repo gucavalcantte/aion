@@ -23,7 +23,7 @@ export default async function PaginaEstudos({ searchParams }: PageProps<"/estudo
       : ([...porDia.keys()].sort().reverse()[0] ?? (mes === hoje.slice(0, 7) ? hoje : `${mes}-01`));
 
   const doDia = porDia.get(diaSelecionado) ?? [];
-  const [ano, mesNum] = mes.split("-").map(Number);
+  const [, mesNum] = mes.split("-").map(Number);
 
   return (
     <>

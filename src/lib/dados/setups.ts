@@ -34,8 +34,6 @@ export type SetupComEstatistica = Setup & {
   delta: number | null;
 };
 
-const VAZIA: Estatistica = { registros: 0, assertividade: null, riscoRetorno: null };
-
 export async function listarSetups(): Promise<SetupComEstatistica[]> {
   const supabase = await clienteServidor();
 

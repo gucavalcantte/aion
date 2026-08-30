@@ -63,9 +63,15 @@ export function FormularioTrade({
   const [pontos, setPontos] = useState(trade ? String(trade.pontos_stop) : "");
   const [contratos, setContratos] = useState(trade ? String(trade.contratos) : "");
   const [resultado, setResultado] = useState(trade ? String(trade.resultado) : "");
-  const [rr, setRr] = useState(trade?.risco_retorno != null ? String(trade.risco_retorno) : "");
+  // `rr` não é sincronizado por effect: enquanto o usuário não clica numa opção
+  // (rrManual === null), ele é sempre o valor calculado (rrAuto), recomputado a
+  // cada render — não precisa de useEffect para "alcançar" o valor sugerido.
+  // Em edição, rrManual nasce definido (mesmo "") para nunca deixar a sugestão
+  // sobrescrever um trade que já tem risco/retorno gravado.
+  const [rrManual, setRrManual] = useState<string | null>(
+    editando ? (trade?.risco_retorno != null ? String(trade.risco_retorno) : "") : null,
+  );
   const [previa, setPrevia] = useState<string | null>(trade?.imagem ?? null);
-  const [tocouRr, setTocouRr] = useState(editando);
   const arquivo = useRef<HTMLInputElement>(null);
 
   // Em edição o diálogo já abre; em cadastro espera o clique no botão.
@@ -86,20 +92,26 @@ export function FormularioTrade({
   const sugerido = r !== null && stopDolar ? riscoRetornoSugerido(r, stopDolar) : null;
 
   // O R:R chega pré-calculado; escolher à mão para de ser sobrescrito.
-  useEffect(() => {
-    if (sugerido === null || tocouRr) return;
-    const maisProximo = [...RISCO_RETORNO].sort(
-      (a, b) => Math.abs(a.valor - sugerido) - Math.abs(b.valor - sugerido),
-    )[0];
-    setRr(String(maisProximo.valor));
-  }, [sugerido, tocouRr]);
+  const rrAuto =
+    sugerido === null
+      ? null
+      : String(
+          [...RISCO_RETORNO].sort(
+            (a, b) => Math.abs(a.valor - sugerido) - Math.abs(b.valor - sugerido),
+          )[0].valor,
+        );
+  const rr = rrManual ?? rrAuto ?? "";
 
+  // Fecha o diálogo e limpa o input de arquivo quando a Server Action confirma
+  // o salvamento — são operações imperativas em elementos nativos, não dá pra
+  // fazer isso durante o render. O reset dos campos vai junto, como parte do
+  // mesmo "limpar o formulário".
   useEffect(() => {
     if (!estado.ok) return;
     dialogo.current?.close();
     if (!editando) {
-      setPontos(""); setContratos(""); setResultado(""); setRr(""); setPrevia(null);
-      setTocouRr(false);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ver comentário acima
+      setPontos(""); setContratos(""); setResultado(""); setRrManual(null); setPrevia(null);
       if (arquivo.current) arquivo.current.value = "";
     }
     aoFechar?.();
@@ -269,7 +281,7 @@ export function FormularioTrade({
                         name="risco_retorno"
                         value={o.valor}
                         checked={rr === String(o.valor)}
-                        onChange={() => { setRr(String(o.valor)); setTocouRr(true); }}
+                        onChange={() => setRrManual(String(o.valor))}
                         className="peer sr-only"
                       />
                       <span className="num block cursor-pointer rounded-lg border border-line-strong bg-raised px-[14px] py-[9px] text-[14.5px] font-medium text-ink-3 peer-checked:border-accent peer-checked:bg-accent peer-checked:text-accent-ink">

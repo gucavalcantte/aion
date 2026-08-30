@@ -8,9 +8,13 @@ export function AlternadorDeTema({ compacto = false }: { compacto?: boolean }) {
   const [tema, setTema] = useState<Tema>("dark");
 
   // O script no layout já pintou a tela antes disto. Aqui só sincronizamos
-  // o estado do botão com o que está no <html>.
+  // o estado do botão com o que está no <html> — de propósito depois do mount,
+  // nunca no lazy initializer do useState: ler `document` ali daria um valor
+  // diferente do HTML renderizado no servidor (sempre "dark") e provocaria um
+  // erro de hidratação. O efeito é a forma correta de corrigir isso depois.
   useEffect(() => {
     const atual = document.documentElement.dataset.theme;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- ver comentário acima
     if (atual === "light" || atual === "dark") setTema(atual);
   }, []);
 

@@ -37,9 +37,14 @@ export function FormularioEstudo({
     if (editando) dialogo.current?.showModal();
   }, [editando]);
 
+  // Fecha o diálogo e limpa o input de arquivo quando a Server Action confirma
+  // o salvamento — são operações imperativas em elementos nativos (<dialog>,
+  // <input type="file">), não dá pra fazer isso durante o render. O reset do
+  // estado da prévia vai junto por ser parte do mesmo "limpar o formulário".
   useEffect(() => {
     if (!estado.ok) return;
     dialogo.current?.close();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- ver comentário acima
     setPrevia(null);
     if (arquivo.current) arquivo.current.value = "";
     aoFechar?.();
