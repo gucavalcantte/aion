@@ -251,6 +251,10 @@ Cards no topo: **Total de backtestes** · **Assertividade geral** · **Risco ret
   do usuário: preencher do zero é parte do aprendizado, duplicar atrapalha a memorização.
 - Listagem mostra todas as colunas do cadastro (16), com rolagem horizontal.
   **Número da linha e Data ficam fixos** à esquerda ao rolar.
+- **Paginação: 20 registros por página**, só na tabela. Os cards do topo e a
+  análise de contexto continuam olhando para o recorte inteiro do filtro, não
+  para a página visível — só a listagem é paginada. O número da linha (`#`) é
+  a posição no recorte completo, não reinicia a cada página.
 
 **Abaixo da tabela — análise de contexto** (quatro cards):
 

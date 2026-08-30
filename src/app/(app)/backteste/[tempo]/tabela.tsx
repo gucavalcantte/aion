@@ -51,6 +51,8 @@ const COLUNAS = [
 
 const LARGURA = COLUNAS.reduce((a, c) => a + c.largura, 0);
 
+const TAMANHO_PAGINA = 20;
+
 type Setups = { id: string; nome: string }[];
 
 export function TabelaBackteste({
@@ -66,6 +68,15 @@ export function TabelaBackteste({
 }) {
   const [editando, setEditando] = useState<string | null>(null);
   const [expandida, setExpandida] = useState(false);
+  const [pagina, setPagina] = useState(1);
+
+  // Numeração e página são independentes: o número da linha vem do índice no
+  // array inteiro (mais recente = maior número), não da posição na página.
+  const totalPaginas = Math.max(1, Math.ceil(linhas.length / TAMANHO_PAGINA));
+  const paginaAtual = Math.min(pagina, totalPaginas);
+  const inicioPagina = (paginaAtual - 1) * TAMANHO_PAGINA;
+  const linhasPagina = linhas.slice(inicioPagina, inicioPagina + TAMANHO_PAGINA);
+  const fimPagina = inicioPagina + linhasPagina.length;
 
   useEffect(() => {
     if (!expandida) return;
@@ -104,7 +115,8 @@ export function TabelaBackteste({
       <tbody>
         <LinhaEditavel formId="nova-linha" tempo={tempo} setups={setups} inicial={null} />
 
-        {linhas.map((linha, indice) => {
+        {linhasPagina.map((linha, i) => {
+          const indice = inicioPagina + i;
           const numero = linhas.length - indice;
           return editando === linha.id ? (
             <LinhaEditavel
@@ -166,10 +178,42 @@ export function TabelaBackteste({
 
         <div className={expandida ? "flex-1 overflow-auto" : "overflow-x-auto"}>{tabela}</div>
 
-        <div className="border-t border-line px-[18px] py-[13px]">
+        <div className="flex items-center justify-between gap-3 border-t border-line px-[18px] py-[13px]">
           <p className="text-[13px] text-ink-4">
             {expandida ? "Esc fecha a tela cheia" : "O lápis abre a linha para correção"}
           </p>
+
+          {linhas.length > TAMANHO_PAGINA && (
+            <div className="flex items-center gap-3">
+              <span className="num text-[13px] text-ink-4">
+                {inicioPagina + 1}–{fimPagina} de {linhas.length}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setPagina(paginaAtual - 1)}
+                  disabled={paginaAtual === 1}
+                  aria-label="Página anterior"
+                  className="flex size-8 items-center justify-center rounded-lg border border-line-strong bg-raised text-ink-2 hover:text-ink disabled:opacity-40 disabled:hover:text-ink-2"
+                >
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M10 3L5 8l5 5" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPagina(paginaAtual + 1)}
+                  disabled={paginaAtual === totalPaginas}
+                  aria-label="Próxima página"
+                  className="flex size-8 items-center justify-center rounded-lg border border-line-strong bg-raised text-ink-2 hover:text-ink disabled:opacity-40 disabled:hover:text-ink-2"
+                >
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M6 3l5 5-5 5" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -218,12 +262,16 @@ function LinhaEditavel({
 
   const unidade = ATIVOS.find((a) => a.codigo === valor("ativo"))?.unidade ?? "pontos";
 
+  // Focar o primeiro campo é imperativo (não dá pra fazer durante o render);
+  // o reset da linha de cadastro vai junto, como parte do mesmo "limpou, então
+  // prepara a próxima".
   useEffect(() => {
     if (!estado.ok) return;
     if (editando) {
       aoFechar?.();
     } else {
       // Salvou: limpa a linha e volta o foco para a data, para emendar o próximo.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ver comentário acima
       setVersao((v) => v + 1);
       setCampos(valoresIniciais(null));
       primeiro.current?.focus();
