@@ -117,8 +117,11 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
       saldo,
       totalTrades: trades.length,
       assertividade: assertividade(gains, losses),
+      // Só os gains entram — o número passa a ser "quanto o setup paga quando ganha", não a expectativa.
       riscoRetorno: riscoRetornoMedio(
-        trades.filter((t) => t.risco_retorno !== null).map((t) => t.risco_retorno as number),
+        trades
+          .filter((t) => t.status === "Gain" && t.risco_retorno !== null)
+          .map((t) => t.risco_retorno as number),
       ),
       mediaGanho: mediaDeGanho(resultados),
       mediaPerda: mediaDePerda(resultados),

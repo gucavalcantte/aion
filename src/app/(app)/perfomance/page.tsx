@@ -80,12 +80,12 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
       <AvisoDeConstancia />
 
-      {/* HERO — o número mais importante do app (R:R médio) e o saldo dividem o topo */}
+      {/* HERO — R:R médio dos gains e o saldo dividem o topo */}
       <div className="mb-3 grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-3">
-        <Cartao titulo="Risco retorno médio">
+        <Cartao titulo="R:R médio dos gains">
           <GaugeRiscoRetorno valor={resumo.riscoRetorno} />
           <p className="mt-1 text-center text-[12.5px] text-ink-4">
-            expectativa por operação — o número que decide se o mês fecha positivo
+            quanto o setup paga em média quando o trade dá gain
           </p>
         </Cartao>
 

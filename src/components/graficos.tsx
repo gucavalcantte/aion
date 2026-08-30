@@ -327,7 +327,7 @@ export function GaugeRiscoRetorno({ valor }: { valor: number | null }) {
         viewBox="0 0 220 132"
         className="w-full max-w-[260px]"
         role="img"
-        aria-label={`Risco retorno médio: ${emR(valor)}`}
+        aria-label={`R:R médio dos gains: ${emR(valor)}`}
       >
         <path
           d={arcoEntre(GAUGE_CX, GAUGE_CY, GAUGE_R, 180, 0)}

@@ -55,7 +55,9 @@ export async function resumoPorTempo() {
       gains,
       losses,
       assertividade: assertividade(gains, losses),
-      riscoRetorno: riscoRetornoMedio(doTempo.map((l) => n(l.risco_retorno))),
+      riscoRetorno: riscoRetornoMedio(
+        doTempo.filter((l) => l.resultado === "Gain").map((l) => n(l.risco_retorno)),
+      ),
     };
   });
 
@@ -67,7 +69,9 @@ export async function resumoPorTempo() {
     geral: {
       registros: linhas.length,
       assertividade: assertividade(gains, losses),
-      riscoRetorno: riscoRetornoMedio(linhas.map((l) => n(l.risco_retorno))),
+      riscoRetorno: riscoRetornoMedio(
+        linhas.filter((l) => l.resultado === "Gain").map((l) => n(l.risco_retorno)),
+      ),
     },
   };
 }
@@ -106,7 +110,9 @@ export async function listarBacktestes(tempo: string, filtros: FiltrosBackteste 
     resumo: {
       registros: linhas.length,
       assertividade: assertividade(gains, losses),
-      riscoRetorno: riscoRetornoMedio(linhas.map((l) => l.risco_retorno)),
+      riscoRetorno: riscoRetornoMedio(
+        linhas.filter((l) => l.resultado === "Gain").map((l) => l.risco_retorno),
+      ),
     },
   };
 }

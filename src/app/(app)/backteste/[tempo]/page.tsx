@@ -64,7 +64,7 @@ export default async function PaginaTempo({
         />
         <Cartao titulo="Assertividade" valor={percentual(resumo.assertividade)} />
         <Cartao
-          titulo="Risco retorno"
+          titulo="R:R médio dos gains"
           valor={emR(resumo.riscoRetorno)}
           cor={
             resumo.riscoRetorno === null

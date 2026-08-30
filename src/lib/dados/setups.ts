@@ -60,7 +60,10 @@ export async function listarSetups(): Promise<SetupComEstatistica[]> {
         bt.filter((b) => b.resultado === "Gain").length,
         bt.filter((b) => b.resultado === "Loss").length,
       ),
-      riscoRetorno: riscoRetornoMedio(bt.map((b) => n(b.risco_retorno))),
+      // Só os gains entram no R:R — o número vira "quanto o setup paga quando ganha".
+      riscoRetorno: riscoRetornoMedio(
+        bt.filter((b) => b.resultado === "Gain").map((b) => n(b.risco_retorno)),
+      ),
     };
 
     // Zerado fica fora do denominador — por isso filtramos Gain e Loss, não o resto.
@@ -71,7 +74,7 @@ export async function listarSetups(): Promise<SetupComEstatistica[]> {
         tr.filter((t) => t.status === "Loss").length,
       ),
       riscoRetorno: riscoRetornoMedio(
-        tr.filter((t) => t.risco_retorno !== null).map((t) => n(t.risco_retorno)),
+        tr.filter((t) => t.status === "Gain" && t.risco_retorno !== null).map((t) => n(t.risco_retorno)),
       ),
     };
 

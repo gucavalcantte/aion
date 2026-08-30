@@ -50,7 +50,10 @@ function agrupar<T extends LinhaAnalisavel>(linhas: T[], chave: (l: T) => string
       assertividade: assertividade(gains, itens.length - gains) ?? 0,
       piso: pisoDeConfianca(gains, itens.length) ?? 0,
       teto: tetoDeConfianca(gains, itens.length) ?? 100,
-      riscoRetorno: riscoRetornoMedio(itens.map((i) => i.risco_retorno)),
+      // Só os gains entram — o R:R do contexto é "quanto paga quando acerta", não a expectativa.
+      riscoRetorno: riscoRetornoMedio(
+        itens.filter((i) => i.resultado === "Gain").map((i) => i.risco_retorno),
+      ),
     };
   });
 }

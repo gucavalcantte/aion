@@ -37,7 +37,8 @@ const r2 = (n: number | null) => (n === null ? null : Math.round(n * 10) / 10);
 eq("assertividade 9 gain / 5 loss", r2(assertividade(9, 5)), 64.3);
 eq("assertividade sem trades", assertividade(0, 0), null);
 
-// LOSS = -1, então a média é a expectativa em R
+// riscoRetornoMedio é genérica — quem chama filtra o que entra na média.
+// (No app, só os Gains entram: vira "quanto paga quando ganha", não expectativa.)
 eq("risco retorno médio", r2(riscoRetornoMedio([-1, 2, 3, -1])), 0.8);
 eq("risco retorno de lista vazia", riscoRetornoMedio([]), null);
 

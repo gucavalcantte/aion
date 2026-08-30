@@ -83,9 +83,11 @@ por trás grava número:
 
 `LOSS → -1` · `0.5:1 → 0.5` · `0.66:1 → 0.66` · `1:1 → 1` · `1.5:1 → 1.5` · `2:1 → 2` · `3:1 → 3` · `4:1 ou mais → 4`
 
-Consequência importante: **a média de `risco_retorno` — exibida como "Risco
-retorno médio" — é a expectativa em R por operação.** Positiva = ganha dinheiro no
-agregado; negativa = perde. É o número mais importante do app.
+Consequência importante: **a média de `risco_retorno` é calculada só sobre os
+registros com resultado Gain, e exibida como "R:R médio dos gains".** Não é
+expectativa por operação (que exigiria somar o LOSS = -1) — é quanto o setup
+paga em média quando ganha. Loss continua contando na Assertividade; só sai da
+conta do R:R.
 
 ## 4. Schema
 
@@ -237,16 +239,16 @@ Ações: editar, remover. Sem filtros.
 
 **Tela inicial — lista fixa dos 7 tempos gráficos** (não é cadastro; não existe
 "criar bloco"). Ordenada do menor tempo gráfico para o maior. Cada linha mostra:
-tempo gráfico · quantidade de backtestes · assertividade · risco retorno médio.
+tempo gráfico · quantidade de backtestes · assertividade · R:R médio dos gains.
 
-Cards no topo: **Total de backtestes** · **Assertividade geral** · **Risco retorno geral**.
+Cards no topo: **Total de backtestes** · **Assertividade geral** · **R:R médio dos gains**.
 
 **Ao clicar num tempo gráfico** abre a listagem das linhas daquele tempo gráfico.
 
 - `tempo_grafico` já vem preenchido no cadastro de nova linha.
 - Ordenação: mais recentes primeiro.
 - Filtro: por setup.
-- Cards no topo, respeitando os filtros ativos: **Quantidade** · **Assertividade** · **Risco retorno**.
+- Cards no topo, respeitando os filtros ativos: **Quantidade** · **Assertividade** · **R:R médio dos gains**.
 - Ações por linha: **Editar · Remover**. **Não existe duplicar** — decisão explícita
   do usuário: preencher do zero é parte do aprendizado, duplicar atrapalha a memorização.
 - Listagem mostra todas as colunas do cadastro (16), com rolagem horizontal.
@@ -304,7 +306,7 @@ Cards:
 | Meta para saque | `meta − (saldo_atual − saldo_inicial)` = quanto falta; com barra de progresso |
 | Drawdown do pico | maior queda desde o topo do saldo, com barra de consumo do limite |
 | Sequência atual | gains ou losses consecutivos, com os últimos 10 trades em faixas |
-| Risco retorno médio | `avg(risco_retorno)` — é a expectativa em R por trade |
+| R:R médio dos gains | `avg(risco_retorno)` onde `status = Gain` — quanto o setup paga em média quando ganha |
 | Média de ganho | `avg(resultado)` onde `resultado > 0` |
 | Média de perda | `avg(resultado)` onde `resultado < 0` |
 | MLPT | valor cadastrado na conta selecionada |
@@ -390,6 +392,8 @@ enum `evento`** — decisão explícita: o valor `Tail` já engloba os dois.
 ## 6. Regras que não podem ser violadas
 
 - **Assertividade nunca inclui trades zerados no denominador.**
+- **"R:R médio dos gains" só entra com registros de resultado Gain.** Loss
+  continua contando na Assertividade — só sai da conta do R:R médio.
 - **Estatística de backteste e de trade real nunca são somadas num número único.**
   Backteste tende a acertar mais que execução real, e misturar infla o número.
 - **Nenhum número derivável é digitado duas vezes** (stop em dólar, resultado em

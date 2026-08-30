@@ -65,8 +65,10 @@ export function assertividade(gains: number, losses: number): number | null {
 }
 
 /**
- * A média de risco/retorno é a expectativa em R por operação, porque LOSS
- * está gravado como -1. Positiva = ganha dinheiro no agregado.
+ * Média simples de uma lista de R:R. Função genérica — quem chama decide o
+ * que entra na lista. A convenção do app é passar só os valores de resultado
+ * Gain, para que o número represente "quanto o setup paga em média quando
+ * ganha", não a expectativa por operação (que exigiria incluir LOSS = -1).
  */
 export function riscoRetornoMedio(valores: number[]): number | null {
   const v = valores.filter((n) => Number.isFinite(n));

@@ -19,7 +19,7 @@ export default async function PaginaBackteste() {
         <Cartao titulo="Total de backtestes" valor={inteiro(geral.registros)} />
         <Cartao titulo="Assertividade geral" valor={percentual(geral.assertividade)} />
         <Cartao
-          titulo="Risco retorno geral"
+          titulo="R:R médio dos gains"
           valor={emR(geral.riscoRetorno)}
           cor={
             geral.riscoRetorno === null
@@ -43,7 +43,7 @@ export default async function PaginaBackteste() {
           <Rotulo>Tempo</Rotulo>
           <Rotulo>Registros</Rotulo>
           <Rotulo>Gain / loss</Rotulo>
-          <Rotulo direita>Risco retorno</Rotulo>
+          <Rotulo direita>R:R dos gains</Rotulo>
           <span />
         </div>
 
