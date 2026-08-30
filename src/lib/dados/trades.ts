@@ -3,6 +3,7 @@ import "server-only";
 import type { Ativo, Moeda } from "@/lib/ativos";
 import {
   assertividade,
+  disciplina,
   drawdownDoPico,
   mediaDeGanho,
   mediaDePerda,
@@ -122,6 +123,9 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
       mediaGanho: mediaDeGanho(resultados),
       mediaPerda: mediaDePerda(resultados),
       sequencia: sequenciaAtual(resultados),
+      disciplina: disciplina(
+        trades.map((t) => ({ resultado: t.resultado, respeitou_plano: t.respeitou_plano })),
+      ),
       // Lançamento fora: saque não é perda.
       drawdown: drawdownDoPico(conta.saldo_inicial, resultados),
       meta: progressoDaMeta(saldo, conta.saldo_inicial, conta.meta),

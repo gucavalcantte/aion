@@ -6,6 +6,7 @@
 
 import {
   assertividade,
+  disciplina,
   drawdownDoPico,
   pisoDeConfianca,
   progressoDaMeta,
@@ -71,6 +72,43 @@ eq("sequência atual", sequenciaAtual([-1, 200, 300, 400]), {
   tipo: "Gain",
   quantidade: 3,
 });
+
+// disciplina: liga assertividade a resultado, com e sem respeitou_plano
+eq("disciplina sem trades", disciplina([]), null);
+
+eq(
+  "disciplina: multiplicador e resultado fora do plano",
+  (() => {
+    const d = disciplina([
+      { resultado: 100, respeitou_plano: true },
+      { resultado: 100, respeitou_plano: true },
+      { resultado: 100, respeitou_plano: true },
+      { resultado: -50, respeitou_plano: true },
+      { resultado: 50, respeitou_plano: false },
+      { resultado: -100, respeitou_plano: false },
+      { resultado: -100, respeitou_plano: false },
+      { resultado: -100, respeitou_plano: false },
+    ]);
+    if (!d) return null;
+    return [
+      r2(d.comPlano.assertividade),
+      r2(d.semPlano.assertividade),
+      r2(d.multiplicador),
+      d.resultadoFora,
+    ];
+  })(),
+  [75, 25, 3, -250],
+);
+
+// sem gain fora do plano, a razão vira divisão por zero — mostra "—", não Infinity
+eq(
+  "disciplina: sem acerto fora do plano tem multiplicador nulo",
+  disciplina([
+    { resultado: 100, respeitou_plano: true },
+    { resultado: -10, respeitou_plano: false },
+  ])?.multiplicador,
+  null,
+);
 
 // o ponto principal: 1 registro a 100% não vence 22 a 86%
 eq("piso de 1/1  (100,0%)", r2(pisoDeConfianca(1, 1)), 20.7);

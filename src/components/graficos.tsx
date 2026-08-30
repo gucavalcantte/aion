@@ -1,5 +1,5 @@
 import type { MarcaDeCaixa, PontoDaCurva } from "@/lib/dados/trades";
-import { moeda, simboloDaMoeda } from "@/lib/formato";
+import { emR, moeda, simboloDaMoeda } from "@/lib/formato";
 import type { Moeda } from "@/lib/ativos";
 
 /**
@@ -39,6 +39,17 @@ function curto(v: number, simbolo: string) {
 /** Rótulos do eixo X sem amontoar: mostra no máximo ~12. */
 function passoDoEixoX(n: number) {
   return Math.max(1, Math.ceil(n / 12));
+}
+
+/**
+ * Fração do espaço de cada trade que a barra ocupa. Fixa em pixel, o vão fica
+ * enorme quando o histórico cresce e nunca aperta de volta. Em fração, poucos
+ * trades respiram (60%) e muitos viram quase um traço contínuo (93%).
+ */
+function densidadeDaBarra(n: number) {
+  if (n <= 15) return 0.6;
+  if (n >= 90) return 0.93;
+  return 0.6 + (0.93 - 0.6) * ((n - 15) / (90 - 15));
 }
 
 function Legenda({ itens }: { itens: { cor: string; texto: string; tracejado?: boolean }[] }) {
@@ -206,7 +217,8 @@ export function ResultadoPorOperacao({
 
   const y = (v: number) => BASE - ((v - min) / (max - min)) * (BASE - TOPO);
   const faixa = (largura - ESQ - DIR) / trades.length;
-  const espessura = Math.max(2.5, Math.min(14, faixa - 4));
+  const espessura = Math.max(1.2, Math.min(28, faixa * densidadeDaBarra(trades.length)));
+  const arredondar = espessura < 3.4 ? 0 : Math.min(3, espessura * 0.32);
   const passo = passoDoEixoX(trades.length);
 
   return (
@@ -246,7 +258,7 @@ export function ResultadoPorOperacao({
               y={topo}
               width={espessura}
               height={alto}
-              rx="2.5"
+              rx={arredondar}
               fill={t.resultado > 0 ? "var(--gain)" : t.resultado < 0 ? "var(--loss)" : "var(--neutral)"}
             >
               <title>{`#${i + 1} · ${t.data} · ${moeda(t.resultado, moedaConta, true)}`}</title>
@@ -262,6 +274,96 @@ export function ResultadoPorOperacao({
           ) : null,
         )}
       </svg>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------
+   Gauge de risco/retorno — arco de -1R a +4R, o mesmo intervalo do dropdown
+   de risco/retorno em trades e backtestes (ver lib/opcoes.ts). O zero é o
+   único ponto fixo do arco: acima dele a estratégia paga, abaixo ela custa.
+------------------------------------------------------------------------- */
+
+const GAUGE_MIN = -1;
+const GAUGE_MAX = 4;
+const GAUGE_CX = 110;
+const GAUGE_CY = 98;
+const GAUGE_R = 88;
+
+function pontoNoArco(cx: number, cy: number, r: number, grausAbsolutos: number) {
+  const rad = (grausAbsolutos * Math.PI) / 180;
+  return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
+}
+
+/** t em [0,1] vira ângulo de 180° (esquerda) a 0° (direita), passando pelo topo. */
+function anguloParaT(t: number) {
+  return 180 - 180 * t;
+}
+
+function arcoEntre(cx: number, cy: number, r: number, grausInicio: number, grausFim: number) {
+  const inicio = pontoNoArco(cx, cy, r, grausInicio);
+  const fim = pontoNoArco(cx, cy, r, grausFim);
+  const grande = grausInicio - grausFim > 180 ? 1 : 0;
+  return `M ${inicio.x} ${inicio.y} A ${r} ${r} 0 ${grande} 1 ${fim.x} ${fim.y}`;
+}
+
+export function GaugeRiscoRetorno({ valor }: { valor: number | null }) {
+  const tZero = (0 - GAUGE_MIN) / (GAUGE_MAX - GAUGE_MIN);
+  const tValor = valor === null ? tZero : (valor - GAUGE_MIN) / (GAUGE_MAX - GAUGE_MIN);
+  const tInicio = Math.min(tZero, tValor);
+  const tFim = Math.max(tZero, tValor);
+  const cor = valor === null ? "var(--ink-4)" : valor >= 0 ? "var(--gain)" : "var(--loss)";
+
+  const zeroDentro = pontoNoArco(GAUGE_CX, GAUGE_CY, GAUGE_R - 7, anguloParaT(tZero));
+  const zeroFora = pontoNoArco(GAUGE_CX, GAUGE_CY, GAUGE_R + 7, anguloParaT(tZero));
+  const ponta = pontoNoArco(GAUGE_CX, GAUGE_CY, GAUGE_R, anguloParaT(tValor));
+  const rotuloMin = pontoNoArco(GAUGE_CX, GAUGE_CY, GAUGE_R + 18, 180);
+  const rotuloMax = pontoNoArco(GAUGE_CX, GAUGE_CY, GAUGE_R + 18, 0);
+  const rotuloZero = pontoNoArco(GAUGE_CX, GAUGE_CY, GAUGE_R + 16, anguloParaT(tZero));
+
+  return (
+    <div className="flex flex-col items-center">
+      <svg
+        viewBox="0 0 220 132"
+        className="w-full max-w-[260px]"
+        role="img"
+        aria-label={`Risco retorno médio: ${emR(valor)}`}
+      >
+        <path
+          d={arcoEntre(GAUGE_CX, GAUGE_CY, GAUGE_R, 180, 0)}
+          fill="none"
+          stroke="var(--line-strong)"
+          strokeWidth="11"
+          strokeLinecap="round"
+        />
+        {valor !== null && (
+          <path
+            d={arcoEntre(GAUGE_CX, GAUGE_CY, GAUGE_R, anguloParaT(tInicio), anguloParaT(tFim))}
+            fill="none"
+            stroke={cor}
+            strokeWidth="11"
+            strokeLinecap="round"
+          />
+        )}
+        <line x1={zeroDentro.x} y1={zeroDentro.y} x2={zeroFora.x} y2={zeroFora.y} stroke="var(--ink-4)" strokeWidth="1.5" />
+        {valor !== null && <circle cx={ponta.x} cy={ponta.y} r="5.5" fill="var(--well)" stroke={cor} strokeWidth="2.4" />}
+        <text x={rotuloMin.x} y={rotuloMin.y + 4} textAnchor="start" fontSize="10.5" fill="var(--ink-4)" className="num">
+          {GAUGE_MIN}R
+        </text>
+        <text x={rotuloMax.x} y={rotuloMax.y + 4} textAnchor="end" fontSize="10.5" fill="var(--ink-4)" className="num">
+          +{GAUGE_MAX}R
+        </text>
+        <text x={rotuloZero.x} y={rotuloZero.y - 10} textAnchor="middle" fontSize="10.5" fill="var(--ink-4)" className="num">
+          0
+        </text>
+      </svg>
+      <p
+        className={`display -mt-1 text-[46px] font-extrabold leading-none ${
+          valor === null ? "text-ink-4" : valor >= 0 ? "text-gain" : "text-loss"
+        }`}
+      >
+        {emR(valor)}
+      </p>
     </div>
   );
 }

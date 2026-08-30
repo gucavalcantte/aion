@@ -86,6 +86,49 @@ export function mediaDePerda(resultados: number[]): number | null {
   return v.reduce((a, b) => a + b, 0) / v.length;
 }
 
+export type Disciplina = {
+  comPlano: { assertividade: number | null; trades: number };
+  semPlano: { assertividade: number | null; trades: number };
+  /** Quantas vezes mais a assertividade seguindo o plano é maior. Nulo se não dá pra comparar. */
+  multiplicador: number | null;
+  /** Soma líquida dos trades fora do plano — pode ser negativa ou positiva. */
+  resultadoFora: number;
+};
+
+/**
+ * Compara assertividade com e sem `respeitou_plano`. É a métrica que liga
+ * disciplina a resultado num número só.
+ */
+export function disciplina(
+  trades: { resultado: number; respeitou_plano: boolean }[],
+): Disciplina | null {
+  if (trades.length === 0) return null;
+
+  const com = trades.filter((t) => t.respeitou_plano);
+  const sem = trades.filter((t) => !t.respeitou_plano);
+
+  const assertComPlano = assertividade(
+    com.filter((t) => t.resultado > 0).length,
+    com.filter((t) => t.resultado < 0).length,
+  );
+  const assertSemPlano = assertividade(
+    sem.filter((t) => t.resultado > 0).length,
+    sem.filter((t) => t.resultado < 0).length,
+  );
+
+  const multiplicador =
+    assertComPlano !== null && assertSemPlano !== null && assertSemPlano > 0
+      ? assertComPlano / assertSemPlano
+      : null;
+
+  return {
+    comPlano: { assertividade: assertComPlano, trades: com.length },
+    semPlano: { assertividade: assertSemPlano, trades: sem.length },
+    multiplicador,
+    resultadoFora: sem.reduce((a, t) => a + t.resultado, 0),
+  };
+}
+
 /** Gains ou losses consecutivos do fim para trás. Zerado interrompe a contagem. */
 export function sequenciaAtual(
   resultadosEmOrdem: number[],

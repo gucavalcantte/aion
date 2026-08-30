@@ -3,9 +3,9 @@ import Link from "next/link";
 import { AvisoDeConstancia } from "@/components/aviso-constancia";
 import { BotaoRemover } from "@/components/botao-remover";
 import { CalendarioDeConsistencia } from "@/components/calendario";
-import { CurvaDeCapital, ResultadoPorOperacao } from "@/components/graficos";
+import { CurvaDeCapital, GaugeRiscoRetorno, ResultadoPorOperacao } from "@/components/graficos";
 import { contasParaSeletor, dadosDaPerfomance } from "@/lib/dados/trades";
-import { data as fData, emR, hora, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
+import { data as fData, hora, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
 import { rotuloRiscoRetorno, TEMPOS_GRAFICOS } from "@/lib/opcoes";
 
 import { removerLancamento } from "./acoes";
@@ -48,6 +48,17 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
   const [ano, mesNum] = mes.split("-").map(Number);
   const lucro = resumo.saldo - conta.saldo_inicial;
 
+  // Multiplicador da disciplina pode sair < 1 (raro: foi melhor fora do plano).
+  // Mostrar sempre o lado maior por cima, com a cor e a frase do lado que venceu.
+  const d = resumo.disciplina;
+  const comPlanoGanha = d?.multiplicador !== null && d?.multiplicador !== undefined && d.multiplicador >= 1;
+  const razaoDisciplina =
+    d?.multiplicador === null || d?.multiplicador === undefined
+      ? null
+      : comPlanoGanha
+        ? d.multiplicador
+        : 1 / d.multiplicador;
+
   return (
     <>
       <header className="mb-5 flex items-end justify-between">
@@ -69,11 +80,17 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
       <AvisoDeConstancia />
 
-      {/* HERO */}
-      <div className="mb-3 grid grid-cols-4 gap-3">
-        <div className="col-span-2 rounded-xl border border-line bg-card px-[22px] py-[18px]">
-          <p className="text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3">Saldo atual</p>
-          <p className={`num mt-2.5 text-[40px] font-semibold leading-none tracking-[-0.035em] ${lucro > 0 ? "text-gain" : lucro < 0 ? "text-loss" : ""}`}>
+      {/* HERO — o número mais importante do app (R:R médio) e o saldo dividem o topo */}
+      <div className="mb-3 grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-3">
+        <Cartao titulo="Risco retorno médio">
+          <GaugeRiscoRetorno valor={resumo.riscoRetorno} />
+          <p className="mt-1 text-center text-[12.5px] text-ink-4">
+            expectativa por operação — o número que decide se o mês fecha positivo
+          </p>
+        </Cartao>
+
+        <Cartao titulo="Saldo atual">
+          <p className={`num mt-2.5 text-[34px] font-semibold leading-none tracking-[-0.03em] ${lucro > 0 ? "text-gain" : lucro < 0 ? "text-loss" : ""}`}>
             {moeda(resumo.saldo, conta.moeda)}
           </p>
           <p className="mt-3 flex items-center gap-2.5">
@@ -85,89 +102,77 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
               {resumo.tradesNoMes > 0 && ` · ${resumo.tradesNoMes} trades`}
             </span>
           </p>
-        </div>
-
-        <Cartao titulo="Meta para saque" destaque>
-          {resumo.meta === null ? (
-            <p className="num mt-2.5 text-[27px] font-semibold text-ink-4">{VAZIO}</p>
-          ) : (
-            <>
-              <p className="mt-2.5 flex items-baseline gap-2">
-                <span className="num text-[27px] font-semibold tracking-[-0.03em] text-accent-soft">
-                  {moeda(resumo.meta.falta, conta.moeda)}
-                </span>
-                <span className="text-[14px] text-ink-2">para liberar</span>
-              </p>
-              <Barra percentual={resumo.meta.percentual} cor="bg-accent" />
-              <div className="mt-2 flex justify-between text-[12px] text-ink-4">
-                <span className="num">{moeda(resumo.meta.lucro, conta.moeda, true)} de {moeda(conta.meta, conta.moeda)}</span>
-                <span className="num">{percentual(Math.max(0, resumo.meta.percentual))}</span>
-              </div>
-            </>
-          )}
-        </Cartao>
-
-        <Cartao titulo="Drawdown do pico">
-          <p className={`num mt-2.5 text-[27px] font-semibold tracking-[-0.03em] ${resumo.drawdown.atual > 0 ? "text-loss" : "text-ink-2"}`}>
-            {resumo.drawdown.atual > 0 ? `-${moeda(resumo.drawdown.atual, conta.moeda)}` : moeda(0, conta.moeda)}
-          </p>
-          <p className="mt-3 text-[12.5px] text-ink-4">
-            máximo já visto: <span className="num text-ink-3">{moeda(resumo.drawdown.maximo, conta.moeda)}</span>
-          </p>
-          <p className="mt-1.5 text-[12px] text-ink-4">saque e aporte ficam de fora</p>
         </Cartao>
       </div>
 
-      {/* TILES */}
-      <div className="mb-5 grid grid-cols-5 gap-3">
-        <Tile titulo="Trades" valor={inteiro(resumo.totalTrades)} extra={`${resumo.tradesNoMes} no mês`} />
-        <Tile titulo="Assertividade" valor={percentual(resumo.assertividade)}>
+      {/* FAIXA — estatísticas secundárias, uma tira só em vez de seis cards
+          disputando atenção com o topo. */}
+      <div className="mb-5 grid grid-cols-6 divide-x divide-line rounded-xl border border-line bg-card py-4 transition-colors hover:border-line-strong">
+        <ItemFaixa titulo="Trades" valor={inteiro(resumo.totalTrades)} extra={`${resumo.tradesNoMes} no mês`} />
+
+        <ItemFaixa titulo="Assertividade" valor={percentual(resumo.assertividade)}>
           {resumo.assertividade !== null && (
-            <span className="mt-2.5 flex h-[5px] gap-0.5">
-              <span className="rounded-[3px] bg-gain" style={{ width: `${resumo.assertividade}%` }} />
-              <span className="flex-1 rounded-[3px] bg-loss opacity-60" />
+            <span className="mt-2 flex h-[4px] gap-0.5">
+              <span className="rounded-[2px] bg-gain" style={{ width: `${resumo.assertividade}%` }} />
+              <span className="flex-1 rounded-[2px] bg-loss opacity-60" />
             </span>
           )}
-        </Tile>
-        <Tile
-          titulo="Risco retorno médio"
-          valor={emR(resumo.riscoRetorno)}
-          cor={resumo.riscoRetorno === null ? "" : resumo.riscoRetorno >= 0 ? "text-gain" : "text-loss"}
-        />
-        <div className="rounded-xl border border-line bg-card px-5 py-4">
-          <p className="text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3">Ganho / perda médios</p>
-          <p className="mt-2.5 flex items-baseline gap-2.5">
-            <span className="num text-[22px] font-semibold tracking-[-0.03em] text-gain">{moeda(resumo.mediaGanho, conta.moeda, true)}</span>
+        </ItemFaixa>
+
+        <ItemFaixa titulo="Ganho / perda">
+          <p className="num mt-2 flex items-baseline gap-1.5 text-[16px] font-semibold">
+            <span className="text-gain">{moeda(resumo.mediaGanho, conta.moeda, true)}</span>
             <span className="text-ink-4">/</span>
-            <span className="num text-[22px] font-semibold tracking-[-0.03em] text-loss">{moeda(resumo.mediaPerda, conta.moeda)}</span>
+            <span className="text-loss">{moeda(resumo.mediaPerda, conta.moeda)}</span>
           </p>
-        </div>
-        <div className="rounded-xl border border-line bg-card px-5 py-4">
-          <p className="text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3">Sequência</p>
+        </ItemFaixa>
+
+        <ItemFaixa titulo="Sequência">
           {resumo.sequencia ? (
             <>
-              <p className="mt-2.5 flex items-baseline gap-2">
-                <span className={`num text-[26px] font-semibold tracking-[-0.03em] ${resumo.sequencia.tipo === "Gain" ? "text-gain" : resumo.sequencia.tipo === "Loss" ? "text-loss" : "text-ink-3"}`}>
+              <p className="mt-2 flex items-baseline gap-1.5">
+                <span className={`num text-[18px] font-semibold ${resumo.sequencia.tipo === "Gain" ? "text-gain" : resumo.sequencia.tipo === "Loss" ? "text-loss" : "text-ink-3"}`}>
                   {resumo.sequencia.quantidade}
                 </span>
-                <span className="text-[13.5px] text-ink-2">
-                  {resumo.sequencia.tipo === "Zerado" ? "zerado" : `${resumo.sequencia.tipo.toLowerCase()}s seguidos`}
+                <span className="text-[11.5px] text-ink-3">
+                  {resumo.sequencia.tipo === "Zerado" ? "zerado" : `${resumo.sequencia.tipo.toLowerCase()}s`}
                 </span>
               </p>
-              <span className="mt-3 flex gap-[3px]">
+              <span className="mt-2 flex gap-[2px]">
                 {resumo.ultimos.map((s, i) => (
                   <span
                     key={i}
-                    className={`h-4 flex-1 rounded-[3px] ${s === "Gain" ? "bg-gain" : s === "Loss" ? "bg-loss" : "bg-neutral"}`}
+                    className={`h-[10px] flex-1 rounded-[2px] ${s === "Gain" ? "bg-gain" : s === "Loss" ? "bg-loss" : "bg-neutral"}`}
                     style={{ opacity: i < resumo.ultimos.length - resumo.sequencia!.quantidade ? 0.5 : 1 }}
                   />
                 ))}
               </span>
             </>
           ) : (
-            <p className="num mt-2.5 text-[26px] font-semibold text-ink-4">{VAZIO}</p>
+            <p className="num mt-2 text-[18px] text-ink-4">{VAZIO}</p>
           )}
-        </div>
+        </ItemFaixa>
+
+        <ItemFaixa
+          titulo="Drawdown do pico"
+          valor={resumo.drawdown.atual > 0 ? `-${moeda(resumo.drawdown.atual, conta.moeda)}` : moeda(0, conta.moeda)}
+          cor={resumo.drawdown.atual > 0 ? "text-loss" : "text-ink-2"}
+          extra={`máx. já visto: ${moeda(resumo.drawdown.maximo, conta.moeda)}`}
+        />
+
+        <ItemFaixa titulo="Meta para saque">
+          {resumo.meta === null ? (
+            <p className="num mt-2 text-[18px] text-ink-4">{VAZIO}</p>
+          ) : (
+            <>
+              <p className="num mt-2 text-[18px] font-semibold text-accent-soft">{moeda(resumo.meta.falta, conta.moeda)}</p>
+              <span className="mt-2 block h-[4px] overflow-hidden rounded-[2px] bg-track">
+                <span className="block h-full rounded-[2px] bg-accent" style={{ width: `${Math.max(0, Math.min(100, resumo.meta.percentual))}%` }} />
+              </span>
+              <p className="mt-1 text-[11px] text-ink-4">{percentual(Math.max(0, resumo.meta.percentual))} da meta</p>
+            </>
+          )}
+        </ItemFaixa>
       </div>
 
       {/* CALENDÁRIO + CURVA */}
@@ -176,7 +181,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           <div className="mb-4">
             <h2 className="display text-[19px]">Calendário de consistência</h2>
             <p className="mt-1.5 text-[13px] text-ink-4">
-              {MESES[mesNum - 1]} de {ano} · só dias úteis
+              {MESES[mesNum - 1]} de {ano} · <span className="num">{resumo.tradesNoMes}</span> trades · só dias úteis
             </p>
           </div>
           <CalendarioDeConsistencia mes={mes} porDia={porDia} moedaConta={conta.moeda} />
@@ -193,27 +198,71 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
         </section>
       </div>
 
-      {/* BARRAS */}
-      <section className="mb-5 rounded-xl border border-line bg-card p-[22px]">
-        <div className="mb-4 flex items-baseline justify-between">
-          <div>
-            <h2 className="display text-[19px]">Resultado por operação</h2>
-            <p className="mt-1.5 text-[13px] text-ink-4">Cada barra é um trade, em ordem</p>
+      {/* BARRAS + DISCIPLINA */}
+      <div className="mb-5 grid grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-3">
+        <section className="rounded-xl border border-line bg-card p-[22px]">
+          <div className="mb-4 flex items-baseline justify-between">
+            <div>
+              <h2 className="display text-[19px]">Resultado por operação</h2>
+              <p className="mt-1.5 text-[13px] text-ink-4">
+                Cada barra é um trade, em ordem — histórico completo, não só {MESES[mesNum - 1]}
+              </p>
+            </div>
+            <p className="flex items-center gap-2 text-[12.5px] text-ink-3">
+              <svg width="22" height="6" aria-hidden><line x1="0" y1="3" x2="22" y2="3" stroke="var(--ref)" strokeWidth="1.5" strokeDasharray="3 3" /></svg>
+              MLPT {moeda(conta.mlpt, conta.moeda)}
+            </p>
           </div>
-          <p className="flex items-center gap-2 text-[12.5px] text-ink-3">
-            <svg width="22" height="6" aria-hidden><line x1="0" y1="3" x2="22" y2="3" stroke="var(--ref)" strokeWidth="1.5" strokeDasharray="3 3" /></svg>
-            MLPT {moeda(conta.mlpt, conta.moeda)}
-          </p>
-        </div>
-        <div className="rounded-[10px] border border-line-soft bg-well p-3">
-          <ResultadoPorOperacao
-            trades={[...listagem].reverse().map((t) => ({ resultado: t.resultado, data: fData(t.data) }))}
-            mlpt={conta.mlpt}
-            moedaConta={conta.moeda}
-            largura={1120}
-          />
-        </div>
-      </section>
+          <div className="rounded-[10px] border border-line-soft bg-well p-3">
+            <ResultadoPorOperacao
+              trades={[...listagem].reverse().map((t) => ({ resultado: t.resultado, data: fData(t.data) }))}
+              mlpt={conta.mlpt}
+              moedaConta={conta.moeda}
+              largura={780}
+            />
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-line bg-card p-[22px]">
+          <h2 className="display text-[19px]">Disciplina</h2>
+          <p className="mt-1.5 text-[13px] text-ink-4">Assertividade conforme você seguiu o plano</p>
+
+          {d === null ? (
+            <p className="mt-6 text-[13.5px] text-ink-4">Ainda não há trades suficientes.</p>
+          ) : (
+            <>
+              <p className={`display mt-4 text-[42px] font-extrabold leading-none ${razaoDisciplina === null ? "text-ink-4" : comPlanoGanha ? "text-gain" : "text-loss"}`}>
+                {razaoDisciplina === null ? VAZIO : `${razaoDisciplina.toFixed(1).replace(".", ",")}×`}
+              </p>
+              <p className="mt-2.5 text-[13.5px] leading-relaxed text-ink-2">
+                {razaoDisciplina === null ? (
+                  "ainda sem trades fora do plano para comparar"
+                ) : comPlanoGanha ? (
+                  <>
+                    mais acerto seguindo o plano
+                    {d.semPlano.trades > 0 && (
+                      <>
+                        {" "}— os <span className="num">{d.semPlano.trades}</span> trades fora dele{" "}
+                        {d.resultadoFora <= 0 ? "custaram" : "renderam"}{" "}
+                        <span className={`num ${d.resultadoFora <= 0 ? "text-loss" : "text-gain"}`}>
+                          {moeda(d.resultadoFora, conta.moeda, true)}
+                        </span>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  "mais acerto quando NÃO seguiu o plano — vale revisar se o plano ainda faz sentido"
+                )}
+              </p>
+
+              <div className="mt-5 flex flex-col gap-3 border-t border-line pt-4">
+                <BarraDeDisciplina rotulo="Respeitou o plano" assertividade={d.comPlano.assertividade} />
+                <BarraDeDisciplina rotulo="Não respeitou" assertividade={d.semPlano.assertividade} />
+              </div>
+            </>
+          )}
+        </section>
+      </div>
 
       {/* TABELA */}
       <section className="mb-5 overflow-hidden rounded-xl border border-line bg-card">
@@ -244,10 +293,10 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
               </thead>
               <tbody>
                 {listagem.map((t) => {
-                  const td = "whitespace-nowrap border-b border-line-soft bg-table-row px-[13px] py-[11px] text-[14.5px] text-ink-2";
+                  const td = "whitespace-nowrap border-b border-line-soft bg-table-row px-[13px] py-[11px] text-[14.5px] text-ink-2 transition-colors group-hover:bg-raised";
                   const setup = setups.find((s) => s.id === t.setup_id)?.nome ?? VAZIO;
                   return (
-                    <tr key={t.id}>
+                    <tr key={t.id} className="group">
                       <td className={`${td} num`}>{fData(t.data)}</td>
                       <td className={`${td} num`}>{hora(t.hora_inicio)}</td>
                       <td className={`${td} num`}>{hora(t.hora_fim)}</td>
@@ -348,24 +397,42 @@ function Cartao({ titulo, destaque, children }: { titulo: string; destaque?: boo
   );
 }
 
-function Tile({ titulo, valor, extra, cor = "", children }: { titulo: string; valor: string; extra?: string; cor?: string; children?: React.ReactNode }) {
+/** Um item da tira de estatísticas secundárias — menor que um Cartao de propósito. */
+function ItemFaixa({
+  titulo,
+  valor,
+  extra,
+  cor = "",
+  children,
+}: {
+  titulo: string;
+  valor?: string;
+  extra?: string;
+  cor?: string;
+  children?: React.ReactNode;
+}) {
   return (
-    <div className="rounded-xl border border-line bg-card px-5 py-4">
-      <p className="text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3">{titulo}</p>
-      <p className="mt-2.5 flex items-baseline gap-2.5">
-        <span className={`num text-[26px] font-semibold tracking-[-0.03em] ${cor}`}>{valor}</span>
-        {extra && <span className="text-[13px] text-ink-4">{extra}</span>}
-      </p>
+    <div className="px-4 first:pl-5 last:pr-5">
+      <p className="text-[10.5px] font-semibold uppercase tracking-[0.09em] text-ink-3">{titulo}</p>
+      {valor !== undefined && <p className={`num mt-2 text-[18px] font-semibold ${cor}`}>{valor}</p>}
+      {extra && <p className="mt-1 text-[11px] text-ink-4">{extra}</p>}
       {children}
     </div>
   );
 }
 
-function Barra({ percentual, cor }: { percentual: number; cor: string }) {
+function BarraDeDisciplina({ rotulo, assertividade }: { rotulo: string; assertividade: number | null }) {
   return (
-    <span className="mt-3.5 block h-[6px] overflow-hidden rounded-[3px] bg-track">
-      <span className={`block h-full rounded-[3px] ${cor}`} style={{ width: `${Math.max(0, Math.min(100, percentual))}%` }} />
-    </span>
+    <div>
+      <div className="mb-1.5 flex items-baseline justify-between text-[12.5px] text-ink-2">
+        <span>{rotulo}</span>
+        <span className="num">{percentual(assertividade)}</span>
+      </div>
+      <div className="flex h-[6px] gap-0.5">
+        <span className="rounded-[3px] bg-gain" style={{ width: `${assertividade ?? 0}%` }} />
+        <span className="flex-1 rounded-[3px] bg-loss opacity-50" />
+      </div>
+    </div>
   );
 }
 
