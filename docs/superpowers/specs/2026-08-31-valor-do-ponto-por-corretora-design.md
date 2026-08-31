@@ -130,10 +130,8 @@ Alternativas descartadas:
   `0001_schema.sql`: campos deriváveis são GENERATED justamente para não poderem
   ficar inconsistentes.
 
-O trigger dispara **só** em `insert` e em `update of conta_id`. Duas
-consequências desejadas: um trade guarda a corretora onde foi executado, mesmo
-que a conta mude depois; e um `update trades set corretora = ...` direto no SQL
-continua possível, que é o que o §7 precisa.
+O trigger dispara **só** em `insert` e em `update of conta_id`. Isso garante que
+um trade guarda a corretora onde foi executado, mesmo que a conta mude depois.
 
 Constraint nova, para o caso de ativo sem ficha na corretora:
 
@@ -159,24 +157,31 @@ Zero), o tooltip não aparece — que já é o comportamento atual quando falta 
 O formulário ganha o seletor de corretora, ao lado do de moeda, e `acoes.ts`
 valida o valor. `Conta` em `tipos.ts` ganha o campo.
 
-### 7. Backfill dos trades já registrados
+### 7. Sem backfill
 
-Se já existem trades da Zero gravados com os valores da Ylos, a migração precisa
-de um passo manual depois de marcar a conta:
+Todos os trades registrados até hoje são da Ylos. O default `corretora = 'Ylos'`
+já é o valor correto para eles — não há passo manual de migração de dados.
 
-```sql
-update public.trades set corretora = 'Zero Markets' where conta_id = '<id da conta>';
-```
+### 8. Correção do rótulo de MGC e MBT (dólares, não pontos)
 
-`stop_dolar` e `resultado_pontos` se recalculam sozinhos (são gerados).
-**`risco_retorno` não** — ele foi gravado a partir de uma sugestão calculada com
-o valor errado, e é um campo que o usuário pode sobrescrever à mão. Corrigi-lo
-em massa apagaria escolhas manuais. Fica como conferência do usuário, trade a
-trade, se ele quiser.
+Achado ao explorar o código para este design, e corrigido junto porque a mesma
+ficha por corretora já está sendo reestruturada: o `CLAUDE.md` §3.2 documenta o
+rótulo da unidade de MGC e MBT como **"dólares"**; `ativos.ts:10` e `:13`
+gravam **"pontos"**. Hoje o campo mostra "Stop em pontos" para Gold e Bitcoin,
+quando deveria mostrar "Stop em dólares".
 
-**A confirmar com o usuário:** existem trades assim?
+Não é um erro de cálculo — para os dois ativos, 1 "ponto" e 1 dólar de
+movimento do preço são a mesma grandeza, e `valorPonto` já reflete isso
+corretamente (MGC: US$1 de movimento = US$10 no contrato; MBT: US$1 = US$0,10).
+É só o texto do rótulo que diverge do que o `CLAUDE.md` documenta como correto.
 
-### 8. O que não muda
+Corrigido nas duas fichas: `unidade` de MGC e MBT é `"dólares"` tanto na Ylos
+quanto na Zero — é a mesma grandeza (dólar de movimento do preço) nas duas
+corretoras, e não há indicação de que a Zero rotule diferente. Sem mudança de
+cálculo, só de rótulo. **Se a plataforma da Zero usa outro termo para isso,
+me avise antes da implementação.**
+
+### 9. O que não muda
 
 - **Setup (§5.4)** e toda a estatística: assertividade e R:R são percentuais e
   razões, imunes ao valor do ponto.
@@ -184,6 +189,18 @@ trade, se ele quiser.
   continuam livres — o plano é um registro por usuário e não tem conta.
 - **Backtestes**: nenhuma coluna nova. O bloco continua sendo só o tempo gráfico.
 - **`moedaDoAtivo`**: WIN é BRL porque negocia na B3, não por causa da corretora.
+
+### 10. Atualizar `CLAUDE.md`
+
+Fonte de verdade do projeto, precisa acompanhar o schema — mesma prática do
+trabalho anterior de moeda por conta. Depois da implementação:
+
+- §3.2 vira uma tabela por corretora (a Ylos como está hoje, mais a ficha da
+  Zero), com o rótulo de MGC/MBT já corrigido para "dólares".
+- §4, `contas`: novo campo `corretora`.
+- §4, `trades`: `contratos` deixa de ser inteiro; `stop_dolar` e
+  `resultado_pontos` passam a depender também da corretora do trade, não só do
+  ativo.
 
 ## Migração (`0003_corretora.sql`)
 
@@ -218,9 +235,4 @@ ter seus valores usados na mesma transação.
 - `stopEmDolar(18, "MCL", 0.10, "Zero Markets") === 18` — o caso do 0,20% a WTI 90
 - `ativosDaCorretora("Zero Markets")` não inclui WIN
 - `moedaDoAtivo("WIN") === "BRL"` em qualquer corretora
-
-## Discrepância pré-existente, fora de escopo
-
-`CLAUDE.md` §3.2 diz que a unidade de MGC e MBT é **"dólares"**; `ativos.ts:10` e
-`:13` gravam **"pontos"**. Este design não resolve isso — preserva o que o código
-faz hoje e apenas move o campo de lugar. Vale uma decisão à parte.
+- `unidadeDoStop("MGC", "Ylos") === "dólares"` e `unidadeDoStop("MBT", "Ylos") === "dólares"`
