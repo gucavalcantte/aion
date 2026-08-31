@@ -145,7 +145,7 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
   };
 }
 
-export type PontoDaCurva = { i: number; lucro: number; resultado: number; data: string };
+export type PontoDaCurva = { i: number; lucro: number; resultado: number; data: string; ativo: Ativo };
 export type MarcaDeCaixa = { i: number; tipo: "Saque" | "Aporte"; valor: number; data: string };
 
 /**
@@ -160,7 +160,7 @@ function curvaDeCapital(_saldoInicial: number, trades: Trade[], lancamentos: Lan
   let acumulado = 0;
   const pontos: PontoDaCurva[] = trades.map((t, i) => {
     acumulado += t.resultado;
-    return { i: i + 1, lucro: acumulado, resultado: t.resultado, data: t.data };
+    return { i: i + 1, lucro: acumulado, resultado: t.resultado, data: t.data, ativo: t.ativo };
   });
 
   const marcadores: MarcaDeCaixa[] = lancamentos.map((l) => ({

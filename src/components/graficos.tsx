@@ -56,7 +56,7 @@ function Legenda({ itens }: { itens: { cor: string; texto: string; tracejado?: b
   return (
     <div className="mb-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
       {itens.map((item) => (
-        <span key={item.texto} className="flex items-center gap-2 text-[12.5px] text-ink-3">
+        <span key={item.texto} className="flex items-center gap-2 text-[12.5px] text-ink">
           {item.tracejado ? (
             <svg width="20" height="6" aria-hidden>
               <line x1="0" y1="3" x2="20" y2="3" stroke={item.cor} strokeWidth="2" strokeDasharray="4 3" />
@@ -96,6 +96,12 @@ export function CurvaDeCapital({
   if (pontos.length < 2) return <Vazio texto="A curva aparece a partir do segundo trade." />;
 
   const simbolo = simboloDaMoeda(moedaConta);
+
+  // Aspecto mais alto que os demais gráficos: este cartão divide a linha com
+  // o calendário, que é bem mais alto, e sobrava vão vazio abaixo da curva.
+  const ALTURA = 300;
+  const BASE = ALTURA - 32;
+  const EIXO_X = ALTURA - 10;
 
   const valores = pontos.map((p) => p.lucro);
   if (meta !== null) valores.push(meta);
@@ -169,7 +175,7 @@ export function CurvaDeCapital({
             r={pontos.length > 80 ? 1.8 : 2.8}
             fill={p.resultado > 0 ? "var(--gain)" : p.resultado < 0 ? "var(--loss)" : "var(--neutral)"}
           >
-            <title>{`#${p.i} · ${p.data} · ${moeda(p.resultado, moedaConta, true)} · acumulado ${moeda(p.lucro, moedaConta, true)}`}</title>
+            <title>{`#${p.i} · ${p.data} · ${p.ativo} · ${moeda(p.resultado, moedaConta, true)} · acumulado ${moeda(p.lucro, moedaConta, true)}`}</title>
           </circle>
         ))}
 
@@ -227,14 +233,14 @@ export function ResultadoPorOperacao({
         itens={[
           { cor: "var(--gain)", texto: "Gain" },
           { cor: "var(--loss)", texto: "Loss" },
-          { cor: "var(--ref)", texto: `Limite MLPT ${moeda(mlpt, moedaConta)}`, tracejado: true },
+          { cor: "var(--accent-soft)", texto: `Limite MLPT ${moeda(mlpt, moedaConta)}`, tracejado: true },
         ]}
       />
       <svg viewBox={`0 0 ${largura} ${ALTURA}`} className="block h-auto w-full" role="img" aria-label="Resultado por operação">
         {marcasDoEixo(min, max).map((v, i) => (
           <g key={i}>
             <line x1={ESQ} y1={y(v)} x2={largura - DIR} y2={y(v)} stroke="var(--line-soft)" strokeWidth="1" />
-            <text x={ESQ - 8} y={y(v) + 4} textAnchor="end" fontSize="11.5" fill="var(--ink-4)" className="num">
+            <text x={ESQ - 8} y={y(v) + 4} textAnchor="end" fontSize="13" fill="var(--ink-4)" className="num">
               {curto(v, simbolo)}
             </text>
           </g>
@@ -244,7 +250,7 @@ export function ResultadoPorOperacao({
 
         {/* Os dois lados do MLPT: mostra se cada trade coube no risco aceito. */}
         {[mlpt, -mlpt].map((v) => (
-          <line key={v} x1={ESQ} y1={y(v)} x2={largura - DIR} y2={y(v)} stroke="var(--ref)" strokeWidth="1.4" strokeDasharray="5 4" opacity="0.85" />
+          <line key={v} x1={ESQ} y1={y(v)} x2={largura - DIR} y2={y(v)} stroke="var(--accent-soft)" strokeWidth="1.4" strokeDasharray="5 4" opacity="0.85" />
         ))}
 
         {trades.map((t, i) => {
@@ -268,7 +274,7 @@ export function ResultadoPorOperacao({
 
         {trades.map((_, i) =>
           i % passo === 0 || i === trades.length - 1 ? (
-            <text key={`x${i}`} x={ESQ + i * faixa + faixa / 2} y={EIXO_X} textAnchor="middle" fontSize="11" fill="var(--ink-4)" className="num">
+            <text key={`x${i}`} x={ESQ + i * faixa + faixa / 2} y={EIXO_X} textAnchor="middle" fontSize="12.5" fill="var(--ink-4)" className="num">
               {i + 1}
             </text>
           ) : null,

@@ -209,7 +209,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
               </p>
             </div>
             <p className="flex items-center gap-2 text-[12.5px] text-ink-3">
-              <svg width="22" height="6" aria-hidden><line x1="0" y1="3" x2="22" y2="3" stroke="var(--ref)" strokeWidth="1.5" strokeDasharray="3 3" /></svg>
+              <svg width="22" height="6" aria-hidden><line x1="0" y1="3" x2="22" y2="3" stroke="var(--accent-soft)" strokeWidth="1.5" strokeDasharray="3 3" /></svg>
               MLPT {moeda(conta.mlpt, conta.moeda)}
             </p>
           </div>
@@ -306,13 +306,13 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
                       <td className={`${td} num text-right`}>{t.contratos}</td>
                       <td className={`${td} num text-right`}>{String(t.pontos_stop).replace(".", ",")}</td>
                       <td className={`${td} num text-right text-ink-3`}>{moeda(t.stop_dolar, conta.moeda)}</td>
-                      <td className={`${td} num text-right font-semibold ${t.resultado > 0 ? "text-gain" : t.resultado < 0 ? "text-loss" : "text-ink-3"}`}>
+                      <td className={`${td} num text-right font-semibold ${t.resultado > 0 ? "!text-gain" : t.resultado < 0 ? "!text-loss" : "!text-ink-3"}`}>
                         {moeda(t.resultado, conta.moeda, true)}
                       </td>
-                      <td className={`${td} num text-right text-ink-3`}>
+                      <td className={`${td} num text-right !text-ink-3`}>
                         {t.resultado_pontos === null ? VAZIO : t.resultado_pontos.toFixed(2).replace(".", ",")}
                       </td>
-                      <td className={`${td} num text-right font-semibold ${(t.risco_retorno ?? 0) >= 0 ? "" : "text-loss"}`}>
+                      <td className={`${td} num text-right font-semibold ${(t.risco_retorno ?? 0) >= 0 ? "" : "!text-loss"}`}>
                         {rotuloRiscoRetorno(t.risco_retorno)}
                       </td>
                       <td className={td}>
