@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { DIMENSOES, type Dimensao } from "@/lib/analise";
 import { ATIVOS } from "@/lib/ativos";
 import { listarBacktestes, totalDoTempo } from "@/lib/dados/backtestes";
-import { mlptDaContaPadrao } from "@/lib/dados/contas";
+import { contaPadraoParaBackteste } from "@/lib/dados/contas";
+import { especificacoesDaCorretora } from "@/lib/dados/corretoras";
 import { listarSetupsSimples } from "@/lib/dados/setups";
 import { emR, inteiro, percentual } from "@/lib/formato";
 import { ehTempoGrafico, OPERACOES } from "@/lib/opcoes";
@@ -33,12 +34,14 @@ export default async function PaginaTempo({
   const temFiltro = Boolean(filtros.setup || filtros.ativo || filtros.operacao);
   const dimensao = (DIMENSOES.find((d) => d.chave === dim)?.chave ?? "localizacao") as Dimensao;
 
-  const [{ linhas, resumo }, setups, total, mlpt] = await Promise.all([
+  const [{ linhas, resumo }, setups, total, contaPadrao] = await Promise.all([
     listarBacktestes(tempo, filtros),
     listarSetupsSimples(),
     totalDoTempo(tempo),
-    mlptDaContaPadrao(),
+    contaPadraoParaBackteste(),
   ]);
+
+  const especificacoes = await especificacoesDaCorretora(contaPadrao.corretora ?? "Ylos");
 
   const nomeDoSetup = setups.find((s) => s.id === filtros.setup)?.nome;
 
@@ -104,7 +107,13 @@ export default async function PaginaTempo({
             )}
           </div>
 
-          <TabelaBackteste tempo={tempo} linhas={linhas} setups={setups} mlpt={mlpt} />
+          <TabelaBackteste
+            tempo={tempo}
+            linhas={linhas}
+            setups={setups}
+            mlpt={contaPadrao.mlpt}
+            especificacoes={especificacoes}
+          />
 
           <div id="contexto" className="mt-5 scroll-mt-6">
             <Contextos linhas={linhas} tempo={tempo} dimensao={dimensao} filtros={filtros} />

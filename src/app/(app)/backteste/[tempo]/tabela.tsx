@@ -3,8 +3,9 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { BotaoRemover } from "@/components/botao-remover";
-import { ATIVOS } from "@/lib/ativos";
+import { ATIVOS, type Ativo } from "@/lib/ativos";
 import type { Backteste } from "@/lib/dados/backtestes";
+import type { EspecificacaoAtivo } from "@/lib/dados/corretoras";
 import { data as formatarData, moeda, simboloDaMoeda, VAZIO } from "@/lib/formato";
 import {
   ALINHAMENTOS,
@@ -60,11 +61,13 @@ export function TabelaBackteste({
   linhas,
   setups,
   mlpt,
+  especificacoes,
 }: {
   tempo: string;
   linhas: Backteste[];
   setups: Setups;
   mlpt: number | null;
+  especificacoes: Partial<Record<Ativo, EspecificacaoAtivo>>;
 }) {
   const [editando, setEditando] = useState<string | null>(null);
   const [expandida, setExpandida] = useState(false);
@@ -113,7 +116,7 @@ export function TabelaBackteste({
         </tr>
       </thead>
       <tbody>
-        <LinhaEditavel formId="nova-linha" tempo={tempo} setups={setups} inicial={null} />
+        <LinhaEditavel formId="nova-linha" tempo={tempo} setups={setups} inicial={null} especificacoes={especificacoes} />
 
         {linhasPagina.map((linha, i) => {
           const indice = inicioPagina + i;
@@ -126,6 +129,7 @@ export function TabelaBackteste({
               setups={setups}
               inicial={linha}
               numero={numero}
+              especificacoes={especificacoes}
               aoFechar={() => setEditando(null)}
             />
           ) : (
@@ -136,6 +140,7 @@ export function TabelaBackteste({
               tempo={tempo}
               setups={setups}
               mlpt={mlpt}
+              especificacoes={especificacoes}
               aoEditar={() => setEditando(linha.id)}
             />
           );
@@ -230,6 +235,7 @@ function LinhaEditavel({
   setups,
   inicial,
   numero,
+  especificacoes,
   aoFechar,
 }: {
   formId: string;
@@ -237,6 +243,7 @@ function LinhaEditavel({
   setups: Setups;
   inicial: Backteste | null;
   numero?: number;
+  especificacoes: Partial<Record<Ativo, EspecificacaoAtivo>>;
   aoFechar?: () => void;
 }) {
   const editando = inicial !== null;
@@ -260,7 +267,7 @@ function LinhaEditavel({
     });
   }
 
-  const unidade = ATIVOS.find((a) => a.codigo === valor("ativo"))?.unidade ?? "pontos";
+  const unidade = especificacoes[valor("ativo") as Ativo]?.unidade ?? "pontos";
 
   // Focar o primeiro campo é imperativo (não dá pra fazer durante o render);
   // o reset da linha de cadastro vai junto, como parte do mesmo "limpou, então
@@ -462,6 +469,7 @@ function LinhaSalva({
   tempo,
   setups,
   mlpt,
+  especificacoes,
   aoEditar,
 }: {
   linha: Backteste;
@@ -469,6 +477,7 @@ function LinhaSalva({
   tempo: string;
   setups: Setups;
   mlpt: number | null;
+  especificacoes: Partial<Record<Ativo, EspecificacaoAtivo>>;
   aoEditar: () => void;
 }) {
   const setup = setups.find((s) => s.id === linha.setup_id)?.nome ?? VAZIO;
@@ -499,7 +508,12 @@ function LinhaSalva({
       <td className={`${td} num`}>
         <span className="flex items-center gap-1.5">
           {String(linha.tamanho_stop).replace(".", ",")}
-          <ValorStopDolar ativo={linha.ativo} tamanhoStop={linha.tamanho_stop} mlpt={mlpt} />
+          <ValorStopDolar
+            ativo={linha.ativo}
+            tamanhoStop={linha.tamanho_stop}
+            mlpt={mlpt}
+            especificacao={especificacoes[linha.ativo as Ativo] ?? null}
+          />
         </span>
       </td>
       <td className={td}>{linha.entrada}</td>
@@ -606,15 +620,17 @@ function ValorStopDolar({
   ativo,
   tamanhoStop,
   mlpt,
+  especificacao,
 }: {
   ativo: string;
   tamanhoStop: number;
   mlpt: number | null;
+  especificacao: EspecificacaoAtivo | null;
 }) {
   const dadosAtivo = ATIVOS.find((a) => a.codigo === ativo);
-  if (!dadosAtivo || !Number.isFinite(tamanhoStop) || !mlpt) return null;
+  if (!dadosAtivo || !especificacao || !Number.isFinite(tamanhoStop) || !mlpt) return null;
 
-  const stopPorContrato = tamanhoStop * dadosAtivo.valorPonto;
+  const stopPorContrato = tamanhoStop * especificacao.valorPonto;
   const contratos = contratosIdeais(stopPorContrato, mlpt);
 
   return (
@@ -631,7 +647,7 @@ function ValorStopDolar({
         className="pointer-events-none absolute left-full top-1/2 z-20 ml-2 w-max -translate-y-1/2 rounded-lg border border-line-strong bg-raised px-3 py-2 opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
       >
         <span className="num whitespace-nowrap text-[12.5px] text-ink-4">
-          {ativo} {String(tamanhoStop).replace(".", ",")} {dadosAtivo.unidade}
+          {ativo} {String(tamanhoStop).replace(".", ",")} {especificacao.unidade}
         </span>
         {contratos >= 1 ? (
           <span className="num mt-1 flex items-center justify-between gap-3 whitespace-nowrap text-[12.5px]">
