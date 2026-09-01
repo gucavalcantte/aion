@@ -34,13 +34,17 @@ export async function atualizarEspecificacao(
   if (!UNIDADES_VALIDAS.includes(unidade)) return { erro: "Escolha a unidade." };
 
   const supabase = await clienteServidor();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("valores_ponto_corretora")
     .update({ valor_ponto: valorPonto, unidade })
     .eq("corretora", corretora)
-    .eq("ativo", ativo);
+    .eq("ativo", ativo)
+    .select("id");
 
   if (error) return { erro: error.message };
+  if (!data || data.length === 0) {
+    return { erro: "Especificação não encontrada para essa corretora/ativo." };
+  }
 
   revalidatePath("/conta/corretoras");
   return { ok: true };

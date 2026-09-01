@@ -10,9 +10,13 @@
 -- compartilhado entre os três usuários, mesma regra do resto do app)
 -- -----------------------------------------------------------------------------
 
-create type corretora as enum ('Ylos', 'ZeroMarkets', 'B3');
+do $$ begin
+  create type corretora as enum ('Ylos', 'ZeroMarkets', 'B3');
+exception
+  when duplicate_object then null;
+end $$;
 
-create table public.valores_ponto_corretora (
+create table if not exists public.valores_ponto_corretora (
   id         uuid primary key default gen_random_uuid(),
   user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
   created_at timestamptz not null default now(),
@@ -82,6 +86,13 @@ declare
   corretora_da_conta corretora;
   vp numeric;
 begin
+  if tg_op = 'UPDATE'
+     and new.conta_id is not distinct from old.conta_id
+     and new.ativo is not distinct from old.ativo then
+    new.valor_ponto := old.valor_ponto;
+    return new;
+  end if;
+
   select corretora into corretora_da_conta
   from public.contas where id = new.conta_id;
 
@@ -99,7 +110,7 @@ end;
 $$;
 
 create trigger trg_valor_ponto_trade
-  before insert or update of conta_id, ativo on public.trades
+  before insert or update on public.trades
   for each row execute function public.definir_valor_ponto_trade();
 
 alter table public.trades drop column stop_dolar;
@@ -109,3 +120,8 @@ alter table public.trades add column stop_dolar numeric(14, 2)
   generated always as (pontos_stop * valor_ponto * contratos) stored;
 alter table public.trades add column resultado_pontos numeric(14, 4)
   generated always as (resultado / nullif(valor_ponto * contratos, 0)) stored;
+
+-- valor_do_ponto(ativo) só existia para as generated columns antigas (0001),
+-- já substituídas acima. Nada mais chama essa função — remover para não
+-- deixar uma segunda fonte de verdade ao lado de valores_ponto_corretora.
+drop function public.valor_do_ponto(ativo);

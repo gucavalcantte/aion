@@ -2,6 +2,8 @@
 
 import { useActionState, useEffect, useState } from "react";
 
+import type { Ativo, Corretora } from "@/lib/ativos";
+import type { LinhaCorretora } from "@/lib/dados/corretoras";
 import { UNIDADES } from "@/lib/opcoes";
 
 import { atualizarEspecificacao, type EstadoEspecificacao } from "./acoes";
@@ -15,8 +17,8 @@ export function TabelaCorretoras({
   corretora,
   ativos,
 }: {
-  corretora: string;
-  ativos: { ativo: string; valorPonto: number; unidade: string }[];
+  corretora: Corretora;
+  ativos: LinhaCorretora[];
 }) {
   return (
     <table className="w-full border-separate border-spacing-0">
@@ -43,8 +45,8 @@ function LinhaAtivo({
   valorPonto,
   unidade,
 }: {
-  corretora: string;
-  ativo: string;
+  corretora: Corretora;
+  ativo: Ativo;
   valorPonto: number;
   unidade: string;
 }) {
