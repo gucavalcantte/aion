@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { corretorasPorMoeda, type Corretora, type Moeda } from "@/lib/ativos";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 export type EstadoConta = { erro?: string };
@@ -24,6 +25,7 @@ export async function salvarConta(
   const numeroConta = String(dados.get("numero") ?? "").trim();
   const tipo = String(dados.get("tipo_conta") ?? "");
   const moedaConta = String(dados.get("moeda") ?? "");
+  const corretoraConta = String(dados.get("corretora") ?? "");
   const saldoInicial = numero(dados.get("saldo_inicial"));
   const meta = numero(dados.get("meta"));
   const mlpt = numero(dados.get("mlpt"));
@@ -33,6 +35,9 @@ export async function salvarConta(
   if (!numeroConta) return { erro: "Informe o número da conta." };
   if (tipo !== "Remunerada" && tipo !== "Simulador") return { erro: "Escolha o tipo da conta." };
   if (moedaConta !== "USD" && moedaConta !== "BRL") return { erro: "Escolha a moeda da conta." };
+  if (!corretorasPorMoeda(moedaConta as Moeda).includes(corretoraConta as Corretora)) {
+    return { erro: "Escolha uma corretora válida para a moeda selecionada." };
+  }
   if (saldoInicial === null) return { erro: "Informe o saldo inicial." };
   if (mlpt === null || mlpt <= 0) return { erro: "Informe o MLPT (maior que zero)." };
   if (mlpd === null || mlpd <= 0) return { erro: "Informe o MLPD (maior que zero)." };
@@ -53,6 +58,7 @@ export async function salvarConta(
     numero: numeroConta,
     tipo_conta: tipo,
     moeda: moedaConta,
+    corretora: corretoraConta,
     saldo_inicial: saldoInicial,
     meta,
     mlpt,

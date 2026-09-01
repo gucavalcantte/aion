@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
-import type { Moeda } from "@/lib/ativos";
+import { corretorasPorMoeda, type Corretora, type Moeda } from "@/lib/ativos";
 import type { Conta } from "@/lib/tipos";
 
 import { salvarConta, type EstadoConta } from "./acoes";
@@ -18,6 +18,15 @@ export function FormularioConta({ conta }: { conta: Conta | null }) {
   const [estado, acao, enviando] = useActionState(salvarConta, INICIAL);
   const editando = Boolean(conta);
   const [moedaSelecionada, setMoedaSelecionada] = useState<Moeda>(conta?.moeda ?? "USD");
+  const [corretoraSelecionada, setCorretoraSelecionada] = useState<Corretora>(
+    conta?.corretora ?? corretorasPorMoeda(conta?.moeda ?? "USD")[0],
+  );
+
+  function trocarMoeda(m: Moeda) {
+    setMoedaSelecionada(m);
+    const opcoes = corretorasPorMoeda(m);
+    if (!opcoes.includes(corretoraSelecionada)) setCorretoraSelecionada(opcoes[0]);
+  }
 
   return (
     <form
@@ -73,11 +82,32 @@ export function FormularioConta({ conta }: { conta: Conta | null }) {
                   name="moeda"
                   value={m}
                   checked={moedaSelecionada === m}
-                  onChange={() => setMoedaSelecionada(m)}
+                  onChange={() => trocarMoeda(m)}
                   className="peer sr-only"
                 />
                 <span className="block cursor-pointer rounded-md py-[7px] text-center text-[14.5px] font-medium text-ink-3 peer-checked:bg-raised peer-checked:text-ink">
                   {m === "USD" ? "Dólar" : "Real"}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend className={rotulo}>Corretora</legend>
+          <div className="flex gap-1 rounded-[9px] border border-line-strong bg-input p-[3px]">
+            {corretorasPorMoeda(moedaSelecionada).map((c) => (
+              <label key={c} className="flex-1">
+                <input
+                  type="radio"
+                  name="corretora"
+                  value={c}
+                  checked={corretoraSelecionada === c}
+                  onChange={() => setCorretoraSelecionada(c)}
+                  className="peer sr-only"
+                />
+                <span className="block cursor-pointer rounded-md py-[7px] text-center text-[14.5px] font-medium text-ink-3 peer-checked:bg-raised peer-checked:text-ink">
+                  {c}
                 </span>
               </label>
             ))}
