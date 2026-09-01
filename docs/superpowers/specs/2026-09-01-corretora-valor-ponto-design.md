@@ -23,6 +23,22 @@ corretora executa a conta, não só do ativo.
   dólar só pode ser Ylos ou ZeroMarkets; uma conta em real só pode ser B3
   (única praça do WIN).
 
+## A unidade do stop também passa a ser por corretora
+
+Descoberta durante o levantamento comparativo: a ZeroMarkets mede o stop do
+Oil (MCL) em **pontos**, não em **%** como a Ylos. Ou seja, `unidade` — o
+rótulo que hoje `ativos.ts` trata como fixo por ativo ("pontos", "dólares"
+ou "%") — na verdade também é uma característica da corretora, não só do
+ativo. Para os outros seis ativos as duas corretoras concordam ("pontos"),
+mas o dado que sustenta isso passa a viver por corretora, não só por ativo
+— senão o MCL fica sem como representar as duas convenções ao mesmo tempo.
+
+Consequência: `unidade` sai de `ATIVOS` e passa a viver em
+`valores_ponto_corretora`, junto do `valor_ponto` — as duas colunas juntas
+são a especificação de como aquele ativo se mede e se precifica *naquela*
+corretora. `ATIVOS` fica só com o que é mesmo fixo do ativo: `nome` e
+`moeda`.
+
 ## Modelo de dados
 
 ### Novo enum `corretora`
@@ -42,13 +58,17 @@ create table public.valores_ponto_corretora (
   corretora corretora not null,
   ativo ativo not null,
   valor_ponto numeric not null,
+  unidade text not null, -- 'pontos' | 'dólares' | '%'
   primary key (corretora, ativo)
 );
 ```
 
 Uma linha por ativo aplicável a cada corretora: Ylos e ZeroMarkets cobrem os
-seis ativos em USD; B3 cobre só WIN. Essa tabela é o que a nova tela
-"Corretoras" lista e edita.
+seis ativos em USD; B3 cobre só WIN. `unidade` é o rótulo do campo de stop
+para esse ativo *nessa* corretora (ver seção acima) — na prática só MCL
+varia (`%` na Ylos, `pontos` na ZeroMarkets); os demais repetem `pontos` em
+toda corretora que os cobre. Essa tabela é o que a nova tela "Corretoras"
+lista e edita.
 
 ### `contas.corretora`
 
@@ -71,20 +91,20 @@ Ylos (100,00), como placeholder a corrigir na tela de Corretoras assim que
 o valor certo for confirmado.
 
 ```sql
-insert into public.valores_ponto_corretora (corretora, ativo, valor_ponto) values
-  ('Ylos', 'MES', 5.0),
-  ('Ylos', 'MYM', 0.5),
-  ('Ylos', 'MNQ', 2.0),
-  ('Ylos', 'MGC', 10.0),
-  ('Ylos', 'MCL', 100.0),
-  ('Ylos', 'MBT', 0.1),
-  ('B3',   'WIN', 0.2),
-  ('ZeroMarkets', 'MES', 1.0),
-  ('ZeroMarkets', 'MYM', 1.0),
-  ('ZeroMarkets', 'MNQ', 1.0),
-  ('ZeroMarkets', 'MGC', 100.0),
-  ('ZeroMarkets', 'MCL', 100.0), -- placeholder: valor real da ZeroMarkets ainda não confirmado, ver nota acima
-  ('ZeroMarkets', 'MBT', 1.0);
+insert into public.valores_ponto_corretora (corretora, ativo, valor_ponto, unidade) values
+  ('Ylos', 'MES', 5.0,   'pontos'),
+  ('Ylos', 'MYM', 0.5,   'pontos'),
+  ('Ylos', 'MNQ', 2.0,   'pontos'),
+  ('Ylos', 'MGC', 10.0,  'pontos'),
+  ('Ylos', 'MCL', 100.0, '%'),
+  ('Ylos', 'MBT', 0.1,   'pontos'),
+  ('B3',   'WIN', 0.2,   'pontos'),
+  ('ZeroMarkets', 'MES', 1.0,   'pontos'),
+  ('ZeroMarkets', 'MYM', 1.0,   'pontos'),
+  ('ZeroMarkets', 'MNQ', 1.0,   'pontos'),
+  ('ZeroMarkets', 'MGC', 100.0, 'pontos'),
+  ('ZeroMarkets', 'MCL', 100.0, 'pontos'), -- placeholder: valor real da ZeroMarkets ainda não confirmado, ver nota acima; unidade já é 'pontos', confirmada
+  ('ZeroMarkets', 'MBT', 1.0,   'pontos');
 ```
 
 ### `trades`: congelar o valor no momento do registro
@@ -172,23 +192,32 @@ comportamento de hoje, sem quebrar).
 
 ### `src/lib/ativos.ts`
 
-`ATIVOS` perde o campo `valorPonto` (mantém `nome`, `unidade`, `moeda` —
-esses continuam fixos). Novo tipo `Corretora = "Ylos" | "ZeroMarkets" |
-"B3"` e helper `corretorasPorMoeda(moeda: Moeda): Corretora[]` — retorna
-`["Ylos", "ZeroMarkets"]` para USD e `["B3"]` para BRL. Usado tanto no
-formulário de Conta (filtrar as opções) quanto na tela de Corretoras
-(agrupar por moeda).
+`ATIVOS` perde os campos `valorPonto` e `unidade` (mantém `nome` e `moeda`
+— esses sim continuam fixos por ativo, independente de corretora).
+`unidadeDoStop(codigo)` deixa de existir como função pura — vira parte do
+retorno das funções de `corretoras.ts`, já que agora depende também de
+qual corretora. Novo tipo `Corretora = "Ylos" | "ZeroMarkets" | "B3"` e
+helper `corretorasPorMoeda(moeda: Moeda): Corretora[]` — retorna `["Ylos",
+"ZeroMarkets"]` para USD e `["B3"]` para BRL. Usado tanto no formulário de
+Conta (filtrar as opções) quanto na tela de Corretoras (agrupar por
+moeda).
 
 ### `src/lib/dados/corretoras.ts` (novo)
 
-Data access da nova tabela:
+Data access da nova tabela. Cada ativo de uma corretora carrega valor por
+ponto **e** unidade juntos — as duas colunas descrevem a mesma
+especificação de contrato:
 
-- `valoresPontoDaCorretora(corretora): Promise<Record<Ativo, number>>` —
-  usado pelo Backteste e pelo formulário de trade.
-- `listarCorretoras(): Promise<{ corretora: Corretora; valores: { ativo: Ativo; valorPonto: number }[] }[]>`
+```ts
+type EspecificacaoAtivo = { valorPonto: number; unidade: string };
+```
+
+- `especificacoesDaCorretora(corretora): Promise<Record<Ativo, EspecificacaoAtivo>>`
+  — usado pelo Backteste e pelo formulário de trade.
+- `listarCorretoras(): Promise<{ corretora: Corretora; ativos: (EspecificacaoAtivo & { ativo: Ativo })[] }[]>`
   — usado pela tela de Corretoras.
-- `atualizarValorPonto(corretora, ativo, valorPonto)` (Server Action) —
-  usada pela edição inline da tela de Corretoras.
+- `atualizarEspecificacao(corretora, ativo, valorPonto, unidade)` (Server
+  Action) — usada pela edição inline da tela de Corretoras.
 
 ### `src/lib/metricas.ts`
 
@@ -219,18 +248,28 @@ moeda quando a coluna vier nula de alguma linha antiga).
 ### `src/app/(app)/backteste/[tempo]/page.tsx` e `tabela.tsx`
 
 `page.tsx` troca a chamada por `contaPadraoParaBackteste()` e, se houver
-corretora, busca `valoresPontoDaCorretora(corretora)`; passa esse mapa para
-`TabelaBackteste`. `ValorStopDolar` passa a receber `valorPonto: number |
-null` como prop em vez de ler `dadosAtivo.valorPonto`.
+corretora, busca `especificacoesDaCorretora(corretora)`; passa esse mapa
+para `TabelaBackteste`. Isso substitui as duas leituras de `ATIVOS.find(...).unidade`
+que hoje existem em `tabela.tsx` (linha do rótulo do stop no cadastro
+inline, e a linha de exibição do valor cadastrado) — ambas passam a ler o
+mapa vindo da conta padrão em vez de `ATIVOS`. `ValorStopDolar` passa a
+receber `{ valorPonto, unidade }: EspecificacaoAtivo | null` como prop em
+vez de ler `dadosAtivo.valorPonto`/`dadosAtivo.unidade`. Sem conta padrão
+com corretora resolvida, cai no valor/unidade da Ylos (mesmo
+comportamento de fallback já descrito para o valor por ponto).
 
 ### `src/app/(app)/perfomance/page.tsx` e `formulario-trade.tsx`
 
-`page.tsx` busca `valoresPontoDaCorretora(conta.corretora)` para a conta
-selecionada e passa como prop (`valoresPonto: Record<Ativo, number>`) para
-`FormularioTrade`, que troca `stopEmDolar(p, ativo, c)` por
-`stopEmDolar(p, valoresPonto[ativo], c)` no cálculo de preview (o valor
-final de verdade continua vindo do trigger, no banco — isso aqui é só o
-número que o formulário mostra antes de salvar).
+`page.tsx` busca `especificacoesDaCorretora(conta.corretora)` para a conta
+selecionada e passa como prop (`especificacoes: Record<Ativo,
+EspecificacaoAtivo>`) para `FormularioTrade`, que troca:
+
+- `stopEmDolar(p, ativo, c)` por `stopEmDolar(p, especificacoes[ativo].valorPonto, c)`
+  no cálculo de preview (o valor final de verdade continua vindo do
+  trigger, no banco — isso aqui é só o número que o formulário mostra
+  antes de salvar);
+- a leitura `ATIVOS.find((a) => a.codigo === ativo)?.unidade` pelo rótulo
+  vindo de `especificacoes[ativo].unidade`.
 
 ### `src/lib/tipos.ts`
 
@@ -251,12 +290,13 @@ está entre as permitidas para a moeda escolhida antes de gravar.
 
 Acessível por um link no topo da tela de Conta. Lista as três corretoras,
 cada uma com a tabela dos ativos que ela cobre (Ylos/ZeroMarkets: os seis
-em USD; B3: só WIN) e o valor por ponto editável inline — mesmo padrão de
-"clica, edita a célula, confirma" já usado no cadastro inline do Backteste
-(CLAUDE.md, seção 5.2). Cada edição chama `atualizarValorPonto` e revalida
-a página; como a tabela é por corretora (não por conta), o aviso de que
-"isso vale para todas as contas dessa corretora" fica no cabeçalho de cada
-cartão.
+em USD; B3: só WIN), com **valor por ponto e unidade** editáveis inline
+por linha — mesmo padrão de "clica, edita a célula, confirma" já usado no
+cadastro inline do Backteste (CLAUDE.md, seção 5.2); a unidade é um select
+fechado (`pontos` | `dólares` | `%`), não texto livre. Cada edição chama
+`atualizarEspecificacao` e revalida a página; como a tabela é por
+corretora (não por conta), o aviso de que "isso vale para todas as contas
+dessa corretora" fica no cabeçalho de cada cartão.
 
 ## Fora de escopo
 
@@ -276,10 +316,12 @@ cartão.
 Duas seções precisam de atualização (no `aion/CLAUDE.md`, fonte de
 verdade):
 
-- **Seção 3.2** — a tabela de ativos deixa de ter uma coluna única de
-  "valor do ponto"; passa a dizer que o valor por ponto é por corretora,
-  vive em `valores_ponto_corretora`, e a tabela em `ativos.ts` guarda só
-  nome/unidade/moeda (metadado fixo do ativo, não o valor monetário).
+- **Seção 3.2** — a tabela de ativos deixa de ter colunas únicas de "valor
+  do ponto" e "unidade"; ambas passam a ser por corretora, vivem em
+  `valores_ponto_corretora`, e a tabela em `ativos.ts` guarda só
+  nome/moeda (o que é mesmo fixo do ativo). Registrar explicitamente que o
+  Oil (MCL) é medido em `%` na Ylos e em `pontos` na ZeroMarkets — é o
+  caso que motivou unidade deixar de ser fixa por ativo.
 - **Seção 4** (schema `contas`) — novo campo `corretora`, com a mesma nota
   de trava por moeda já usada para o campo `moeda`. `trades` ganha
   `valor_ponto` (preenchido por trigger, não digitado) na lista de "campos
@@ -295,9 +337,12 @@ verdade):
 - Teste manual, depois de rodar a migração:
   1. Contas existentes: Ylos para as em USD, B3 para a em BRL.
   2. Tela Corretoras mostra os três cartões com os valores seedados (os
-     cinco reais da ZeroMarkets + o placeholder de MCL).
+     cinco reais da ZeroMarkets + o placeholder de MCL) e o MCL da
+     ZeroMarkets já aparece com unidade `pontos` (não `%`).
   3. Criar uma conta ZeroMarkets, lançar um trade em MES, conferir que
-     `stop_dolar` bate com US$1,00/pt (não US$5,00/pt da Ylos).
+     `stop_dolar` bate com US$1,00/pt (não US$5,00/pt da Ylos), e que o
+     campo de stop no formulário de trade para MCL nessa conta mostra
+     "Stop em pontos" em vez de "Stop em %".
   4. Editar o valor de MES da ZeroMarkets depois desse trade salvo:
      o trade antigo não muda; um trade novo já usa o valor atualizado.
   5. Marcar a conta ZeroMarkets como padrão e abrir o Backteste: o
