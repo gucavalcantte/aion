@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Moeda } from "@/lib/ativos";
+import type { Corretora, Moeda } from "@/lib/ativos";
 import { progressoDaMeta, saldoAtual } from "@/lib/metricas";
 import { clienteServidor } from "@/lib/supabase/servidor";
 import type { Conta, ContaComSaldo } from "@/lib/tipos";
@@ -41,6 +41,7 @@ export async function listarContas(): Promise<ContaComSaldo[]> {
       mlpt: n(conta.mlpt),
       mlpd: n(conta.mlpd),
       moeda: (conta.moeda ?? "USD") as Moeda,
+      corretora: (conta.corretora ?? "Ylos") as Corretora,
       saldo_atual: saldo,
       trades: resultados.length,
       progresso: progressoDaMeta(saldo, n(conta.saldo_inicial), conta.meta === null ? null : n(conta.meta)),
@@ -48,18 +49,21 @@ export async function listarContas(): Promise<ContaComSaldo[]> {
   });
 }
 
-/** MLPT da conta padrão (ou da primeira cadastrada, na falta de uma padrão). */
-export async function mlptDaContaPadrao(): Promise<number | null> {
+export type ContaPadraoBackteste = { mlpt: number | null; corretora: Corretora | null };
+
+/** MLPT e corretora da conta padrão (ou da primeira cadastrada, na falta de uma padrão). */
+export async function contaPadraoParaBackteste(): Promise<ContaPadraoBackteste> {
   const supabase = await clienteServidor();
   const { data, error } = await supabase
     .from("contas")
-    .select("mlpt")
+    .select("mlpt, corretora")
     .order("is_padrao", { ascending: false })
     .order("created_at")
     .limit(1)
     .maybeSingle();
   if (error) throw error;
-  return data ? n(data.mlpt) : null;
+  if (!data) return { mlpt: null, corretora: null };
+  return { mlpt: n(data.mlpt), corretora: (data.corretora ?? "Ylos") as Corretora };
 }
 
 export async function buscarConta(id: string): Promise<Conta | null> {
@@ -67,5 +71,5 @@ export async function buscarConta(id: string): Promise<Conta | null> {
   const { data, error } = await supabase.from("contas").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   if (!data) return null;
-  return { ...data, moeda: (data.moeda ?? "USD") as Moeda } as Conta;
+  return { ...data, moeda: (data.moeda ?? "USD") as Moeda, corretora: (data.corretora ?? "Ylos") as Corretora } as Conta;
 }
