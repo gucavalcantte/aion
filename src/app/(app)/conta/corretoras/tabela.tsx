@@ -90,7 +90,7 @@ function LinhaAtivo({
               name="valor_ponto"
               form={formId}
               inputMode="decimal"
-              defaultValue={String(valorPonto)}
+              defaultValue={String(valorPonto).replace(".", ",")}
               className={`${celula} num`}
             />
           </form>
