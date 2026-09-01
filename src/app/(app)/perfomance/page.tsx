@@ -5,6 +5,7 @@ import { BotaoRemover } from "@/components/botao-remover";
 import { CalendarioDeConsistencia } from "@/components/calendario";
 import { CurvaDeCapital, GaugeRiscoRetorno, ResultadoPorOperacao } from "@/components/graficos";
 import { contasParaSeletor, dadosDaPerfomance } from "@/lib/dados/trades";
+import { especificacoesDaCorretora } from "@/lib/dados/corretoras";
 import { data as fData, hora, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
 import { rotuloRiscoRetorno, TEMPOS_GRAFICOS } from "@/lib/opcoes";
 
@@ -45,6 +46,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
   };
 
   const { listagem, lancamentos, setups, resumo, curva, porDia } = await dadosDaPerfomance(conta, mes, filtros);
+  const especificacoes = await especificacoesDaCorretora(conta.corretora);
   const [ano, mesNum] = mes.split("-").map(Number);
   const lucro = resumo.saldo - conta.saldo_inicial;
 
@@ -74,7 +76,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           <SeletorConta contas={contas} atual={conta.id} mes={mes} />
           <SeletorMes mes={mes} contaId={conta.id} />
           <FormularioLancamento contaId={conta.id} moedaConta={conta.moeda} />
-          <FormularioTrade contaId={conta.id} setups={setups} moedaConta={conta.moeda} />
+          <FormularioTrade contaId={conta.id} setups={setups} moedaConta={conta.moeda} especificacoes={especificacoes} />
         </div>
       </header>
 
@@ -329,6 +331,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
                           contaId={conta.id}
                           setups={setups}
                           moedaConta={conta.moeda}
+                          especificacoes={especificacoes}
                         />
                       </td>
                     </tr>

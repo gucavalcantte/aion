@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Ativo, Moeda } from "@/lib/ativos";
+import type { Ativo, Corretora, Moeda } from "@/lib/ativos";
 import {
   assertividade,
   disciplina,
@@ -60,6 +60,7 @@ export async function contasParaSeletor() {
     mlpt: n(c.mlpt),
     mlpd: n(c.mlpd),
     moeda: (c.moeda ?? "USD") as Moeda,
+    corretora: (c.corretora ?? "Ylos") as Corretora,
   })) as Conta[];
 }
 
