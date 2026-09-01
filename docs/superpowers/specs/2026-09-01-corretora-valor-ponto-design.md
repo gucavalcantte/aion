@@ -55,12 +55,21 @@ qualquer outro enum do app.
 
 ```sql
 create table public.valores_ponto_corretora (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+
   corretora corretora not null,
   ativo ativo not null,
   valor_ponto numeric not null,
   unidade text not null, -- 'pontos' | 'dólares' | '%'
-  primary key (corretora, ativo)
+
+  unique (user_id, corretora, ativo)
 );
+
+alter table public.valores_ponto_corretora enable row level security;
+create policy "dono" on public.valores_ponto_corretora
+  for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
 ```
 
 Uma linha por ativo aplicável a cada corretora: Ylos e ZeroMarkets cobrem os
@@ -69,6 +78,15 @@ para esse ativo *nessa* corretora (ver seção acima) — na prática só MCL
 varia (`%` na Ylos, `pontos` na ZeroMarkets); os demais repetem `pontos` em
 toda corretora que os cobre. Essa tabela é o que a nova tela "Corretoras"
 lista e edita.
+
+**Por usuário, não global.** CLAUDE.md (seção 1) é explícito: "nada é
+compartilhado — nem os setups". Sem `user_id` aqui, um usuário editando o
+valor da ZeroMarkets mudaria silenciosamente o cálculo de trades dos
+outros dois. Mesmo padrão `user_id` + RLS "dono" das demais tabelas —
+`especificacoesDaCorretora`/`listarCorretoras`/`atualizarEspecificacao`
+não precisam filtrar por usuário explicitamente, o banco já recusa ver ou
+editar a linha de outro (mesmo padrão que `contasParaSeletor` já usa hoje,
+sem `.eq("user_id", …)` nas queries).
 
 ### `contas.corretora`
 
@@ -90,22 +108,35 @@ gravar um número sabidamente errado, MCL da ZeroMarkets nasce igual ao da
 Ylos (100,00), como placeholder a corrigir na tela de Corretoras assim que
 o valor certo for confirmado.
 
+Como a tabela é por usuário, o seed cruza os três usuários existentes com
+os valores acima — cada um nasce com sua própria cópia, editável depois
+sem afetar os outros dois:
+
 ```sql
-insert into public.valores_ponto_corretora (corretora, ativo, valor_ponto, unidade) values
-  ('Ylos', 'MES', 5.0,   'pontos'),
-  ('Ylos', 'MYM', 0.5,   'pontos'),
-  ('Ylos', 'MNQ', 2.0,   'pontos'),
-  ('Ylos', 'MGC', 10.0,  'pontos'),
-  ('Ylos', 'MCL', 100.0, '%'),
-  ('Ylos', 'MBT', 0.1,   'pontos'),
-  ('B3',   'WIN', 0.2,   'pontos'),
-  ('ZeroMarkets', 'MES', 1.0,   'pontos'),
-  ('ZeroMarkets', 'MYM', 1.0,   'pontos'),
-  ('ZeroMarkets', 'MNQ', 1.0,   'pontos'),
-  ('ZeroMarkets', 'MGC', 100.0, 'pontos'),
-  ('ZeroMarkets', 'MCL', 100.0, 'pontos'), -- placeholder: valor real da ZeroMarkets ainda não confirmado, ver nota acima; unidade já é 'pontos', confirmada
-  ('ZeroMarkets', 'MBT', 1.0,   'pontos');
+insert into public.valores_ponto_corretora (user_id, corretora, ativo, valor_ponto, unidade)
+select u.id, v.corretora, v.ativo, v.valor_ponto, v.unidade
+from auth.users u
+cross join (values
+  ('Ylos'::corretora, 'MES'::ativo, 5.0,   'pontos'),
+  ('Ylos'::corretora, 'MYM'::ativo, 0.5,   'pontos'),
+  ('Ylos'::corretora, 'MNQ'::ativo, 2.0,   'pontos'),
+  ('Ylos'::corretora, 'MGC'::ativo, 10.0,  'pontos'),
+  ('Ylos'::corretora, 'MCL'::ativo, 100.0, '%'),
+  ('Ylos'::corretora, 'MBT'::ativo, 0.1,   'pontos'),
+  ('B3'::corretora,   'WIN'::ativo, 0.2,   'pontos'),
+  ('ZeroMarkets'::corretora, 'MES'::ativo, 1.0,   'pontos'),
+  ('ZeroMarkets'::corretora, 'MYM'::ativo, 1.0,   'pontos'),
+  ('ZeroMarkets'::corretora, 'MNQ'::ativo, 1.0,   'pontos'),
+  ('ZeroMarkets'::corretora, 'MGC'::ativo, 100.0, 'pontos'),
+  -- placeholder: valor real da ZeroMarkets ainda não confirmado, ver nota acima; unidade já é 'pontos', confirmada
+  ('ZeroMarkets'::corretora, 'MCL'::ativo, 100.0, 'pontos'),
+  ('ZeroMarkets'::corretora, 'MBT'::ativo, 1.0,   'pontos')
+) as v(corretora, ativo, valor_ponto, unidade);
 ```
+
+Um usuário futuro (o app já documenta que contas são criadas manualmente
+no painel do Supabase) precisa do mesmo seed rodado manualmente pra ele —
+igual a qualquer outro cadastro inicial hoje ("banco começa zerado").
 
 ### `trades`: congelar o valor no momento do registro
 
@@ -138,7 +169,7 @@ begin
 
   select valor_ponto into vp
   from public.valores_ponto_corretora
-  where corretora = corretora_da_conta and ativo = new.ativo;
+  where user_id = new.user_id and corretora = corretora_da_conta and ativo = new.ativo;
 
   if vp is null then
     raise exception 'Valor por ponto não cadastrado para % / %', corretora_da_conta, new.ativo;
