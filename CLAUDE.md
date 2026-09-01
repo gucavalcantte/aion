@@ -56,18 +56,26 @@ compartilhado — nem os setups. Toda consulta filtra por `user_id`.
 
 ### 3.2 Tabela de ativos (constante da aplicação, não editável pelo usuário)
 
-| Código | Nome | Valor do ponto (na moeda do ativo) | Moeda | Rótulo da unidade |
-|---|---|---|---|---|
-| MES | S&P | 5,00 | USD | pontos |
-| MYM | Dow | 0,50 | USD | pontos |
-| MNQ | Nasdaq | 2,00 | USD | pontos |
-| MGC | Gold | 10,00 | USD | dólares |
-| MCL | Oil | 100,00 | USD | **%** |
-| MBT | Bitcoin | 0,10 | USD | dólares |
-| WIN | Mini Índice | 0,20 | BRL | pontos |
+| Código | Nome | Moeda |
+|---|---|---|
+| MES | S&P | USD |
+| MYM | Dow | USD |
+| MNQ | Nasdaq | USD |
+| MGC | Gold | USD |
+| MCL | Oil | USD |
+| MBT | Bitcoin | USD |
+| WIN | Mini Índice | BRL |
 
-O rótulo da unidade muda o label do campo de stop conforme o ativo escolhido.
-MCL é pensado em % pelo usuário: 1% = 1,00 de movimento = $100 por contrato.
+**Valor por ponto e unidade não são mais fixos por ativo — variam por
+corretora.** Vivem em `valores_ponto_corretora` (seção 4), uma linha por
+ativo e por corretora, editável na tela Corretoras (5.1). O rótulo da
+unidade muda o label do campo de stop conforme o ativo *e* a corretora da
+conta escolhida — foi o Oil (MCL) que forçou essa mudança: a Ylos mede o
+stop dele em `%` (1% = 1,00 de movimento = $100 por contrato), a
+ZeroMarkets mede o mesmo MCL em `pontos`. Uma constante única por ativo não
+tinha como representar as duas convenções ao mesmo tempo. Os outros seis
+ativos concordam em `pontos` nas duas corretoras, mas o dado passou a viver
+por corretora do mesmo jeito.
 
 **Moeda por ativo, sem conversão.** Os campos derivados de `valor_ponto`
 (`stop_dolar` em `trades`, MLPT/MLPD na conta, etc.) herdam a moeda do próprio
@@ -101,12 +109,33 @@ Todas as tabelas têm `id`, `user_id`, `created_at`.
   Default `USD` para não quebrar contas já cadastradas. No formulário de trade
   (Perfomance), o seletor de ativo filtra pela moeda da conta escolhida — uma
   conta em USD nunca oferece WIN, e uma conta em BRL só oferece WIN.
+- `corretora` (enum `Ylos` | `ZeroMarkets` | `B3`) — de qual corretora a conta
+  opera. Trava por moeda, mesmo esquema do campo `moeda` acima: uma conta em
+  BRL só pode ser `B3` (única praça do WIN); uma conta em USD só pode ser
+  `Ylos` ou `ZeroMarkets`. No formulário de Conta, o seletor de corretora
+  filtra pelas opções válidas para a moeda escolhida. Default `Ylos` para as
+  contas já cadastradas em USD (o que já valia, implicitamente, antes de
+  existir o conceito); a conta em BRL virou `B3` na migração. É essa coluna
+  que decide qual linha de `valores_ponto_corretora` (abaixo) os trades da
+  conta usam.
 - `saldo_inicial` (numeric) — **saldo atual é sempre calculado**, nunca digitado
 - `meta` (numeric, **nullable**) — lucro acumulado necessário para liberar o saque.
   Nulo = conta sem meta (simulador, por exemplo)
 - `mlpt` (numeric) — perda máxima aceita por trade, em USD
 - `mlpd` (numeric) — perda máxima aceita no dia, em USD
 - `is_padrao` (boolean) — a conta pré-selecionada na Perfomance; só uma por usuário
+
+### `valores_ponto_corretora`
+Especificação de contrato por corretora — **por usuário, não global** (mesma
+regra da seção 1: nada é compartilhado entre os três). Uma linha por ativo
+que a corretora cobre: Ylos e ZeroMarkets cobrem os seis ativos em USD; B3
+cobre só WIN.
+
+`corretora` (enum) · `ativo` (enum) · `valor_ponto` (numeric) · `unidade`
+(text: `pontos` | `dólares` | `%`)
+
+Editável na tela Corretoras (5.1). É daqui que `trades.valor_ponto` (abaixo)
+busca o valor no momento do cadastro.
 
 ### `lancamentos`
 Movimentações de dinheiro que **não são resultado de operação**.
@@ -183,8 +212,15 @@ Sem imagem. Sem vínculo a bloco — o "bloco" é apenas o `tempo_grafico` (ver 
 **Campos calculados, nunca digitados** (evitam contradição entre números que
 descrevem a mesma coisa):
 
-- `stop_dolar` = `pontos_stop × valor_ponto(ativo) × contratos`
-- `resultado_pontos` = `resultado ÷ (valor_ponto(ativo) × contratos)`
+- `valor_ponto` — preenchido por um trigger no insert/update, não digitado.
+  O trigger olha a `corretora` da conta do trade e busca o valor em
+  `valores_ponto_corretora` para aquele ativo. **Congelado no momento do
+  cadastro**: editar o valor por ponto de uma corretora depois na tela
+  Corretoras não muda trades já salvos, só passa a valer para os novos.
+  Trocar a conta ou o ativo de um trade existente recalcula o snapshot com o
+  valor vigente naquele momento.
+- `stop_dolar` = `pontos_stop × valor_ponto × contratos`
+- `resultado_pontos` = `resultado ÷ (valor_ponto × contratos)`
 - `status` = `resultado > 0 → Gain` · `resultado < 0 → Loss` · `resultado = 0 → Zerado`
 
 **Não existe duração.** Decisão explícita do usuário: o que interessa é o horário
@@ -232,8 +268,15 @@ Auth (e-mail + senha). Logout volta para esta tela.
 
 ### 5.1 Conta
 
-CRUD simples: número, tipo, moeda, saldo inicial, MLPT, marcar como padrão.
-Ações: editar, remover. Sem filtros.
+CRUD simples: número, tipo, moeda, corretora, saldo inicial, MLPT, marcar
+como padrão. Ações: editar, remover. Sem filtros.
+
+**Corretoras** — link no topo da tela. Lista as três corretoras, cada uma
+com a tabela dos ativos que ela cobre (Ylos/ZeroMarkets: os seis em USD;
+B3: só WIN), com **valor por ponto e unidade editáveis inline** por linha —
+mesmo padrão de "clica, edita a célula, confirma" do cadastro inline do
+Backteste (5.2). Editar aqui vale para toda conta marcada com aquela
+corretora, não só a que abriu o link.
 
 ### 5.2 Backteste
 
