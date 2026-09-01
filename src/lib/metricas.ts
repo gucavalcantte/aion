@@ -9,8 +9,6 @@
  *    poderem ser testadas sem subir nada.
  */
 
-import { valorPonto, type Ativo } from "./ativos";
-
 export type Status = "Gain" | "Loss" | "Zerado";
 
 /* -------------------------------------------------------------------------
@@ -25,18 +23,18 @@ export function statusDoResultado(resultado: number): Status {
 
 export function stopEmDolar(
   pontosStop: number,
-  ativo: Ativo,
+  valorPonto: number,
   contratos: number,
 ): number {
-  return pontosStop * valorPonto(ativo) * contratos;
+  return pontosStop * valorPonto * contratos;
 }
 
 export function resultadoEmPontos(
   resultado: number,
-  ativo: Ativo,
+  valorPonto: number,
   contratos: number,
 ): number | null {
-  const divisor = valorPonto(ativo) * contratos;
+  const divisor = valorPonto * contratos;
   if (divisor === 0) return null;
   return resultado / divisor;
 }

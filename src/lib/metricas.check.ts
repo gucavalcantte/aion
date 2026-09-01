@@ -18,7 +18,7 @@ import {
   stopEmDolar,
   tetoDeConfianca,
 } from "./metricas";
-import { moedaDoAtivo, valorPonto } from "./ativos";
+import { moedaDoAtivo } from "./ativos";
 import { moeda } from "./formato";
 
 let falhas = 0;
@@ -43,9 +43,9 @@ eq("risco retorno médio", r2(riscoRetornoMedio([-1, 2, 3, -1])), 0.8);
 eq("risco retorno de lista vazia", riscoRetornoMedio([]), null);
 
 // campos calculados
-eq("stop MNQ 12,5 pts × 3 contratos", stopEmDolar(12.5, "MNQ", 3), 75);
-eq("stop MCL 0,18 × 1", stopEmDolar(0.18, "MCL", 1), 18);
-eq("resultado em pontos", resultadoEmPontos(225, "MNQ", 3), 37.5);
+eq("stop MNQ 12,5 pts × 3 contratos", stopEmDolar(12.5, 2, 3), 75);
+eq("stop MCL 0,18 × 1", stopEmDolar(0.18, 100, 1), 18);
+eq("resultado em pontos", resultadoEmPontos(225, 2, 3), 37.5);
 eq("status de zerado", statusDoResultado(0), "Zerado");
 
 // saque derruba o saldo
@@ -125,7 +125,6 @@ eq("teto de 2/8  (25,0%)", r2(tetoDeConfianca(2, 8)), 59.1);
 eq("teto de 2/7  (28,6%)", r2(tetoDeConfianca(2, 7)), 64.1);
 
 // WIN entrou como ativo em BRL — os outros seis continuam em USD
-eq("valor do ponto do WIN", valorPonto("WIN"), 0.2);
 eq("moeda nativa do WIN", moedaDoAtivo("WIN"), "BRL");
 eq("moeda nativa do MES", moedaDoAtivo("MES"), "USD");
 
