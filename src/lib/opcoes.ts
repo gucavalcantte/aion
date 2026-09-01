@@ -14,6 +14,7 @@ export const LOCALIZACOES = [
   "Encostado na M20 e M200",
 ] as const;
 export const RESULTADOS = ["Gain", "Loss"] as const;
+export const UNIDADES = ["pontos", "dólares", "%"] as const;
 
 /**
  * Risco/retorno é dropdown na tela e numeric no banco.
