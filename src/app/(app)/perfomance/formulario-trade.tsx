@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { ATIVOS, type Ativo, type Moeda } from "@/lib/ativos";
+import type { EspecificacaoAtivo } from "@/lib/dados/corretoras";
 import { moeda, VAZIO } from "@/lib/formato";
 import { riscoRetornoSugerido, statusDoResultado, stopEmDolar } from "@/lib/metricas";
 import { RISCO_RETORNO, TEMPOS_GRAFICOS } from "@/lib/opcoes";
@@ -44,12 +45,14 @@ export function FormularioTrade({
   contaId,
   setups,
   moedaConta,
+  especificacoes,
   trade,
   aoFechar,
 }: {
   contaId: string;
   setups: { id: string; nome: string }[];
   moedaConta: Moeda;
+  especificacoes: Partial<Record<Ativo, EspecificacaoAtivo>>;
   /** Presente = corrigindo um trade já salvo. */
   trade?: TradeParaEdicao;
   aoFechar?: () => void;
@@ -88,7 +91,10 @@ export function FormularioTrade({
   const c = num(contratos);
   const r = num(resultado);
 
-  const stopDolar = p !== null && c !== null && c > 0 ? stopEmDolar(p, ativo, c) : null;
+  const stopDolar =
+    p !== null && c !== null && c > 0 && especificacoes[ativo]
+      ? stopEmDolar(p, especificacoes[ativo]!.valorPonto, c)
+      : null;
   const sugerido = r !== null && stopDolar ? riscoRetornoSugerido(r, stopDolar) : null;
 
   // O R:R chega pré-calculado; escolher à mão para de ser sobrescrito.
@@ -122,7 +128,7 @@ export function FormularioTrade({
     aoFechar?.();
   }
 
-  const unidade = ATIVOS.find((a) => a.codigo === ativo)?.unidade ?? "pontos";
+  const unidade = especificacoes[ativo]?.unidade ?? "pontos";
 
   return (
     <>

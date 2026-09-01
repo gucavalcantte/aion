@@ -3,7 +3,8 @@
 import { useState } from "react";
 
 import { BotaoRemover } from "@/components/botao-remover";
-import type { Moeda } from "@/lib/ativos";
+import type { Ativo, Moeda } from "@/lib/ativos";
+import type { EspecificacaoAtivo } from "@/lib/dados/corretoras";
 import { data as fData, moeda } from "@/lib/formato";
 
 import { removerTrade } from "./acoes";
@@ -15,11 +16,13 @@ export function AcoesDoTrade({
   contaId,
   setups,
   moedaConta,
+  especificacoes,
 }: {
   trade: TradeParaEdicao;
   contaId: string;
   setups: { id: string; nome: string }[];
   moedaConta: Moeda;
+  especificacoes: Partial<Record<Ativo, EspecificacaoAtivo>>;
 }) {
   const [editando, setEditando] = useState(false);
 
@@ -50,6 +53,7 @@ export function AcoesDoTrade({
           setups={setups}
           trade={trade}
           moedaConta={moedaConta}
+          especificacoes={especificacoes}
           aoFechar={() => setEditando(false)}
         />
       )}
