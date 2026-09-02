@@ -9,11 +9,14 @@ export type EstudoComImagem = Estudo & { imagem: string | null };
 export async function estudosDoMes(mes: string) {
   const supabase = await clienteServidor();
 
+  const [ano, mesNumero] = mes.split("-").map(Number);
+  const proximoMes = new Date(Date.UTC(ano, mesNumero, 1)).toISOString().slice(0, 10);
+
   const { data, error } = await supabase
     .from("estudos")
     .select("*")
     .gte("data", `${mes}-01`)
-    .lte("data", `${mes}-31`)
+    .lt("data", proximoMes)
     .order("data", { ascending: false })
     .order("created_at", { ascending: false });
   if (error) throw error;
