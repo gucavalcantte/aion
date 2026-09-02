@@ -6,6 +6,7 @@ import { inteiro } from "@/lib/formato";
 
 import { FormularioEstudo } from "./formulario";
 import { Galeria } from "./galeria";
+import { SeletorMes } from "./seletor-mes";
 
 export const metadata = { title: "Estudos do dia — AION" };
 
@@ -35,17 +36,7 @@ export default async function PaginaEstudos({ searchParams }: PageProps<"/estudo
           </p>
         </div>
         <div className="flex gap-2.5">
-          <form action="/estudos" className="flex">
-            <label htmlFor="mes" className="sr-only">Mês</label>
-            <input
-              id="mes"
-              name="mes"
-              type="month"
-              defaultValue={mes}
-              className="num h-[38px] rounded-lg border border-line-strong bg-raised px-[13px] text-[14.5px] text-ink-2 outline-none"
-            />
-            <button type="submit" className="sr-only">Trocar mês</button>
-          </form>
+          <SeletorMes mes={mes} />
           <FormularioEstudo dia={diaSelecionado} />
         </div>
       </header>
