@@ -38,6 +38,7 @@ yarn-error.log*
 
 # worktrees isolados para features (superpowers:using-git-worktrees)
 /.worktrees
+.claude/
 
 # typescript
 *.tsbuildinfo
