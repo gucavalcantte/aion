@@ -206,8 +206,15 @@ Sem imagem. Sem vínculo a bloco — o "bloco" é apenas o `tempo_grafico` (ver 
 ### `trades` — exibido como "Perfomance"
 
 `conta_id` (FK) · `data` · `hora_inicio` · `hora_fim` · `ativo` · `tempo_grafico` ·
-`setup_id` (FK) · `pontos_stop` (numeric) · `contratos` (int) · `resultado` (numeric USD) ·
-`risco_retorno` (numeric) · `respeitou_plano` (boolean) · `imagem_url` · `observacao` (text)
+`setup_id` (FK) · `entrada` (enum, **nullable**) · `pontos_stop` (numeric) · `contratos` (int) ·
+`resultado` (numeric USD) · `risco_retorno` (numeric) · `respeitou_plano` (boolean) ·
+`imagem_url` · `observacao` (text)
+
+`entrada` é o mesmo enum `Confirmada | Antecipada` do backteste. **Obrigatório no
+formulário, nullable no banco:** os trades gravados antes do campo existir não
+têm essa informação, e carimbá-los com um valor inventaria estatística que
+ninguém observou. Eles aparecem como `—` na tabela e ficam de fora do card
+Confirmada × Antecipada até serem editados.
 
 **Campos calculados, nunca digitados** (evitam contradição entre números que
 descrevem a mesma coisa):
@@ -372,7 +379,12 @@ linha tracejada dourada no gráfico de evolução.
 Na tela de Backteste há ainda a **distribuição de risco retorno** — histograma por
 faixa de R:R, que revela concentração de saídas em 1:1 que a média esconde.
 
-Filtros: setup, tempo gráfico. Ordenação: mais recentes primeiro.
+Abaixo dos gráficos, o card **Confirmada × Antecipada** — assertividade e
+resultado por tipo de entrada, lado a lado. Trade sem `entrada` não entra em
+nenhum dos dois lados; é contado à parte, no canto do card. É o mesmo corte que
+o Backteste faz na "Assertividade por dimensão", agora sobre execução real.
+
+Filtros: setup, tempo gráfico, tipo de entrada. Ordenação: mais recentes primeiro.
 Listagem: todas as colunas do cadastro mais as calculadas. Ações: editar, remover.
 
 ### 5.4 Setup

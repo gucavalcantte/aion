@@ -7,11 +7,13 @@ import {
   drawdownDoPico,
   mediaDeGanho,
   mediaDePerda,
+  porEntrada,
   progressoDaMeta,
   riscoRetornoMedio,
   saldoAtual,
   sequenciaAtual,
 } from "@/lib/metricas";
+import type { Entrada } from "@/lib/opcoes";
 import { clienteServidor } from "@/lib/supabase/servidor";
 import type { Conta, Lancamento, TempoGrafico } from "@/lib/tipos";
 
@@ -26,6 +28,8 @@ export type Trade = {
   ativo: Ativo;
   tempo_grafico: TempoGrafico;
   setup_id: string;
+  /** Nulo nos trades gravados antes do campo existir. */
+  entrada: Entrada | null;
   pontos_stop: number;
   contratos: number;
   resultado: number;
@@ -39,7 +43,7 @@ export type Trade = {
   status: "Gain" | "Loss" | "Zerado";
 };
 
-export type Filtros = { setup?: string; tempo?: string };
+export type Filtros = { setup?: string; tempo?: string; entrada?: string };
 
 /** Ordem cronológica de verdade: data e hora, não created_at. */
 const cronologica = (a: Trade, b: Trade) =>
@@ -107,6 +111,7 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
   const listagem = trades
     .filter((t) => (filtros.setup ? t.setup_id === filtros.setup : true))
     .filter((t) => (filtros.tempo ? t.tempo_grafico === filtros.tempo : true))
+    .filter((t) => (filtros.entrada ? t.entrada === filtros.entrada : true))
     .sort((a, b) => -cronologica(a, b));
 
   return {
@@ -129,6 +134,9 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
       sequencia: sequenciaAtual(resultados),
       disciplina: disciplina(
         trades.map((t) => ({ resultado: t.resultado, respeitou_plano: t.respeitou_plano })),
+      ),
+      porEntrada: porEntrada(
+        trades.map((t) => ({ resultado: t.resultado, entrada: t.entrada })),
       ),
       // Lançamento fora: saque não é perda.
       drawdown: drawdownDoPico(conta.saldo_inicial, resultados),

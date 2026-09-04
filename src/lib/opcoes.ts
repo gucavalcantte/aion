@@ -5,6 +5,7 @@ export const PERIODOS = ["Manhã", "Tarde", "Noite"] as const;
 export const OPERACOES = ["Compra", "Venda"] as const;
 export const EVENTOS = ["Barra elefante", "Tail", "180", "Troca de cor"] as const;
 export const ENTRADAS = ["Confirmada", "Antecipada"] as const;
+export type Entrada = (typeof ENTRADAS)[number];
 export const INCLINACOES = ["Plana", "Inclinada para cima", "Inclinada para baixo"] as const;
 export const ALINHAMENTOS = ["Lateral", "Contra a tendência", "A favor da tendência"] as const;
 export const LOCALIZACOES = [

@@ -7,7 +7,7 @@ import { CurvaDeCapital, GaugeRiscoRetorno, ResultadoPorOperacao } from "@/compo
 import { contasParaSeletor, dadosDaPerfomance } from "@/lib/dados/trades";
 import { especificacoesDaCorretora } from "@/lib/dados/corretoras";
 import { data as fData, hora, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
-import { rotuloRiscoRetorno, TEMPOS_GRAFICOS } from "@/lib/opcoes";
+import { ENTRADAS, rotuloRiscoRetorno, TEMPOS_GRAFICOS } from "@/lib/opcoes";
 
 import { removerLancamento } from "./acoes";
 import { AcoesDoTrade } from "./acoes-trade";
@@ -43,6 +43,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
   const filtros = {
     setup: typeof params.setup === "string" && params.setup ? params.setup : undefined,
     tempo: typeof params.tempo === "string" && params.tempo ? params.tempo : undefined,
+    entrada: typeof params.entrada === "string" && params.entrada ? params.entrada : undefined,
   };
 
   const { listagem, lancamentos, setups, resumo, curva, porDia } = await dadosDaPerfomance(conta, mes, filtros);
@@ -53,6 +54,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
   // Multiplicador da disciplina pode sair < 1 (raro: foi melhor fora do plano).
   // Mostrar sempre o lado maior por cima, com a cor e a frase do lado que venceu.
   const d = resumo.disciplina;
+  const pe = resumo.porEntrada;
   const comPlanoGanha = d?.multiplicador !== null && d?.multiplicador !== undefined && d.multiplicador >= 1;
   const razaoDisciplina =
     d?.multiplicador === null || d?.multiplicador === undefined
@@ -266,6 +268,55 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
         </section>
       </div>
 
+      {/* CONFIRMADA x ANTECIPADA */}
+      <section className="mb-5 rounded-xl border border-line bg-card p-[22px]">
+        <div className="flex items-baseline justify-between">
+          <div>
+            <h2 className="display text-[19px]">Confirmada × Antecipada</h2>
+            <p className="mt-1.5 text-[13px] text-ink-4">Assertividade e resultado por tipo de entrada</p>
+          </div>
+          {pe !== null && pe.semRegistro > 0 && (
+            <p className="text-[12.5px] text-ink-4">
+              <span className="num">{pe.semRegistro}</span>{" "}
+              {pe.semRegistro === 1 ? "trade ainda sem tipo" : "trades ainda sem tipo"} — fora da comparação
+            </p>
+          )}
+        </div>
+
+        {pe === null ? (
+          <p className="mt-6 text-[13.5px] text-ink-4">
+            Nenhum trade tem tipo de entrada ainda. Ele passa a ser pedido nos trades novos; os antigos
+            entram aqui conforme você editar cada um.
+          </p>
+        ) : (
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            {pe.fatias.map((f) => (
+              <div key={f.entrada} className="rounded-[10px] border border-line-soft bg-well p-4">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[13.5px] font-semibold text-ink-2">{f.entrada}</span>
+                  <span className="num text-[12.5px] text-ink-4">
+                    {f.trades === 1 ? "1 trade" : `${inteiro(f.trades)} trades`}
+                  </span>
+                </div>
+                <p className={`num mt-3 text-[32px] font-semibold leading-none ${f.assertividade === null ? "text-ink-4" : ""}`}>
+                  {percentual(f.assertividade)}
+                </p>
+                <div className="mt-3 flex h-[6px] gap-0.5">
+                  <span className="rounded-[3px] bg-gain" style={{ width: `${f.assertividade ?? 0}%` }} />
+                  <span className="flex-1 rounded-[3px] bg-loss opacity-50" />
+                </div>
+                <p className="mt-3 text-[12.5px] text-ink-3">
+                  resultado{" "}
+                  <span className={`num font-semibold ${f.trades === 0 ? "" : f.resultado > 0 ? "text-gain" : f.resultado < 0 ? "text-loss" : ""}`}>
+                    {f.trades === 0 ? VAZIO : moeda(f.resultado, conta.moeda, true)}
+                  </span>
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* TABELA */}
       <section className="mb-5 overflow-hidden rounded-xl border border-line bg-card">
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
@@ -279,16 +330,16 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse" style={{ minWidth: 1400 }}>
+            <table className="w-full border-collapse" style={{ minWidth: 1520 }}>
               <thead>
                 <tr>
-                  {["Data", "Entrada", "Saída", "Ativo", "TG", "Setup", "Contratos", "Stop pts", "Stop $", "Resultado", "Pontos", "R:R", "Plano", "Status", ""].map((t, i) => (
+                  {["Data", "Entrada", "Saída", "Ativo", "TG", "Setup", "Tipo entrada", "Contratos", "Stop pts", "Stop $", "Resultado", "Pontos", "R:R", "Plano", "Status", ""].map((t, i) => (
                     <th
                       key={t + i}
                       scope="col"
-                      className={`whitespace-nowrap border-b border-line-strong bg-table-head px-[13px] py-3 text-[11.5px] font-semibold uppercase tracking-[0.09em] text-ink-2 ${[6, 7, 8, 9, 10, 11].includes(i) ? "text-right" : "text-left"}`}
+                      className={`whitespace-nowrap border-b border-line-strong bg-table-head px-[13px] py-3 text-[11.5px] font-semibold uppercase tracking-[0.09em] text-ink-2 ${[7, 8, 9, 10, 11, 12].includes(i) ? "text-right" : "text-left"}`}
                     >
-                      {[8, 10, 13].includes(i) ? <>{t} <Calc /></> : t}
+                      {[9, 11, 14].includes(i) ? <>{t} <Calc /></> : t}
                     </th>
                   ))}
                 </tr>
@@ -305,6 +356,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
                       <td className={`${td} num font-semibold`}>{t.ativo}</td>
                       <td className={`${td} num`}>{t.tempo_grafico}</td>
                       <td className={td}>{setup}</td>
+                      <td className={td}>{t.entrada ?? VAZIO}</td>
                       <td className={`${td} num text-right`}>{t.contratos}</td>
                       <td className={`${td} num text-right`}>{String(t.pontos_stop).replace(".", ",")}</td>
                       <td className={`${td} num text-right text-ink-3`}>{moeda(t.stop_dolar, conta.moeda)}</td>
@@ -448,7 +500,7 @@ function Filtros({
   contaId: string;
   mes: string;
   setups: { id: string; nome: string }[];
-  atual: { setup?: string; tempo?: string };
+  atual: { setup?: string; tempo?: string; entrada?: string };
 }) {
   const estilo = (ativo: boolean) =>
     `h-[34px] rounded-lg border bg-raised px-3 text-[14px] outline-none ${ativo ? "border-accent text-accent-soft" : "border-line-strong text-ink-2"}`;
@@ -466,6 +518,11 @@ function Filtros({
       <select id="f-tempo" name="tempo" defaultValue={atual.tempo ?? ""} className={estilo(Boolean(atual.tempo))}>
         <option value="">Todos os tempos</option>
         {TEMPOS_GRAFICOS.map((t) => <option key={t} value={t}>{t}</option>)}
+      </select>
+      <label htmlFor="f-entrada" className="sr-only">Tipo de entrada</label>
+      <select id="f-entrada" name="entrada" defaultValue={atual.entrada ?? ""} className={estilo(Boolean(atual.entrada))}>
+        <option value="">Todas as entradas</option>
+        {ENTRADAS.map((e) => <option key={e} value={e}>{e}</option>)}
       </select>
       <button type="submit" className="h-[34px] rounded-lg border border-line-strong bg-raised px-3.5 text-[14px] font-medium text-ink-2">
         Filtrar

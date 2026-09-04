@@ -34,6 +34,9 @@ export async function salvarTrade(
     ["ativo", "ativo"],
     ["tempo_grafico", "tempo gráfico"],
     ["setup_id", "setup"],
+    // "tipo de entrada" e não "entrada": a mensagem divide espaço com a
+    // "hora de entrada" logo acima, e as duas confundem se tiverem o mesmo nome.
+    ["entrada", "tipo de entrada"],
   ];
   const faltando = obrigatorios.filter(([campo]) => !texto(dados, campo)).map(([, r]) => r);
   if (faltando.length > 0) {
@@ -58,6 +61,7 @@ export async function salvarTrade(
     ativo: texto(dados, "ativo"),
     tempo_grafico: texto(dados, "tempo_grafico"),
     setup_id: texto(dados, "setup_id"),
+    entrada: texto(dados, "entrada"),
     pontos_stop: pontos,
     contratos: Math.round(contratos),
     resultado,

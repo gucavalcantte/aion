@@ -9,6 +9,8 @@
  *    poderem ser testadas sem subir nada.
  */
 
+import { ENTRADAS, type Entrada } from "./opcoes";
+
 export type Status = "Gain" | "Loss" | "Zerado";
 
 /* -------------------------------------------------------------------------
@@ -127,6 +129,52 @@ export function disciplina(
     multiplicador,
     resultadoFora: sem.reduce((a, t) => a + t.resultado, 0),
   };
+}
+
+export type FatiaDeEntrada = {
+  entrada: Entrada;
+  trades: number;
+  assertividade: number | null;
+  resultado: number;
+};
+
+export type PorEntrada = {
+  fatias: FatiaDeEntrada[];
+  /** Trades gravados antes do campo existir. Ficam fora das fatias, não viram zero. */
+  semRegistro: number;
+};
+
+/**
+ * Assertividade e resultado de Confirmada contra Antecipada.
+ *
+ * Trade sem `entrada` não entra em fatia nenhuma: é dado que não foi
+ * observado, e distribuí-lo entre as duas — ou contá-lo como Confirmada —
+ * inventaria estatística. Ele só aparece no contador `semRegistro`, para a
+ * tela poder dizer quantos trades ainda faltam classificar.
+ *
+ * Devolve `null` quando nenhum trade tem o campo preenchido — não há o que
+ * comparar, e a tela mostra a frase de vazio em vez de duas barras zeradas.
+ */
+export function porEntrada(
+  trades: { resultado: number; entrada: Entrada | null }[],
+): PorEntrada | null {
+  const semRegistro = trades.filter((t) => t.entrada === null).length;
+  if (semRegistro === trades.length) return null;
+
+  const fatias = ENTRADAS.map((entrada) => {
+    const dela = trades.filter((t) => t.entrada === entrada);
+    return {
+      entrada,
+      trades: dela.length,
+      assertividade: assertividade(
+        dela.filter((t) => t.resultado > 0).length,
+        dela.filter((t) => t.resultado < 0).length,
+      ),
+      resultado: dela.reduce((a, t) => a + t.resultado, 0),
+    };
+  });
+
+  return { fatias, semRegistro };
 }
 
 /** Gains ou losses consecutivos do fim para trás. Zerado interrompe a contagem. */

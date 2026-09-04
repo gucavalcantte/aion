@@ -9,6 +9,7 @@ import {
   disciplina,
   drawdownDoPico,
   pisoDeConfianca,
+  porEntrada,
   progressoDaMeta,
   resultadoEmPontos,
   riscoRetornoMedio,
@@ -123,6 +124,34 @@ eq("piso de 7/9  (77,8%)", r2(pisoDeConfianca(7, 9)), 45.3);
 eq("teto de 2/12 (16,7%)", r2(tetoDeConfianca(2, 12)), 44.8);
 eq("teto de 2/8  (25,0%)", r2(tetoDeConfianca(2, 8)), 59.1);
 eq("teto de 2/7  (28,6%)", r2(tetoDeConfianca(2, 7)), 64.1);
+
+// porEntrada: Confirmada x Antecipada, sem inventar valor para trade antigo
+eq("porEntrada sem nenhum campo preenchido", porEntrada([{ resultado: 100, entrada: null }]), null);
+
+eq(
+  "porEntrada: trade sem registro fica fora das fatias",
+  porEntrada([
+    { resultado: 100, entrada: "Confirmada" },
+    { resultado: -50, entrada: "Confirmada" },
+    { resultado: 200, entrada: "Antecipada" },
+    { resultado: 0, entrada: "Antecipada" },
+    { resultado: -80, entrada: null },
+  ]),
+  {
+    fatias: [
+      { entrada: "Confirmada", trades: 2, assertividade: 50, resultado: 50 },
+      // o zerado conta como trade e soma no resultado, mas sai do denominador
+      { entrada: "Antecipada", trades: 2, assertividade: 100, resultado: 200 },
+    ],
+    semRegistro: 1,
+  },
+);
+
+eq(
+  "porEntrada: fatia vazia devolve — em vez de 0%",
+  porEntrada([{ resultado: 100, entrada: "Confirmada" }])?.fatias[1],
+  { entrada: "Antecipada", trades: 0, assertividade: null, resultado: 0 },
+);
 
 // WIN entrou como ativo em BRL — os outros seis continuam em USD
 eq("moeda nativa do WIN", moedaDoAtivo("WIN"), "BRL");

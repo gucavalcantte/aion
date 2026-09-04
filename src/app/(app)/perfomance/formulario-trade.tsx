@@ -6,7 +6,7 @@ import { ATIVOS, type Ativo, type Moeda } from "@/lib/ativos";
 import type { EspecificacaoAtivo } from "@/lib/dados/corretoras";
 import { moeda, VAZIO } from "@/lib/formato";
 import { riscoRetornoSugerido, statusDoResultado, stopEmDolar } from "@/lib/metricas";
-import { RISCO_RETORNO, TEMPOS_GRAFICOS } from "@/lib/opcoes";
+import { ENTRADAS, type Entrada, RISCO_RETORNO, TEMPOS_GRAFICOS } from "@/lib/opcoes";
 
 import { salvarTrade, type EstadoTrade } from "./acoes";
 
@@ -32,6 +32,7 @@ export type TradeParaEdicao = {
   ativo: Ativo;
   tempo_grafico: string;
   setup_id: string;
+  entrada: Entrada | null;
   pontos_stop: number;
   contratos: number;
   resultado: number;
@@ -224,6 +225,23 @@ export function FormularioTrade({
                   ))}
                 </select>
               </label>
+
+              <div>
+                <span className={rotulo}>Tipo de entrada</span>
+                <div className="flex flex-wrap gap-[7px]">
+                  {ENTRADAS.map((e) => (
+                    <label key={e}>
+                      {/* Sem defaultChecked: obrigatório é escolher, não herdar
+                          um padrão silencioso. Trade antigo (entrada nula)
+                          abre em branco e força a decisão na edição. */}
+                      <input type="radio" name="entrada" value={e} defaultChecked={trade?.entrada === e} className="peer sr-only" />
+                      <span className="block cursor-pointer rounded-lg border border-line-strong bg-raised px-[14px] py-[9px] text-[14.5px] font-medium text-ink-3 peer-checked:border-accent peer-checked:bg-accent peer-checked:text-accent-ink">
+                        {e}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <label>
