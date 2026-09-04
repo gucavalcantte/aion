@@ -6,14 +6,14 @@ import { CalendarioDeConsistencia } from "@/components/calendario";
 import { CurvaDeCapital, GaugeRiscoRetorno, ResultadoPorOperacao } from "@/components/graficos";
 import { contasParaSeletor, dadosDaPerfomance } from "@/lib/dados/trades";
 import { especificacoesDaCorretora } from "@/lib/dados/corretoras";
-import { data as fData, hora, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
-import { ENTRADAS, rotuloRiscoRetorno, TEMPOS_GRAFICOS } from "@/lib/opcoes";
+import { data as fData, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
+import { ENTRADAS, TEMPOS_GRAFICOS } from "@/lib/opcoes";
 
 import { removerLancamento } from "./acoes";
-import { AcoesDoTrade } from "./acoes-trade";
 import { FormularioLancamento } from "./formulario-lancamento";
 import { FormularioTrade } from "./formulario-trade";
 import { SeletorConta, SeletorMes } from "./seletores";
+import { TabelaTrades } from "./tabela-trades";
 
 export const metadata = { title: "Perfomance — AION" };
 
@@ -324,79 +324,14 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           <Filtros contaId={conta.id} mes={mes} setups={setups} atual={filtros} />
         </div>
 
-        {listagem.length === 0 ? (
-          <p className="px-5 py-10 text-center text-[14px] text-ink-4">
-            {resumo.totalTrades === 0 ? "Nenhum trade ainda." : "Nenhum trade com esses filtros."}
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse" style={{ minWidth: 1520 }}>
-              <thead>
-                <tr>
-                  {["Data", "Entrada", "Saída", "Ativo", "TG", "Setup", "Tipo entrada", "Contratos", "Stop pts", "Stop $", "Resultado", "Pontos", "R:R", "Plano", "Status", ""].map((t, i) => (
-                    <th
-                      key={t + i}
-                      scope="col"
-                      className={`whitespace-nowrap border-b border-line-strong bg-table-head px-[13px] py-3 text-[11.5px] font-semibold uppercase tracking-[0.09em] text-ink-2 ${[7, 8, 9, 10, 11, 12].includes(i) ? "text-right" : "text-left"}`}
-                    >
-                      {[9, 11, 14].includes(i) ? <>{t} <Calc /></> : t}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {listagem.map((t) => {
-                  const td = "whitespace-nowrap border-b border-line-soft bg-table-row px-[13px] py-[11px] text-[14.5px] text-ink-2 transition-colors group-hover:bg-raised";
-                  const setup = setups.find((s) => s.id === t.setup_id)?.nome ?? VAZIO;
-                  return (
-                    <tr key={t.id} className="group">
-                      <td className={`${td} num`}>{fData(t.data)}</td>
-                      <td className={`${td} num`}>{hora(t.hora_inicio)}</td>
-                      <td className={`${td} num`}>{hora(t.hora_fim)}</td>
-                      <td className={`${td} num font-semibold`}>{t.ativo}</td>
-                      <td className={`${td} num`}>{t.tempo_grafico}</td>
-                      <td className={td}>{setup}</td>
-                      <td className={td}>{t.entrada ?? VAZIO}</td>
-                      <td className={`${td} num text-right`}>{t.contratos}</td>
-                      <td className={`${td} num text-right`}>{String(t.pontos_stop).replace(".", ",")}</td>
-                      <td className={`${td} num text-right text-ink-3`}>{moeda(t.stop_dolar, conta.moeda)}</td>
-                      <td className={`${td} num text-right font-semibold ${t.resultado > 0 ? "!text-gain" : t.resultado < 0 ? "!text-loss" : "!text-ink-3"}`}>
-                        {moeda(t.resultado, conta.moeda, true)}
-                      </td>
-                      <td className={`${td} num text-right !text-ink-3`}>
-                        {t.resultado_pontos === null ? VAZIO : t.resultado_pontos.toFixed(2).replace(".", ",")}
-                      </td>
-                      <td className={`${td} num text-right font-semibold ${(t.risco_retorno ?? 0) >= 0 ? "" : "!text-loss"}`}>
-                        {rotuloRiscoRetorno(t.risco_retorno)}
-                      </td>
-                      <td className={td}>
-                        <Selo ok={t.respeitou_plano}>{t.respeitou_plano ? "Sim" : "Não"}</Selo>
-                      </td>
-                      <td className={td}>
-                        <span className={`inline-flex h-[23px] items-center rounded-md px-[9px] text-[13px] font-semibold ${t.status === "Gain" ? "bg-gain-bg text-gain" : t.status === "Loss" ? "bg-loss-bg text-loss" : "bg-track text-ink-3"}`}>
-                          {t.status}
-                        </span>
-                      </td>
-                      <td className={td}>
-                        <AcoesDoTrade
-                          trade={{ ...t, imagem: null }}
-                          contaId={conta.id}
-                          setups={setups}
-                          moedaConta={conta.moeda}
-                          especificacoes={especificacoes}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        <p className="flex items-center gap-2 border-t border-line px-5 py-3.5 text-[13px] text-ink-4">
-          <Calc /> calculado pelo app — não se digita
-        </p>
+        <TabelaTrades
+          listagem={listagem}
+          totalTrades={resumo.totalTrades}
+          setups={setups}
+          contaId={conta.id}
+          moedaConta={conta.moeda}
+          especificacoes={especificacoes}
+        />
       </section>
 
       {lancamentos.length > 0 && (
@@ -428,18 +363,6 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
         </section>
       )}
     </>
-  );
-}
-
-function Calc() {
-  return <span className="inline-block size-[5px] rounded-full bg-accent-soft align-super" aria-label="calculado" />;
-}
-
-function Selo({ ok, children }: { ok: boolean; children: React.ReactNode }) {
-  return (
-    <span className={`inline-flex h-[23px] items-center rounded-md px-[9px] text-[13px] font-semibold ${ok ? "bg-gain-bg text-gain" : "bg-loss-bg text-loss"}`}>
-      {children}
-    </span>
   );
 }
 
