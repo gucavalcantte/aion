@@ -10,6 +10,7 @@ import {
   drawdownDoPico,
   pisoDeConfianca,
   porEntrada,
+  porExecucoes,
   progressoDaMeta,
   resultadoEmPontos,
   riscoRetornoMedio,
@@ -151,6 +152,42 @@ eq(
   "porEntrada: fatia vazia devolve — em vez de 0%",
   porEntrada([{ resultado: 100, entrada: "Confirmada" }])?.fatias[1],
   { entrada: "Antecipada", trades: 0, assertividade: null, resultado: 0 },
+);
+
+// porExecucoes: uso do log de parciais/adições, sem recalcular nada do trade
+eq("porExecucoes sem nenhuma execução", porExecucoes([{ status: "Gain", risco_retorno: 1, execucoes: [] }]), null);
+
+eq(
+  "porExecucoes: distribuição, adição e comparação com/sem",
+  (() => {
+    const r = porExecucoes([
+      { status: "Gain", risco_retorno: 2, execucoes: [{ tipo: "Parcial", quantidade: 2 }, { tipo: "Saída do trade", quantidade: 1 }] },
+      { status: "Loss", risco_retorno: null, execucoes: [{ tipo: "Adição", quantidade: 1 }, { tipo: "Saída do trade", quantidade: 3 }] },
+      { status: "Gain", risco_retorno: 1, execucoes: [] },
+      { status: "Loss", risco_retorno: null, execucoes: [] },
+    ]);
+    if (!r) return null;
+    return {
+      percentualComExecucoes: r.percentualComExecucoes,
+      mediaExecucoesPorTrade: r.mediaExecucoesPorTrade,
+      percentualAdicao: r.percentualAdicao,
+      distribuicao: r.distribuicao,
+      com: { trades: r.comExecucoesGrupo.trades, assertividade: r.comExecucoesGrupo.assertividade, riscoRetorno: r.comExecucoesGrupo.riscoRetorno },
+      sem: { trades: r.semExecucoesGrupo.trades, assertividade: r.semExecucoesGrupo.assertividade, riscoRetorno: r.semExecucoesGrupo.riscoRetorno },
+    };
+  })(),
+  {
+    percentualComExecucoes: 50,
+    mediaExecucoesPorTrade: 2,
+    percentualAdicao: 50,
+    distribuicao: [
+      { tipo: "Parcial", quantidade: 2 },
+      { tipo: "Adição", quantidade: 1 },
+      { tipo: "Saída do trade", quantidade: 4 },
+    ],
+    com: { trades: 2, assertividade: 50, riscoRetorno: 2 },
+    sem: { trades: 2, assertividade: 50, riscoRetorno: 1 },
+  },
 );
 
 // WIN entrou como ativo em BRL — os outros seis continuam em USD

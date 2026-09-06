@@ -48,6 +48,13 @@
   /* linha de referência (MLPT, MLPD) — neutra, não compete com o acento */
   --ref: #a79c89;
 
+  /* distribuição por tipo de execução — identidade, não ganho/perda.
+     Saída do trade reusa o acento (fecha a posição); os outros dois são
+     categóricos, validados contra --well (#1a1710) na verificação de
+     paleta do skill de dataviz (CVD ΔE 9.4, contraste ≥ 3:1). */
+  --serie-parcial: #d95926;
+  --serie-adicao: #3987e5;
+
   /* trilha vazia de barra, tinta de painel e sombra da coluna fixa.
      Existem como token porque preto puro no modo claro fica pesado. */
   --track: rgba(0, 0, 0, 0.30);
@@ -89,6 +96,9 @@
   --table-row: #ffffff;
 
   --ref: #7a6f58;
+
+  --serie-parcial: #eb6834;
+  --serie-adicao: #2a78d6;
 
   --track: rgba(58, 48, 28, 0.13);
   --tint: rgba(58, 48, 28, 0.045);

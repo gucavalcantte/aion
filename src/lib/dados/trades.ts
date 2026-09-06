@@ -8,6 +8,7 @@ import {
   mediaDeGanho,
   mediaDePerda,
   porEntrada,
+  porExecucoes,
   progressoDaMeta,
   riscoRetornoMedio,
   saldoAtual,
@@ -160,6 +161,13 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
       ),
       porEntrada: porEntrada(
         trades.map((t) => ({ resultado: t.resultado, entrada: t.entrada })),
+      ),
+      porExecucoes: porExecucoes(
+        trades.map((t) => ({
+          status: t.status,
+          risco_retorno: t.risco_retorno,
+          execucoes: execucoesPorTrade[t.id] ?? [],
+        })),
       ),
       // Lançamento fora: saque não é perda.
       drawdown: drawdownDoPico(conta.saldo_inicial, resultados),
