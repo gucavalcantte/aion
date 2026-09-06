@@ -216,6 +216,16 @@ têm essa informação, e carimbá-los com um valor inventaria estatística que
 ninguém observou. Eles aparecem como `—` na tabela e ficam de fora do card
 Confirmada × Antecipada até serem editados.
 
+`setup_id` também é nullable, mas por um motivo diferente de `entrada`: aqui o
+nulo é uma escolha ativa do usuário, não dado faltando. O seletor de setup
+tem uma opção **"Sem setup"** — escolhê-la grava `setup_id = null` e trava o
+checkbox "Respeitou o plano" em desmarcado (operar fora de qualquer setup
+estudado nunca é plano, por definição). Trades sem setup aparecem como "Sem
+setup" na tabela e ficam fora de toda estatística por setup (tela de Setup,
+contextos do Backteste) — mesmo tratamento que `entrada` nula recebe hoje.
+A Perfomance mostra uma faixa discreta ("N trades sem setup neste recorte",
+mesmo padrão visual do aviso de constância) quando o filtro ativo tem algum.
+
 **Campos calculados, nunca digitados** (evitam contradição entre números que
 descrevem a mesma coisa):
 
