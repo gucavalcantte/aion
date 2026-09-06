@@ -46,7 +46,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
     entrada: typeof params.entrada === "string" && params.entrada ? params.entrada : undefined,
   };
 
-  const { listagem, lancamentos, setups, resumo, curva, porDia } = await dadosDaPerfomance(conta, mes, filtros);
+  const { listagem, lancamentos, setups, resumo, curva, porDia, execucoesPorTrade } = await dadosDaPerfomance(conta, mes, filtros);
   const especificacoes = await especificacoesDaCorretora(conta.corretora);
   const [ano, mesNum] = mes.split("-").map(Number);
   const lucro = resumo.saldo - conta.saldo_inicial;
@@ -331,6 +331,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           contaId={conta.id}
           moedaConta={conta.moeda}
           especificacoes={especificacoes}
+          execucoesPorTrade={execucoesPorTrade}
         />
       </section>
 

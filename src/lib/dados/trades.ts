@@ -13,6 +13,7 @@ import {
   saldoAtual,
   sequenciaAtual,
 } from "@/lib/metricas";
+import type { ExecucaoTrade } from "@/lib/execucoes-trade";
 import type { Entrada } from "@/lib/opcoes";
 import { clienteServidor } from "@/lib/supabase/servidor";
 import type { Conta, Lancamento, TempoGrafico } from "@/lib/tipos";
@@ -68,6 +69,25 @@ export async function contasParaSeletor() {
   })) as Conta[];
 }
 
+export async function execucoesPorTrades(tradeIds: string[]): Promise<Record<string, ExecucaoTrade[]>> {
+  if (tradeIds.length === 0) return {};
+
+  const supabase = await clienteServidor();
+  const { data, error } = await supabase
+    .from("execucoes_trade")
+    .select("*")
+    .in("trade_id", tradeIds)
+    .order("ordem");
+  if (error) throw error;
+
+  const mapa: Record<string, ExecucaoTrade[]> = {};
+  for (const row of data ?? []) {
+    const lista = mapa[row.trade_id] ?? (mapa[row.trade_id] = []);
+    lista.push({ id: row.id, tipo: row.tipo, quantidade: row.quantidade, ordem: row.ordem, notas: row.notas });
+  }
+  return mapa;
+}
+
 export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filtros = {}) {
   const supabase = await clienteServidor();
 
@@ -88,6 +108,8 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
     resultado_pontos: t.resultado_pontos === null ? null : n(t.resultado_pontos),
     risco_retorno: t.risco_retorno === null ? null : n(t.risco_retorno),
   })) as Trade[];
+
+  const execucoesPorTrade = await execucoesPorTrades(trades.map((t) => t.id));
 
   const lancamentos = (lancResp.data ?? []).map((l) => ({
     ...l,
@@ -116,6 +138,7 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
 
   return {
     trades,
+    execucoesPorTrade,
     listagem,
     lancamentos,
     setups,

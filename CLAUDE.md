@@ -241,6 +241,13 @@ Fuso horário não é registrado — os horários são anotados no relógio que 
 usa. Uma análise futura de "resultado por horário do dia" vai exigir definir isso
 antes.
 
+**Execuções (opcional, só documentação).** Um trade pode ter um log de como a
+posição foi montada/desmontada — `execucoes_trade` (`trade_id`, `tipo`:
+`Parcial` | `Adição` | `Saída do trade`, `quantidade`, `ordem`, `notas`). É só
+registro: não recalcula `contratos`, `resultado` nem nenhum campo calculado
+acima. Fecha quando `contratos + soma(Adição) = soma(Parcial) + soma(Saída do
+trade)`, exigindo pelo menos uma execução de `Saída do trade`.
+
 ### `estudos`
 Prints do dia — o que aconteceu no gráfico, inclusive as entradas que estavam no
 plano e não foram executadas. Substitui o antigo "Diário", com escopo menor.
