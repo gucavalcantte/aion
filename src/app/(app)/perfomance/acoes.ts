@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
+import { fechamentoDeExecucoes, type LinhaExecucao } from "@/lib/execucoes-trade";
+import { TIPOS_EXECUCAO, type TipoExecucao } from "@/lib/opcoes";
 import { enviarImagem, removerImagem } from "@/lib/storage";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
@@ -18,6 +20,21 @@ function decimal(valor: FormDataEntryValue | null): number | null {
   // Aceita "1.500,50" e "-85.5". O sinal importa: é ele que separa gain de loss.
   const n = Number(t.replace(/\.(?=\d{3}\b)/g, "").replace(",", "."));
   return Number.isFinite(n) ? n : null;
+}
+
+function linhasDeExecucao(dados: FormData): LinhaExecucao[] {
+  const tipos = dados.getAll("execucao_tipo");
+  const quantidades = dados.getAll("execucao_quantidade");
+  const notasCampo = dados.getAll("execucao_notas");
+  const notaTexto = (v: FormDataEntryValue | undefined) => {
+    const s = String(v ?? "").trim();
+    return s === "" ? null : s;
+  };
+  return tipos.map((tipo, i) => ({
+    tipo: String(tipo) as TipoExecucao,
+    quantidade: Math.round(decimal(quantidades[i] ?? null) ?? 0),
+    notas: notaTexto(notasCampo[i]),
+  }));
 }
 
 export async function salvarTrade(
@@ -50,6 +67,30 @@ export async function salvarTrade(
   if (pontos === null || pontos <= 0) return { erro: "Informe o stop em pontos." };
   if (contratos === null || contratos < 1) return { erro: "Informe a quantidade de contratos." };
   if (resultado === null) return { erro: "Informe o resultado em dólar (use sinal negativo no loss)." };
+
+  const tevaParciais = dados.get("teve_parciais") === "on";
+  const linhas = tevaParciais ? linhasDeExecucao(dados) : [];
+
+  if (tevaParciais) {
+    if (linhas.some((l) => !TIPOS_EXECUCAO.includes(l.tipo))) {
+      return { erro: "Tipo de execução inválido." };
+    }
+    if (linhas.some((l) => l.quantidade < 1)) {
+      return { erro: "Cada execução precisa de uma quantidade de contratos maior que zero." };
+    }
+    const fechamento = fechamentoDeExecucoes(Math.round(contratos), linhas);
+    if (!fechamento.fechado) {
+      if (!fechamento.temSaida) {
+        return { erro: 'Inclua uma execução do tipo "Saída do trade" para fechar a posição.' };
+      }
+      return {
+        erro:
+          fechamento.falta > 0
+            ? `Faltam ${fechamento.falta} contrato(s) para fechar a posição.`
+            : `A soma das execuções passou ${Math.abs(fechamento.falta)} contrato(s) da quantidade da posição.`,
+      };
+    }
+  }
 
   const rr = decimal(dados.get("risco_retorno"));
 
@@ -87,10 +128,25 @@ export async function salvarTrade(
     campos.imagem_url = null;
   }
 
-  const { error } = id
-    ? await supabase.from("trades").update(campos).eq("id", id)
-    : await supabase.from("trades").insert(campos);
-  if (error) return { erro: error.message };
+  let tradeId = id;
+  if (id) {
+    const { error } = await supabase.from("trades").update(campos).eq("id", id);
+    if (error) return { erro: error.message };
+  } else {
+    const { data, error } = await supabase.from("trades").insert(campos).select("id").single();
+    if (error) return { erro: error.message };
+    tradeId = data.id;
+  }
+
+  // Substitui sempre — inclusive quando o checkbox veio desmarcado, o que
+  // apaga qualquer execução salva antes (evita log "fantasma" desatualizado).
+  await supabase.from("execucoes_trade").delete().eq("trade_id", tradeId);
+  if (linhas.length > 0) {
+    const { error: erroExecucoes } = await supabase.from("execucoes_trade").insert(
+      linhas.map((l, i) => ({ trade_id: tradeId, tipo: l.tipo, quantidade: l.quantidade, ordem: i, notas: l.notas })),
+    );
+    if (erroExecucoes) return { erro: erroExecucoes.message };
+  }
 
   if (campos.imagem_url !== undefined && caminhoAntigo && caminhoAntigo !== campos.imagem_url) {
     await removerImagem(caminhoAntigo);
