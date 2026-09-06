@@ -20,6 +20,13 @@ export const RESULTADOS = ["Gain", "Loss"] as const;
 export const UNIDADES = ["pontos", "dólares", "%"] as const;
 
 /**
+ * Sentinela para "Sem setup" no seletor da Perfomance — distinto de "" (que
+ * continua significando "nada escolhido ainda", inválido). Escolher isto
+ * grava `setup_id = null` no trade.
+ */
+export const SEM_SETUP = "sem-setup";
+
+/**
  * Risco/retorno é dropdown na tela e numeric no banco.
  * LOSS grava -1 — é isso que faz a média deste campo ser a expectativa em R.
  */

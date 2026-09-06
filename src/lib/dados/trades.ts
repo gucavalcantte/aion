@@ -15,7 +15,7 @@ import {
   sequenciaAtual,
 } from "@/lib/metricas";
 import type { ExecucaoTrade } from "@/lib/execucoes-trade";
-import type { Entrada } from "@/lib/opcoes";
+import { SEM_SETUP, type Entrada } from "@/lib/opcoes";
 import { clienteServidor } from "@/lib/supabase/servidor";
 import type { Conta, Lancamento, TempoGrafico } from "@/lib/tipos";
 
@@ -29,7 +29,8 @@ export type Trade = {
   hora_fim: string;
   ativo: Ativo;
   tempo_grafico: TempoGrafico;
-  setup_id: string;
+  /** Nulo = "Sem setup", escolhido de propósito — não é dado faltando. */
+  setup_id: string | null;
   /** Nulo nos trades gravados antes do campo existir. */
   entrada: Entrada | null;
   pontos_stop: number;
@@ -132,7 +133,9 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
 
   // Filtros valem só para a listagem — os cards falam da conta inteira.
   const listagem = trades
-    .filter((t) => (filtros.setup ? t.setup_id === filtros.setup : true))
+    .filter((t) =>
+      filtros.setup ? (filtros.setup === SEM_SETUP ? t.setup_id === null : t.setup_id === filtros.setup) : true,
+    )
     .filter((t) => (filtros.tempo ? t.tempo_grafico === filtros.tempo : true))
     .filter((t) => (filtros.entrada ? t.entrada === filtros.entrada : true))
     .sort((a, b) => -cronologica(a, b));
@@ -143,6 +146,7 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
     listagem,
     lancamentos,
     setups,
+    semSetupNoRecorte: listagem.filter((t) => t.setup_id === null).length,
     resumo: {
       saldo,
       totalTrades: trades.length,

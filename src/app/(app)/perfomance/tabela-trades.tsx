@@ -75,7 +75,7 @@ export function TabelaTrades({
           <tbody>
             {listagemPagina.map((t) => {
               const td = "whitespace-nowrap border-b border-line-soft bg-table-row px-[13px] py-[11px] text-[14.5px] text-ink-2 transition-colors group-hover:bg-raised";
-              const setup = setups.find((s) => s.id === t.setup_id)?.nome ?? VAZIO;
+              const setup = t.setup_id === null ? "Sem setup" : (setups.find((s) => s.id === t.setup_id)?.nome ?? VAZIO);
               const execucoes = execucoesPorTrade[t.id] ?? [];
               return (
                 <Fragment key={t.id}>

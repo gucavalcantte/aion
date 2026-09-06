@@ -7,7 +7,7 @@ import type { EspecificacaoAtivo } from "@/lib/dados/corretoras";
 import { fechamentoDeExecucoes, type ExecucaoTrade } from "@/lib/execucoes-trade";
 import { moeda, VAZIO } from "@/lib/formato";
 import { riscoRetornoSugerido, statusDoResultado, stopEmDolar } from "@/lib/metricas";
-import { ENTRADAS, type Entrada, RISCO_RETORNO, TEMPOS_GRAFICOS, TIPOS_EXECUCAO } from "@/lib/opcoes";
+import { ENTRADAS, type Entrada, RISCO_RETORNO, SEM_SETUP, TEMPOS_GRAFICOS, TIPOS_EXECUCAO } from "@/lib/opcoes";
 
 import { salvarTrade, type EstadoTrade } from "./acoes";
 
@@ -32,7 +32,7 @@ export type TradeParaEdicao = {
   hora_fim: string;
   ativo: Ativo;
   tempo_grafico: string;
-  setup_id: string;
+  setup_id: string | null;
   entrada: Entrada | null;
   pontos_stop: number;
   contratos: number;
@@ -69,6 +69,10 @@ export function FormularioTrade({
   const [estado, acao, enviando] = useActionState(salvarTrade, INICIAL);
 
   const [ativo, setAtivo] = useState<Ativo>(trade?.ativo ?? ativosPermitidos[0]?.codigo ?? "MNQ");
+  // "" = nada escolhido ainda (obrigatório); SEM_SETUP é a sentinela de "Sem setup".
+  const [setupId, setSetupId] = useState(trade ? (trade.setup_id ?? SEM_SETUP) : "");
+  const semSetup = setupId === SEM_SETUP;
+  const [respeitouPlano, setRespeitouPlano] = useState(trade?.respeitou_plano ?? true);
   const [pontos, setPontos] = useState(trade ? String(trade.pontos_stop) : "");
   const [contratos, setContratos] = useState(trade ? String(trade.contratos) : "");
   const [resultado, setResultado] = useState(trade ? String(trade.resultado) : "");
@@ -148,6 +152,7 @@ export function FormularioTrade({
       // eslint-disable-next-line react-hooks/set-state-in-effect -- ver comentário acima
       setPontos(""); setContratos(""); setResultado(""); setRrManual(null); setPrevia(null);
       setTeveParciais(false); setLinhas([]);
+      setSetupId(""); setRespeitouPlano(true);
       if (arquivo.current) arquivo.current.value = "";
     }
     aoFechar?.();
@@ -247,8 +252,17 @@ export function FormularioTrade({
 
               <label>
                 <span className={rotulo}>Setup</span>
-                <select name="setup_id" defaultValue={trade?.setup_id ?? ""} className={`${campo} appearance-none`}>
+                <select
+                  name="setup_id"
+                  value={setupId}
+                  onChange={(e) => {
+                    setSetupId(e.target.value);
+                    if (e.target.value === SEM_SETUP) setRespeitouPlano(false);
+                  }}
+                  className={`${campo} appearance-none`}
+                >
                   <option value="">Selecione</option>
+                  <option value={SEM_SETUP}>Sem setup</option>
                   {setups.map((s) => (
                     <option key={s.id} value={s.id}>{s.nome}</option>
                   ))}
@@ -425,14 +439,17 @@ export function FormularioTrade({
                 </div>
               </div>
 
-              <label className="flex cursor-pointer items-center gap-[10px] text-[14.5px] text-ink-2">
+              <label className={`flex items-center gap-[10px] text-[14.5px] ${semSetup ? "text-ink-4" : "cursor-pointer text-ink-2"}`}>
                 <input
                   type="checkbox"
                   name="respeitou_plano"
-                  defaultChecked={trade?.respeitou_plano ?? true}
-                  className="size-[18px] appearance-none rounded-[5px] border border-line-strong bg-input checked:border-accent checked:bg-accent checked:bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M3 8.4l3.2 3.2L13 4.8%22/></svg>')] checked:bg-center checked:bg-no-repeat"
+                  checked={semSetup ? false : respeitouPlano}
+                  disabled={semSetup}
+                  onChange={(e) => setRespeitouPlano(e.target.checked)}
+                  className="size-[18px] appearance-none rounded-[5px] border border-line-strong bg-input checked:border-accent checked:bg-accent checked:bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M3 8.4l3.2 3.2L13 4.8%22/></svg>')] checked:bg-center checked:bg-no-repeat disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 Respeitou o plano
+                {semSetup && <span className="normal-case font-normal text-ink-4">— sem setup nunca é plano</span>}
               </label>
             </div>
 
