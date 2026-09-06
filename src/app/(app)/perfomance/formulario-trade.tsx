@@ -4,9 +4,10 @@ import { useActionState, useEffect, useRef, useState } from "react";
 
 import { ATIVOS, type Ativo, type Moeda } from "@/lib/ativos";
 import type { EspecificacaoAtivo } from "@/lib/dados/corretoras";
+import { fechamentoDeExecucoes, type ExecucaoTrade } from "@/lib/execucoes-trade";
 import { moeda, VAZIO } from "@/lib/formato";
 import { riscoRetornoSugerido, statusDoResultado, stopEmDolar } from "@/lib/metricas";
-import { ENTRADAS, type Entrada, RISCO_RETORNO, TEMPOS_GRAFICOS } from "@/lib/opcoes";
+import { ENTRADAS, type Entrada, RISCO_RETORNO, TEMPOS_GRAFICOS, TIPOS_EXECUCAO } from "@/lib/opcoes";
 
 import { salvarTrade, type EstadoTrade } from "./acoes";
 
@@ -40,7 +41,11 @@ export type TradeParaEdicao = {
   respeitou_plano: boolean;
   observacao: string | null;
   imagem: string | null;
+  execucoes: ExecucaoTrade[];
 };
+
+type TipoExecucaoDoForm = (typeof TIPOS_EXECUCAO)[number];
+type LinhaExecucaoForm = { tipo: TipoExecucaoDoForm; quantidade: string; notas: string };
 
 export function FormularioTrade({
   contaId,
@@ -78,6 +83,21 @@ export function FormularioTrade({
   const [previa, setPrevia] = useState<string | null>(trade?.imagem ?? null);
   const arquivo = useRef<HTMLInputElement>(null);
 
+  const [teveParciais, setTeveParciais] = useState((trade?.execucoes.length ?? 0) > 0);
+  const [linhas, setLinhas] = useState<LinhaExecucaoForm[]>(
+    trade?.execucoes.map((e) => ({ tipo: e.tipo, quantidade: String(e.quantidade), notas: e.notas ?? "" })) ?? [],
+  );
+
+  function adicionarLinha() {
+    setLinhas((ls) => [...ls, { tipo: "Parcial", quantidade: "", notas: "" }]);
+  }
+  function removerLinha(i: number) {
+    setLinhas((ls) => ls.filter((_, idx) => idx !== i));
+  }
+  function atualizarLinha(i: number, campo: keyof LinhaExecucaoForm, valor: string) {
+    setLinhas((ls) => ls.map((l, idx) => (idx === i ? { ...l, [campo]: valor } : l)));
+  }
+
   // Em edição o diálogo já abre; em cadastro espera o clique no botão.
   useEffect(() => {
     if (editando) dialogo.current?.showModal();
@@ -91,6 +111,14 @@ export function FormularioTrade({
   const p = num(pontos);
   const c = num(contratos);
   const r = num(resultado);
+
+  const fechamento =
+    c !== null
+      ? fechamentoDeExecucoes(
+          Math.round(c),
+          linhas.map((l) => ({ tipo: l.tipo, quantidade: num(l.quantidade) ?? 0, notas: null })),
+        )
+      : null;
 
   const stopDolar =
     p !== null && c !== null && c > 0 && especificacoes[ativo]
@@ -119,6 +147,7 @@ export function FormularioTrade({
     if (!editando) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- ver comentário acima
       setPontos(""); setContratos(""); setResultado(""); setRrManual(null); setPrevia(null);
+      setTeveParciais(false); setLinhas([]);
       if (arquivo.current) arquivo.current.value = "";
     }
     aoFechar?.();
@@ -260,6 +289,86 @@ export function FormularioTrade({
                 </div>
               </div>
 
+              <div className="rounded-[11px] border border-line-strong bg-well p-4">
+                <label className="flex cursor-pointer items-center gap-[10px] text-[14.5px] text-ink-2">
+                  <input
+                    type="checkbox"
+                    name="teve_parciais"
+                    checked={teveParciais}
+                    onChange={(e) => {
+                      setTeveParciais(e.target.checked);
+                      if (e.target.checked && linhas.length === 0) adicionarLinha();
+                    }}
+                    className="size-[18px] appearance-none rounded-[5px] border border-line-strong bg-input checked:border-accent checked:bg-accent checked:bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M3 8.4l3.2 3.2L13 4.8%22/></svg>')] checked:bg-center checked:bg-no-repeat"
+                  />
+                  Teve parciais ou adições
+                </label>
+
+                {teveParciais && (
+                  <div className="mt-4 flex flex-col gap-2.5">
+                    {linhas.map((l, i) => (
+                      <div key={i} className="grid grid-cols-[1fr_100px_1fr_32px] items-center gap-2">
+                        <select
+                          name="execucao_tipo"
+                          value={l.tipo}
+                          onChange={(e) => atualizarLinha(i, "tipo", e.target.value)}
+                          className={`${campo} h-[38px] appearance-none text-[14px]`}
+                        >
+                          {TIPOS_EXECUCAO.map((t) => (
+                            <option key={t} value={t}>{t}</option>
+                          ))}
+                        </select>
+                        <input
+                          name="execucao_quantidade"
+                          inputMode="numeric"
+                          value={l.quantidade}
+                          onChange={(e) => atualizarLinha(i, "quantidade", e.target.value)}
+                          placeholder="contratos"
+                          className={`${campo} num h-[38px] text-[14px]`}
+                        />
+                        <input
+                          name="execucao_notas"
+                          value={l.notas}
+                          onChange={(e) => atualizarLinha(i, "notas", e.target.value)}
+                          placeholder="Notas (opcional)"
+                          className={`${campo} h-[38px] text-[14px]`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removerLinha(i)}
+                          aria-label="Remover execução"
+                          className="flex size-[32px] items-center justify-center text-ink-4 hover:text-loss"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
+                            <path d="M4 4l8 8M12 4l-8 8" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={adicionarLinha}
+                      className="self-start text-[13.5px] font-medium text-accent-soft hover:underline"
+                    >
+                      + Adicionar execução
+                    </button>
+
+                    {fechamento && (
+                      <p className={`mt-1 text-[13px] font-medium ${fechamento.fechado ? "text-gain" : fechamento.falta < 0 ? "text-loss" : "text-ink-3"}`}>
+                        {fechamento.fechado
+                          ? "✓ soma bate com a quantidade de contratos"
+                          : fechamento.falta > 0
+                            ? `faltam ${fechamento.falta} contrato${fechamento.falta === 1 ? "" : "s"} para fechar`
+                            : !fechamento.temSaida
+                              ? 'inclua uma execução de "Saída do trade" para fechar'
+                              : `a soma passou ${Math.abs(fechamento.falta)} contrato${Math.abs(fechamento.falta) === 1 ? "" : "s"} da quantidade`}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="grid grid-cols-3 gap-4">
                 <label>
                   <span className={rotulo}>Resultado ({moedaConta})</span>
@@ -379,7 +488,11 @@ export function FormularioTrade({
               <button type="button" onClick={fechar} className="h-[42px] rounded-[9px] border border-line-strong bg-raised px-[19px] text-[15px] font-medium text-ink-2">
                 Cancelar
               </button>
-              <button type="submit" disabled={enviando} className="h-[42px] rounded-[9px] bg-accent px-[19px] text-[15px] font-semibold text-accent-ink disabled:opacity-60">
+              <button
+                type="submit"
+                disabled={enviando || (teveParciais && (linhas.length === 0 || !fechamento?.fechado))}
+                className="h-[42px] rounded-[9px] bg-accent px-[19px] text-[15px] font-semibold text-accent-ink disabled:opacity-60"
+              >
                 {enviando ? "Salvando…" : editando ? "Salvar alterações" : "Salvar trade"}
               </button>
             </div>
