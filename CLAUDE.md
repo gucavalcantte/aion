@@ -248,6 +248,15 @@ registro: não recalcula `contratos`, `resultado` nem nenhum campo calculado
 acima. Fecha quando `contratos + soma(Adição) = soma(Parcial) + soma(Saída do
 trade)`, exigindo pelo menos uma execução de `Saída do trade`.
 
+A Perfomance tem um card **"Execuções (parciais e adições)"** com indicadores
+de uso — % de trades com execução, execuções por trade em média, % que usou
+Adição, distribuição por tipo, e assertividade/R:R médio dos gains comparando
+trades com e sem execução. Continua respeitando o escopo acima: os
+indicadores agrupam trades pela **presença** de execução e reaproveitam
+`resultado`/`status`/`risco_retorno` já calculados — nenhum P&L é derivado de
+preço ou quantidade de execução. Some (card inteiro) quando nenhum trade do
+recorte tem execução registrada.
+
 ### `estudos`
 Prints do dia — o que aconteceu no gráfico, inclusive as entradas que estavam no
 plano e não foram executadas. Substitui o antigo "Diário", com escopo menor.
