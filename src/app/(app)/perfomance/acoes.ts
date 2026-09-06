@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { SEM_SETUP } from "@/lib/opcoes";
 import { enviarImagem, removerImagem } from "@/lib/storage";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
@@ -53,6 +54,11 @@ export async function salvarTrade(
 
   const rr = decimal(dados.get("risco_retorno"));
 
+  // "Sem setup" grava setup_id nulo e nunca conta como plano respeitado —
+  // travado aqui também, não só no client, que é só otimista.
+  const setupEnviado = texto(dados, "setup_id");
+  const semSetup = setupEnviado === SEM_SETUP;
+
   const campos: Record<string, unknown> = {
     conta_id: texto(dados, "conta_id"),
     data: texto(dados, "data"),
@@ -60,13 +66,13 @@ export async function salvarTrade(
     hora_fim: texto(dados, "hora_fim"),
     ativo: texto(dados, "ativo"),
     tempo_grafico: texto(dados, "tempo_grafico"),
-    setup_id: texto(dados, "setup_id"),
+    setup_id: semSetup ? null : setupEnviado,
     entrada: texto(dados, "entrada"),
     pontos_stop: pontos,
     contratos: Math.round(contratos),
     resultado,
     risco_retorno: rr,
-    respeitou_plano: dados.get("respeitou_plano") === "on",
+    respeitou_plano: semSetup ? false : dados.get("respeitou_plano") === "on",
     observacao: texto(dados, "observacao"),
   };
 

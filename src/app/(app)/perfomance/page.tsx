@@ -7,7 +7,7 @@ import { CurvaDeCapital, GaugeRiscoRetorno, ResultadoPorOperacao } from "@/compo
 import { contasParaSeletor, dadosDaPerfomance } from "@/lib/dados/trades";
 import { especificacoesDaCorretora } from "@/lib/dados/corretoras";
 import { data as fData, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
-import { ENTRADAS, TEMPOS_GRAFICOS } from "@/lib/opcoes";
+import { ENTRADAS, SEM_SETUP, TEMPOS_GRAFICOS } from "@/lib/opcoes";
 
 import { removerLancamento } from "./acoes";
 import { FormularioLancamento } from "./formulario-lancamento";
@@ -46,7 +46,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
     entrada: typeof params.entrada === "string" && params.entrada ? params.entrada : undefined,
   };
 
-  const { listagem, lancamentos, setups, resumo, curva, porDia } = await dadosDaPerfomance(conta, mes, filtros);
+  const { listagem, lancamentos, setups, resumo, curva, porDia, semSetupNoRecorte } = await dadosDaPerfomance(conta, mes, filtros);
   const especificacoes = await especificacoesDaCorretora(conta.corretora);
   const [ano, mesNum] = mes.split("-").map(Number);
   const lucro = resumo.saldo - conta.saldo_inicial;
@@ -83,6 +83,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
       </header>
 
       <AvisoDeConstancia />
+      <AvisoDeSemSetup quantidade={semSetupNoRecorte} />
 
       {/* HERO — R:R médio dos gains e o saldo dividem o topo */}
       <div className="mb-3 grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-3">
@@ -366,6 +367,27 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
   );
 }
 
+/**
+ * Lembrete, não alarme — mesmo espírito do AvisoDeConstancia: sem cor de
+ * erro, some sozinho quando não há trade sem setup no recorte filtrado.
+ */
+function AvisoDeSemSetup({ quantidade }: { quantidade: number }) {
+  if (quantidade === 0) return null;
+
+  return (
+    <div className="mb-5 flex items-center gap-3.5 rounded-[11px] border border-accent/40 bg-accent/10 px-[18px] py-3.5">
+      <svg width="19" height="19" viewBox="0 0 16 16" fill="none" stroke="var(--accent-soft)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" aria-hidden>
+        <path d="M8 1.6l6.8 12H1.2z" />
+        <path d="M8 6.4V9M8 11.2h.01" />
+      </svg>
+      <p className="text-[14.5px] text-ink-2">
+        <strong className="num text-accent-soft">{quantidade}</strong>{" "}
+        {quantidade === 1 ? "trade sem setup" : "trades sem setup"} neste recorte.
+      </p>
+    </div>
+  );
+}
+
 function Cartao({ titulo, destaque, children }: { titulo: string; destaque?: boolean; children: React.ReactNode }) {
   return (
     <div className={`rounded-xl border bg-card px-5 py-[18px] ${destaque ? "border-accent/45" : "border-line"}`}>
@@ -435,6 +457,7 @@ function Filtros({
       <label htmlFor="f-setup" className="sr-only">Setup</label>
       <select id="f-setup" name="setup" defaultValue={atual.setup ?? ""} className={estilo(Boolean(atual.setup))}>
         <option value="">Todos os setups</option>
+        <option value={SEM_SETUP}>Sem setup</option>
         {setups.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
       </select>
       <label htmlFor="f-tempo" className="sr-only">Tempo gráfico</label>
