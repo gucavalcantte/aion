@@ -9,7 +9,7 @@
  *    poderem ser testadas sem subir nada.
  */
 
-import { ENTRADAS, type Entrada } from "./opcoes";
+import { ENTRADAS, TIPOS_EXECUCAO, type Entrada, type TipoExecucao } from "./opcoes";
 
 export type Status = "Gain" | "Loss" | "Zerado";
 
@@ -175,6 +175,74 @@ export function porEntrada(
   });
 
   return { fatias, semRegistro };
+}
+
+export type GrupoDeExecucoes = { trades: number; assertividade: number | null; riscoRetorno: number | null };
+
+export type ResumoExecucoes = {
+  comExecucoes: number;
+  totalTrades: number;
+  percentualComExecucoes: number | null;
+  /** Média de linhas de execução, só entre os trades que têm ao menos uma. */
+  mediaExecucoesPorTrade: number | null;
+  trocasComAdicao: number;
+  /** % dos trades COM execução que usaram Adição pelo menos uma vez. */
+  percentualAdicao: number | null;
+  distribuicao: { tipo: TipoExecucao; quantidade: number }[];
+  comExecucoesGrupo: GrupoDeExecucoes;
+  semExecucoesGrupo: GrupoDeExecucoes;
+};
+
+/**
+ * Uso de parciais/adições (`execucoes_trade`) e o efeito no resultado.
+ *
+ * Documentação, não recálculo: `resultado`/`status`/`risco_retorno` do trade
+ * continuam vindo de onde sempre vieram (regra 6 do CLAUDE.md) — esta função
+ * só agrupa trades pela PRESENÇA de execuções e conta tipos, nunca deriva
+ * P&L a partir delas.
+ *
+ * Devolve `null` quando nenhum trade do recorte tem execução registrada —
+ * não há o que mostrar, a tela usa a frase de vazio em vez de cards a zero.
+ */
+export function porExecucoes(
+  trades: { status: Status; risco_retorno: number | null; execucoes: { tipo: TipoExecucao; quantidade: number }[] }[],
+): ResumoExecucoes | null {
+  const totalTrades = trades.length;
+  const comExecucoes = trades.filter((t) => t.execucoes.length > 0);
+  if (comExecucoes.length === 0) return null;
+
+  const semExecucoes = trades.filter((t) => t.execucoes.length === 0);
+  const totalLinhas = comExecucoes.reduce((a, t) => a + t.execucoes.length, 0);
+  const trocasComAdicao = comExecucoes.filter((t) => t.execucoes.some((e) => e.tipo === "Adição")).length;
+
+  const contagem = new Map<TipoExecucao, number>();
+  for (const t of comExecucoes) {
+    for (const e of t.execucoes) contagem.set(e.tipo, (contagem.get(e.tipo) ?? 0) + e.quantidade);
+  }
+  const distribuicao = TIPOS_EXECUCAO.map((tipo) => ({ tipo, quantidade: contagem.get(tipo) ?? 0 }));
+
+  const grupo = (lista: typeof trades): GrupoDeExecucoes => ({
+    trades: lista.length,
+    assertividade: assertividade(
+      lista.filter((t) => t.status === "Gain").length,
+      lista.filter((t) => t.status === "Loss").length,
+    ),
+    riscoRetorno: riscoRetornoMedio(
+      lista.filter((t) => t.status === "Gain" && t.risco_retorno !== null).map((t) => t.risco_retorno as number),
+    ),
+  });
+
+  return {
+    comExecucoes: comExecucoes.length,
+    totalTrades,
+    percentualComExecucoes: totalTrades === 0 ? null : (comExecucoes.length / totalTrades) * 100,
+    mediaExecucoesPorTrade: totalLinhas / comExecucoes.length,
+    trocasComAdicao,
+    percentualAdicao: (trocasComAdicao / comExecucoes.length) * 100,
+    distribuicao,
+    comExecucoesGrupo: grupo(comExecucoes),
+    semExecucoesGrupo: grupo(semExecucoes),
+  };
 }
 
 /** Gains ou losses consecutivos do fim para trás. Zerado interrompe a contagem. */

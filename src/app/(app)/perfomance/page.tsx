@@ -6,7 +6,7 @@ import { CalendarioDeConsistencia } from "@/components/calendario";
 import { CurvaDeCapital, GaugeRiscoRetorno, ResultadoPorOperacao } from "@/components/graficos";
 import { contasParaSeletor, dadosDaPerfomance } from "@/lib/dados/trades";
 import { especificacoesDaCorretora } from "@/lib/dados/corretoras";
-import { data as fData, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
+import { data as fData, emR, inteiro, moeda, percentual, VAZIO } from "@/lib/formato";
 import { ENTRADAS, TEMPOS_GRAFICOS } from "@/lib/opcoes";
 
 import { removerLancamento } from "./acoes";
@@ -55,6 +55,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
   // Mostrar sempre o lado maior por cima, com a cor e a frase do lado que venceu.
   const d = resumo.disciplina;
   const pe = resumo.porEntrada;
+  const pex = resumo.porExecucoes;
   const comPlanoGanha = d?.multiplicador !== null && d?.multiplicador !== undefined && d.multiplicador >= 1;
   const razaoDisciplina =
     d?.multiplicador === null || d?.multiplicador === undefined
@@ -314,6 +315,116 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
               </div>
             ))}
           </div>
+        )}
+      </section>
+
+      {/* EXECUÇÕES — parciais e adições */}
+      <section className="mb-5 rounded-xl border border-line bg-card p-[22px]">
+        <h2 className="display text-[19px]">Execuções (parciais e adições)</h2>
+        <p className="mt-1.5 text-[13px] text-ink-4">
+          Uso do log de execuções e o efeito no resultado — nada aqui recalcula resultado ou status
+        </p>
+
+        {pex === null ? (
+          <p className="mt-6 text-[13.5px] text-ink-4">
+            Nenhum trade tem execuções registradas ainda. Marque &quot;Teve parciais ou adições&quot; no
+            formulário quando isso acontecer.
+          </p>
+        ) : (
+          <>
+            <div className="mt-5 grid grid-cols-3 gap-3">
+              <div className="rounded-[10px] border border-line-soft bg-well p-4">
+                <span className="text-[12.5px] text-ink-3">Trades com execuções</span>
+                <p className="num mt-2 text-[26px] font-semibold leading-none">
+                  {percentual(pex.percentualComExecucoes)}
+                </p>
+                <p className="mt-2 text-[12px] text-ink-4">
+                  {inteiro(pex.comExecucoes)} de {inteiro(pex.totalTrades)} trades
+                </p>
+              </div>
+              <div className="rounded-[10px] border border-line-soft bg-well p-4">
+                <span className="text-[12.5px] text-ink-3">Execuções por trade</span>
+                <p className="num mt-2 text-[26px] font-semibold leading-none">
+                  {pex.mediaExecucoesPorTrade === null ? VAZIO : pex.mediaExecucoesPorTrade.toFixed(1).replace(".", ",")}
+                </p>
+                <p className="mt-2 text-[12px] text-ink-4">média, entre os que usam parcial/adição</p>
+              </div>
+              <div className="rounded-[10px] border border-line-soft bg-well p-4">
+                <span className="text-[12.5px] text-ink-3">Adição usada</span>
+                <p className="num mt-2 text-[26px] font-semibold leading-none">{percentual(pex.percentualAdicao)}</p>
+                <p className="mt-2 text-[12px] text-ink-4">
+                  {inteiro(pex.trocasComAdicao)} dos {inteiro(pex.comExecucoes)} trades com execução
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <div className="rounded-[10px] border border-line-soft bg-well p-4">
+                <p className="text-[13.5px] font-semibold text-ink-2">Distribuição por tipo</p>
+                <div className="mt-3 flex h-[26px] overflow-hidden rounded-md">
+                  {pex.distribuicao.map((d2, i) => {
+                    const total = pex.distribuicao.reduce((a, x) => a + x.quantidade, 0);
+                    const cor =
+                      d2.tipo === "Parcial" ? "var(--serie-parcial)" : d2.tipo === "Adição" ? "var(--serie-adicao)" : "var(--accent)";
+                    return (
+                      <div
+                        key={d2.tipo}
+                        title={`${d2.tipo} — ${inteiro(d2.quantidade)} (${percentual(total === 0 ? null : (d2.quantidade / total) * 100)})`}
+                        className="flex items-center justify-center text-[11.5px] font-semibold text-white"
+                        style={{
+                          width: total === 0 ? 0 : `${(d2.quantidade / total) * 100}%`,
+                          background: cor,
+                          borderRight: i < pex.distribuicao.length - 1 ? "2px solid var(--well)" : "none",
+                        }}
+                      >
+                        {total > 0 && d2.quantidade / total >= 0.12 ? percentual((d2.quantidade / total) * 100, 0) : ""}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+                  {pex.distribuicao.map((d2) => (
+                    <span key={d2.tipo} className="flex items-center gap-1.5 text-[12px] text-ink-3">
+                      <span
+                        className="inline-block size-[9px] rounded-[2px]"
+                        style={{
+                          background:
+                            d2.tipo === "Parcial" ? "var(--serie-parcial)" : d2.tipo === "Adição" ? "var(--serie-adicao)" : "var(--accent)",
+                        }}
+                      />
+                      {d2.tipo} <span className="num text-ink-4">{inteiro(d2.quantidade)}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[10px] border border-line-soft bg-well p-4">
+                <p className="text-[13.5px] font-semibold text-ink-2">Resultado: com × sem execuções</p>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[11.5px] text-ink-4">Assertividade</p>
+                    <p className="num mt-1 text-[15px] font-semibold">
+                      <span className="text-accent-soft">{percentual(pex.comExecucoesGrupo.assertividade)}</span>
+                      <span className="mx-1 text-ink-4">/</span>
+                      <span className="text-ink-3">{percentual(pex.semExecucoesGrupo.assertividade)}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[11.5px] text-ink-4">R:R médio dos gains</p>
+                    <p className="num mt-1 text-[15px] font-semibold">
+                      <span className="text-accent-soft">{emR(pex.comExecucoesGrupo.riscoRetorno)}</span>
+                      <span className="mx-1 text-ink-4">/</span>
+                      <span className="text-ink-3">{emR(pex.semExecucoesGrupo.riscoRetorno)}</span>
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-3 text-[11.5px] text-ink-4">
+                  <span className="text-accent-soft">com execuções</span> ({inteiro(pex.comExecucoesGrupo.trades)}) ·{" "}
+                  <span className="text-ink-3">sem execuções</span> ({inteiro(pex.semExecucoesGrupo.trades)})
+                </p>
+              </div>
+            </div>
+          </>
         )}
       </section>
 
