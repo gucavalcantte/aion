@@ -131,7 +131,7 @@ export function FormularioTrade({
   const fechamento =
     c !== null
       ? fechamentoDeExecucoes(
-          Math.round(c),
+          c,
           linhas.map((l) => ({ tipo: l.tipo, quantidade: num(l.quantidade) ?? 0, notas: null })),
         )
       : null;
@@ -319,7 +319,7 @@ export function FormularioTrade({
                 </label>
                 <label>
                   <span className={rotulo}>Contratos</span>
-                  <input name="contratos" inputMode="numeric" value={contratos} onChange={(e) => setContratos(e.target.value)} placeholder="3" className={`${campo} num`} />
+                  <input name="contratos" inputMode="decimal" value={contratos} onChange={(e) => setContratos(e.target.value)} placeholder="3 ou 0,4" className={`${campo} num`} />
                 </label>
                 <div>
                   <span className={rotulo}><Ponto />Stop inicial</span>
@@ -360,7 +360,7 @@ export function FormularioTrade({
                         </select>
                         <input
                           name="execucao_quantidade"
-                          inputMode="numeric"
+                          inputMode="decimal"
                           value={l.quantidade}
                           onChange={(e) => atualizarLinha(i, "quantidade", e.target.value)}
                           placeholder="contratos"
@@ -399,10 +399,10 @@ export function FormularioTrade({
                         {fechamento.fechado
                           ? "✓ soma bate com a quantidade de contratos"
                           : fechamento.falta > 0
-                            ? `faltam ${fechamento.falta} contrato${fechamento.falta === 1 ? "" : "s"} para fechar`
+                            ? `faltam ${String(fechamento.falta).replace(".", ",")} contrato${fechamento.falta === 1 ? "" : "s"} para fechar`
                             : !fechamento.temSaida
                               ? 'inclua uma execução de "Saída do trade" para fechar'
-                              : `a soma passou ${Math.abs(fechamento.falta)} contrato${Math.abs(fechamento.falta) === 1 ? "" : "s"} da quantidade`}
+                              : `a soma passou ${String(Math.abs(fechamento.falta)).replace(".", ",")} contrato${Math.abs(fechamento.falta) === 1 ? "" : "s"} da quantidade`}
                       </p>
                     )}
                   </div>

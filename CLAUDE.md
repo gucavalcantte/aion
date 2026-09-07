@@ -206,9 +206,14 @@ Sem imagem. Sem vínculo a bloco — o "bloco" é apenas o `tempo_grafico` (ver 
 ### `trades` — exibido como "Perfomance"
 
 `conta_id` (FK) · `data` · `hora_inicio` · `hora_fim` · `ativo` · `tempo_grafico` ·
-`setup_id` (FK) · `entrada` (enum, **nullable**) · `pontos_stop` (numeric) · `contratos` (int) ·
+`setup_id` (FK) · `entrada` (enum, **nullable**) · `pontos_stop` (numeric) · `contratos` (numeric(10,2)) ·
 `resultado` (numeric USD) · `risco_retorno` (numeric) · `respeitou_plano` (boolean) ·
 `imagem_url` · `observacao` (text)
+
+`contratos` era `int` até a corretora Zero Markets entrar em uso: ela permite
+lote fracionado (ex.: 0,4 contrato), que um inteiro não representa. Migrado
+para `numeric(10,2)` — mesma mudança em `execucoes_trade.quantidade`, que
+também guarda contrato.
 
 `entrada` é o mesmo enum `Confirmada | Antecipada` do backteste. **Obrigatório no
 formulário, nullable no banco:** os trades gravados antes do campo existir não

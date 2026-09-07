@@ -86,7 +86,7 @@ export async function execucoesPorTrades(tradeIds: string[]): Promise<Record<str
   const mapa: Record<string, ExecucaoTrade[]> = {};
   for (const row of data ?? []) {
     const lista = mapa[row.trade_id] ?? (mapa[row.trade_id] = []);
-    lista.push({ id: row.id, tipo: row.tipo, quantidade: row.quantidade, ordem: row.ordem, notas: row.notas });
+    lista.push({ id: row.id, tipo: row.tipo, quantidade: n(row.quantidade), ordem: row.ordem, notas: row.notas });
   }
   return mapa;
 }
@@ -117,6 +117,7 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
   const trades = (tradesResp.data ?? []).map((t) => ({
     ...t,
     pontos_stop: n(t.pontos_stop),
+    contratos: n(t.contratos),
     resultado: n(t.resultado),
     stop_dolar: n(t.stop_dolar),
     resultado_pontos: t.resultado_pontos === null ? null : n(t.resultado_pontos),

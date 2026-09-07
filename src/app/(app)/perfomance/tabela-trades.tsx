@@ -92,7 +92,7 @@ export function TabelaTrades({
                   <td className={td}>{t.entrada ?? VAZIO}</td>
                   <td className={`${td} num text-right`}>
                     <span className="inline-flex items-center justify-end gap-1.5">
-                      {t.contratos}
+                      {String(t.contratos).replace(".", ",")}
                       {execucoes.length > 0 && (
                         <button
                           type="button"
@@ -144,7 +144,7 @@ export function TabelaTrades({
                               {e.tipo}
                             </span>
                             <span className="num font-medium">
-                              {e.quantidade} contrato{e.quantidade === 1 ? "" : "s"}
+                              {String(e.quantidade).replace(".", ",")} contrato{e.quantidade === 1 ? "" : "s"}
                             </span>
                             {e.notas && <span className="text-ink-4">{e.notas}</span>}
                           </li>

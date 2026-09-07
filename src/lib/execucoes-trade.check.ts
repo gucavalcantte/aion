@@ -60,6 +60,12 @@ eq(
   { alvo: 3, somaSaida: 0, falta: 3, temSaida: false, fechado: false },
 );
 
+eq(
+  "lote fracionado fecha certo (corretora com lote fracionado, ex. Zero Markets)",
+  fechamentoDeExecucoes(0.4, [{ tipo: "Saída do trade", quantidade: 0.4, notas: null }]),
+  { alvo: 0.4, somaSaida: 0.4, falta: 0, temSaida: true, fechado: true },
+);
+
 if (falhas > 0) {
   console.log(`\n${falhas} falha(s).`);
   process.exit(1);

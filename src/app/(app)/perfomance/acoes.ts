@@ -32,7 +32,7 @@ function linhasDeExecucao(dados: FormData): LinhaExecucao[] {
   };
   return tipos.map((tipo, i) => ({
     tipo: String(tipo) as TipoExecucao,
-    quantidade: Math.round(decimal(quantidades[i] ?? null) ?? 0),
+    quantidade: decimal(quantidades[i] ?? null) ?? 0,
     notas: notaTexto(notasCampo[i]),
   }));
 }
@@ -65,7 +65,7 @@ export async function salvarTrade(
   const resultado = decimal(dados.get("resultado"));
 
   if (pontos === null || pontos <= 0) return { erro: "Informe o stop em pontos." };
-  if (contratos === null || contratos < 1) return { erro: "Informe a quantidade de contratos." };
+  if (contratos === null || contratos <= 0) return { erro: "Informe a quantidade de contratos." };
   if (resultado === null) return { erro: "Informe o resultado em dólar (use sinal negativo no loss)." };
 
   const tevaParciais = dados.get("teve_parciais") === "on";
@@ -75,10 +75,10 @@ export async function salvarTrade(
     if (linhas.some((l) => !TIPOS_EXECUCAO.includes(l.tipo))) {
       return { erro: "Tipo de execução inválido." };
     }
-    if (linhas.some((l) => l.quantidade < 1)) {
+    if (linhas.some((l) => l.quantidade <= 0)) {
       return { erro: "Cada execução precisa de uma quantidade de contratos maior que zero." };
     }
-    const fechamento = fechamentoDeExecucoes(Math.round(contratos), linhas);
+    const fechamento = fechamentoDeExecucoes(contratos, linhas);
     if (!fechamento.fechado) {
       if (!fechamento.temSaida) {
         return { erro: 'Inclua uma execução do tipo "Saída do trade" para fechar a posição.' };
@@ -86,8 +86,8 @@ export async function salvarTrade(
       return {
         erro:
           fechamento.falta > 0
-            ? `Faltam ${fechamento.falta} contrato(s) para fechar a posição.`
-            : `A soma das execuções passou ${Math.abs(fechamento.falta)} contrato(s) da quantidade da posição.`,
+            ? `Faltam ${String(fechamento.falta).replace(".", ",")} contrato(s) para fechar a posição.`
+            : `A soma das execuções passou ${String(Math.abs(fechamento.falta)).replace(".", ",")} contrato(s) da quantidade da posição.`,
       };
     }
   }
@@ -109,7 +109,7 @@ export async function salvarTrade(
     setup_id: semSetup ? null : setupEnviado,
     entrada: texto(dados, "entrada"),
     pontos_stop: pontos,
-    contratos: Math.round(contratos),
+    contratos,
     resultado,
     risco_retorno: rr,
     respeitou_plano: semSetup ? false : dados.get("respeitou_plano") === "on",
