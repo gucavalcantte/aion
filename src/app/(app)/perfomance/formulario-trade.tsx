@@ -76,6 +76,18 @@ export function FormularioTrade({
   const [pontos, setPontos] = useState(trade ? String(trade.pontos_stop) : "");
   const [contratos, setContratos] = useState(trade ? String(trade.contratos) : "");
   const [resultado, setResultado] = useState(trade ? String(trade.resultado) : "");
+  // Controlados (em vez de defaultValue/defaultChecked): um erro do servidor
+  // dispara o reset nativo do <form action=...> do React mesmo na falha, e
+  // sem value+onChange o React não tem motivo pra "corrigir" o campo de volta
+  // depois — ele fica em branco até o usuário digitar de novo. Ver acoes.ts.
+  const [data, setData] = useState(trade?.data ?? new Date().toISOString().slice(0, 10));
+  const [horaInicio, setHoraInicio] = useState(trade?.hora_inicio?.slice(0, 5) ?? "");
+  const [horaFim, setHoraFim] = useState(trade?.hora_fim?.slice(0, 5) ?? "");
+  const [tempoGrafico, setTempoGrafico] = useState(trade?.tempo_grafico ?? "2m");
+  // Sem valor inicial: obrigatório é escolher, não herdar um padrão silencioso.
+  // Trade antigo (entrada nula) abre em branco e força a decisão na edição.
+  const [entradaEscolhida, setEntradaEscolhida] = useState<Entrada | "">(trade?.entrada ?? "");
+  const [observacao, setObservacao] = useState(trade?.observacao ?? "");
   // `rr` não é sincronizado por effect: enquanto o usuário não clica numa opção
   // (rrManual === null), ele é sempre o valor calculado (rrAuto), recomputado a
   // cada render — não precisa de useEffect para "alcançar" o valor sugerido.
@@ -153,6 +165,9 @@ export function FormularioTrade({
       setPontos(""); setContratos(""); setResultado(""); setRrManual(null); setPrevia(null);
       setTeveParciais(false); setLinhas([]);
       setSetupId(""); setRespeitouPlano(true);
+      setData(new Date().toISOString().slice(0, 10));
+      setHoraInicio(""); setHoraFim(""); setTempoGrafico("2m");
+      setEntradaEscolhida(""); setObservacao("");
       if (arquivo.current) arquivo.current.value = "";
     }
     aoFechar?.();
@@ -203,15 +218,15 @@ export function FormularioTrade({
               <div className="grid grid-cols-[1fr_1fr_1fr] gap-4">
                 <label>
                   <span className={rotulo}>Data</span>
-                  <input name="data" type="date" defaultValue={trade?.data ?? new Date().toISOString().slice(0, 10)} className={`${campo} num`} />
+                  <input name="data" type="date" value={data} onChange={(e) => setData(e.target.value)} className={`${campo} num`} />
                 </label>
                 <label>
                   <span className={rotulo}>Hora de entrada</span>
-                  <input name="hora_inicio" type="time" defaultValue={trade?.hora_inicio?.slice(0, 5) ?? ""} className={`${campo} num`} />
+                  <input name="hora_inicio" type="time" value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} className={`${campo} num`} />
                 </label>
                 <label>
                   <span className={rotulo}>Hora de saída</span>
-                  <input name="hora_fim" type="time" defaultValue={trade?.hora_fim?.slice(0, 5) ?? ""} className={`${campo} num`} />
+                  <input name="hora_fim" type="time" value={horaFim} onChange={(e) => setHoraFim(e.target.value)} className={`${campo} num`} />
                 </label>
               </div>
 
@@ -241,7 +256,14 @@ export function FormularioTrade({
                 <div className="flex flex-wrap gap-[7px]">
                   {TEMPOS_GRAFICOS.map((t) => (
                     <label key={t}>
-                      <input type="radio" name="tempo_grafico" value={t} defaultChecked={(trade?.tempo_grafico ?? "2m") === t} className="peer sr-only" />
+                      <input
+                        type="radio"
+                        name="tempo_grafico"
+                        value={t}
+                        checked={tempoGrafico === t}
+                        onChange={() => setTempoGrafico(t)}
+                        className="peer sr-only"
+                      />
                       <span className="num block cursor-pointer rounded-lg border border-line-strong bg-raised px-[14px] py-[9px] text-[14.5px] font-medium text-ink-3 peer-checked:border-accent peer-checked:bg-accent peer-checked:text-accent-ink">
                         {t}
                       </span>
@@ -274,10 +296,14 @@ export function FormularioTrade({
                 <div className="flex flex-wrap gap-[7px]">
                   {ENTRADAS.map((e) => (
                     <label key={e}>
-                      {/* Sem defaultChecked: obrigatório é escolher, não herdar
-                          um padrão silencioso. Trade antigo (entrada nula)
-                          abre em branco e força a decisão na edição. */}
-                      <input type="radio" name="entrada" value={e} defaultChecked={trade?.entrada === e} className="peer sr-only" />
+                      <input
+                        type="radio"
+                        name="entrada"
+                        value={e}
+                        checked={entradaEscolhida === e}
+                        onChange={() => setEntradaEscolhida(e)}
+                        className="peer sr-only"
+                      />
                       <span className="block cursor-pointer rounded-lg border border-line-strong bg-raised px-[14px] py-[9px] text-[14.5px] font-medium text-ink-3 peer-checked:border-accent peer-checked:bg-accent peer-checked:text-accent-ink">
                         {e}
                       </span>
@@ -485,7 +511,13 @@ export function FormularioTrade({
 
               <label className="flex flex-1 flex-col">
                 <span className={rotulo}>Observação</span>
-                <textarea name="observacao" rows={6} defaultValue={trade?.observacao ?? ""} className="flex-1 resize-y rounded-[9px] border border-line-strong bg-input px-[14px] py-3 text-[14.5px] leading-[1.6] text-ink-2 outline-none focus:border-accent" />
+                <textarea
+                  name="observacao"
+                  rows={6}
+                  value={observacao}
+                  onChange={(e) => setObservacao(e.target.value)}
+                  className="flex-1 resize-y rounded-[9px] border border-line-strong bg-input px-[14px] py-3 text-[14.5px] leading-[1.6] text-ink-2 outline-none focus:border-accent"
+                />
               </label>
             </div>
           </div>
