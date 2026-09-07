@@ -342,9 +342,18 @@ Cards no topo: **Total de backtestes** · **Assertividade geral** · **R:R médi
    M200, alinhamento, entrada, período, operação) e vê-se o gain/loss por valor.
 4. **Matriz M20 × M200** — mapa de calor 3×3 cruzando as inclinações das médias.
 
-**Os quatro cards respeitam o filtro de setup.** Sem setup selecionado, analisam
-todos os registros do tempo gráfico; com setup selecionado, só os dele. É o mesmo
-recorte dos cards do topo — a tela inteira fala do mesmo conjunto.
+**Os quatro cards respeitam o filtro de setup** — é o mesmo recorte dos cards do
+topo, a tela inteira fala do mesmo conjunto. Mas **Melhores/Piores contextos
+exigem um setup escolhido**: cada setup lê `entrada` + `alinhamento` +
+`localizacao` do seu próprio jeito, então misturar setups nesses dois rankings
+não diz nada — sem setup selecionado eles mostram um aviso pedindo a escolha
+em vez de ranquear dados misturados. Assertividade por dimensão e a matriz
+M20×M200 continuam funcionando sem setup (analisam todos os registros do
+tempo gráfico) — só os dois rankings têm essa trava.
+
+Esse filtro de setup usa **chips clicáveis acima dos dois cards** (mesmo
+padrão visual dos chips de dimensão em "Assertividade por dimensão"), não o
+dropdown+botão dos filtros do topo — mais rápido de trocar sem sair da seção.
 
 **Regra do ranking — não ordenar por percentual de acerto.** Um contexto com
 1 registro e 100% não é melhor que um com 22 registros e 86%. Ordenar pelo

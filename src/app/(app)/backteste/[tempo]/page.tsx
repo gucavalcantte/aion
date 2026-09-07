@@ -116,7 +116,7 @@ export default async function PaginaTempo({
           />
 
           <div id="contexto" className="mt-5 scroll-mt-6">
-            <Contextos linhas={linhas} tempo={tempo} dimensao={dimensao} filtros={filtros} />
+            <Contextos linhas={linhas} tempo={tempo} dimensao={dimensao} filtros={filtros} setups={setups} />
           </div>
         </>
       )}

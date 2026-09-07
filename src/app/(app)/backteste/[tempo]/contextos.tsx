@@ -21,11 +21,13 @@ export function Contextos({
   tempo,
   dimensao,
   filtros,
+  setups,
 }: {
   linhas: LinhaAnalisavel[];
   tempo: string;
   dimensao: Dimensao;
-  filtros: { setup?: string; ativo?: string };
+  filtros: { setup?: string; ativo?: string; operacao?: string };
+  setups: { id: string; nome: string }[];
 }) {
   if (linhas.length < MINIMO_PARA_ANALISE) {
     return (
@@ -40,55 +42,72 @@ export function Contextos({
     );
   }
 
-  const { melhores, piores, curtos } = contextos(linhas);
   const dimensoes = porDimensao(linhas, dimensao);
   const matriz = matrizDasMedias(linhas, INCLINACOES);
   const maiorNaMatriz = Math.max(...matriz.flat().map((c) => c.registros));
 
+  const urlComSetup = (setupId: string) => {
+    const url = new URLSearchParams();
+    if (dimensao) url.set("dim", dimensao);
+    if (filtros.ativo) url.set("ativo", filtros.ativo);
+    if (filtros.operacao) url.set("operacao", filtros.operacao);
+    if (setupId) url.set("setup", setupId);
+    return `/backteste/${encodeURIComponent(tempo)}?${url}#contexto`;
+  };
+
   return (
     <div className="flex flex-col gap-3.5">
-      <div className="grid grid-cols-2 gap-3.5">
-        <Cartao
-          titulo="Melhores contextos"
-          descricao="Onde este setup, neste tempo gráfico, aparece mais forte"
-          selo="ORDENADO PELO PISO"
-          seloClasse="bg-accent/20 text-accent-soft"
+      <div className="flex flex-wrap items-center gap-[7px]">
+        <span className="mr-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-4">Setup</span>
+        <Link
+          href={urlComSetup("")}
+          className={
+            "flex h-8 items-center rounded-lg border px-3 text-[13.5px] font-medium " +
+            (!filtros.setup
+              ? "border-accent bg-accent font-semibold text-accent-ink"
+              : "border-line-strong bg-raised text-ink-3 hover:text-ink-2")
+          }
         >
-          {melhores.length === 0 ? (
-            <Nenhum />
-          ) : (
-            melhores.map((c) => <Linha key={c.chave} contexto={c} bom />)
-          )}
-
-          {curtos.length > 0 && (
-            <p className="mt-3.5 flex gap-2.5 border-t border-line pt-3.5 text-[12.5px] leading-[1.6] text-ink-4">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0" aria-hidden>
-                <circle cx="8" cy="8" r="6.2" />
-                <path d="M8 5.2v3.4M8 10.9v.1" />
-              </svg>
-              <span>
-                Fora do ranking por amostra curta:{" "}
-                <span className="text-ink-3">
-                  {curto(curtos[0].entrada)} · {curto(curtos[0].alinhamento)} · {curto(curtos[0].localizacao)}
-                </span>{" "}
-                tem <span className="num">{percentual(curtos[0].assertividade, 0)}</span> em{" "}
-                <span className="num">{curtos[0].registros}</span>{" "}
-                {curtos[0].registros === 1 ? "registro" : "registros"} — piso de apenas{" "}
-                <span className="num">{percentual(curtos[0].piso)}</span>.
-              </span>
-            </p>
-          )}
-        </Cartao>
-
-        <Cartao
-          titulo="Piores contextos"
-          descricao="Onde vale parar de operar este setup"
-          selo={`MÍNIMO ${AMOSTRA_MINIMA}`}
-          seloClasse="bg-loss-bg text-loss"
-        >
-          {piores.length === 0 ? <Nenhum /> : piores.map((c) => <Linha key={c.chave} contexto={c} />)}
-        </Cartao>
+          Todos os setups
+        </Link>
+        {setups.map((s) => (
+          <Link
+            key={s.id}
+            href={urlComSetup(s.id)}
+            className={
+              "flex h-8 items-center rounded-lg border px-3 text-[13.5px] font-medium " +
+              (filtros.setup === s.id
+                ? "border-accent bg-accent font-semibold text-accent-ink"
+                : "border-line-strong bg-raised text-ink-3 hover:text-ink-2")
+            }
+          >
+            {s.nome}
+          </Link>
+        ))}
       </div>
+
+      {!filtros.setup ? (
+        <div className="grid grid-cols-2 gap-3.5">
+          <Cartao
+            titulo="Melhores contextos"
+            descricao="Onde este setup, neste tempo gráfico, aparece mais forte"
+            selo="ESCOLHA UM SETUP"
+            seloClasse="bg-accent/20 text-accent-soft"
+          >
+            <SemSetup />
+          </Cartao>
+          <Cartao
+            titulo="Piores contextos"
+            descricao="Onde vale parar de operar este setup"
+            selo="ESCOLHA UM SETUP"
+            seloClasse="bg-loss-bg text-loss"
+          >
+            <SemSetup />
+          </Cartao>
+        </div>
+      ) : (
+        <MelhoresPiores linhas={linhas} />
+      )}
 
       <div className="grid grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-3.5">
         <section className="rounded-xl border border-line bg-card p-[22px]">
@@ -169,6 +188,69 @@ export function Contextos({
         </section>
       </div>
     </div>
+  );
+}
+
+/**
+ * Misturar entrada/alinhamento/localização de setups diferentes não diz
+ * nada — cada setup lê essas dimensões do jeito dele. Por isso essa análise
+ * só roda depois que um setup é escolhido no filtro (ver `Contextos` acima).
+ */
+function MelhoresPiores({ linhas }: { linhas: LinhaAnalisavel[] }) {
+  const { melhores, piores, curtos } = contextos(linhas);
+
+  return (
+    <div className="grid grid-cols-2 gap-3.5">
+      <Cartao
+        titulo="Melhores contextos"
+        descricao="Onde este setup, neste tempo gráfico, aparece mais forte"
+        selo="ORDENADO PELO PISO"
+        seloClasse="bg-accent/20 text-accent-soft"
+      >
+        {melhores.length === 0 ? (
+          <Nenhum />
+        ) : (
+          melhores.map((c) => <Linha key={c.chave} contexto={c} bom />)
+        )}
+
+        {curtos.length > 0 && (
+          <p className="mt-3.5 flex gap-2.5 border-t border-line pt-3.5 text-[12.5px] leading-[1.6] text-ink-4">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0" aria-hidden>
+              <circle cx="8" cy="8" r="6.2" />
+              <path d="M8 5.2v3.4M8 10.9v.1" />
+            </svg>
+            <span>
+              Fora do ranking por amostra curta:{" "}
+              <span className="text-ink-3">
+                {curto(curtos[0].entrada)} · {curto(curtos[0].alinhamento)} · {curto(curtos[0].localizacao)}
+              </span>{" "}
+              tem <span className="num">{percentual(curtos[0].assertividade, 0)}</span> em{" "}
+              <span className="num">{curtos[0].registros}</span>{" "}
+              {curtos[0].registros === 1 ? "registro" : "registros"} — piso de apenas{" "}
+              <span className="num">{percentual(curtos[0].piso)}</span>.
+            </span>
+          </p>
+        )}
+      </Cartao>
+
+      <Cartao
+        titulo="Piores contextos"
+        descricao="Onde vale parar de operar este setup"
+        selo={`MÍNIMO ${AMOSTRA_MINIMA}`}
+        seloClasse="bg-loss-bg text-loss"
+      >
+        {piores.length === 0 ? <Nenhum /> : piores.map((c) => <Linha key={c.chave} contexto={c} />)}
+      </Cartao>
+    </div>
+  );
+}
+
+function SemSetup() {
+  return (
+    <p className="rounded-[10px] border border-line-soft bg-well px-4 py-6 text-center text-[13.5px] leading-relaxed text-ink-4">
+      Escolha um setup no filtro acima. Misturar entrada, alinhamento e localização de setups
+      diferentes não diz nada — cada um lê essas dimensões do seu jeito.
+    </p>
   );
 }
 
