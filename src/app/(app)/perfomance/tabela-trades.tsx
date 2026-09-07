@@ -21,6 +21,7 @@ export function TabelaTrades({
   moedaConta,
   especificacoes,
   execucoesPorTrade,
+  imagensPorTrade,
 }: {
   listagem: Trade[];
   totalTrades: number;
@@ -29,6 +30,8 @@ export function TabelaTrades({
   moedaConta: Moeda;
   especificacoes: Partial<Record<Ativo, EspecificacaoAtivo>>;
   execucoesPorTrade: Record<string, ExecucaoTrade[]>;
+  /** URL assinada (bucket privado) por trade — ausente quando o trade não tem print. */
+  imagensPorTrade: Record<string, string>;
 }) {
   const [pagina, setPagina] = useState(1);
   const [expandido, setExpandido] = useState<Set<string>>(new Set());
@@ -123,7 +126,7 @@ export function TabelaTrades({
                   </td>
                   <td className={td}>
                     <AcoesDoTrade
-                      trade={{ ...t, imagem: null, execucoes }}
+                      trade={{ ...t, imagem: imagensPorTrade[t.id] ?? null, execucoes }}
                       contaId={contaId}
                       setups={setups}
                       moedaConta={moedaConta}

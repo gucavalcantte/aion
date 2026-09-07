@@ -16,6 +16,7 @@ import {
 } from "@/lib/metricas";
 import type { ExecucaoTrade } from "@/lib/execucoes-trade";
 import { SEM_SETUP, type Entrada } from "@/lib/opcoes";
+import { urlsAssinadas } from "@/lib/storage";
 import { clienteServidor } from "@/lib/supabase/servidor";
 import type { Conta, Lancamento, TempoGrafico } from "@/lib/tipos";
 
@@ -90,6 +91,17 @@ export async function execucoesPorTrades(tradeIds: string[]): Promise<Record<str
   return mapa;
 }
 
+/** Bucket privado — a listagem e a edição só conseguem mostrar a imagem com URL assinada. */
+export async function imagensPorTrades(trades: Pick<Trade, "id" | "imagem_url">[]): Promise<Record<string, string>> {
+  const mapa = await urlsAssinadas(trades.map((t) => t.imagem_url));
+  const porTrade: Record<string, string> = {};
+  for (const t of trades) {
+    const url = t.imagem_url ? mapa.get(t.imagem_url) : undefined;
+    if (url) porTrade[t.id] = url;
+  }
+  return porTrade;
+}
+
 export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filtros = {}) {
   const supabase = await clienteServidor();
 
@@ -112,6 +124,7 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
   })) as Trade[];
 
   const execucoesPorTrade = await execucoesPorTrades(trades.map((t) => t.id));
+  const imagensPorTrade = await imagensPorTrades(trades);
 
   const lancamentos = (lancResp.data ?? []).map((l) => ({
     ...l,
@@ -143,6 +156,7 @@ export async function dadosDaPerfomance(conta: Conta, mes: string, filtros: Filt
   return {
     trades,
     execucoesPorTrade,
+    imagensPorTrade,
     listagem,
     lancamentos,
     setups,
