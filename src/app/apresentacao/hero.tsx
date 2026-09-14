@@ -121,48 +121,50 @@ export function Hero() {
         <circle cx="50" cy="50" r="18" stroke="var(--accent)" strokeWidth="0.9" />
       </svg>
 
-      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-14 px-6 py-[92px] sm:px-8 lg:grid-cols-[1fr_450px] lg:gap-20 lg:py-[124px]">
-        <div>
-          <div
-            className="apr-entra flex items-center justify-between gap-4 text-ink"
-            style={{ animationDelay: "60ms" }}
-          >
-            <Marca tamanho={24} corpo={20} />
+      <div className="relative mx-auto max-w-[1180px] px-6 sm:px-8">
+        <div
+          className="apr-entra flex items-center justify-between gap-4 pt-[34px] text-ink"
+          style={{ animationDelay: "60ms" }}
+        >
+          <Marca tamanho={24} corpo={20} />
 
-            <a
-              href="/login"
-              className="flex h-9 shrink-0 items-center rounded-[8px] border border-line-strong px-4 text-[13.5px] font-medium text-ink-2 transition-colors hover:border-accent-soft hover:text-ink"
-            >
-              Entrar
-            </a>
-          </div>
-
-          <h1
-            className="apr-entra display mt-9 text-[clamp(36px,5.2vw,60px)] leading-[1.03]"
-            style={{ animationDelay: "140ms" }}
+          <a
+            href="/login"
+            className="flex h-9 shrink-0 items-center rounded-[8px] border border-line-strong px-4 text-[13.5px] font-medium text-ink-2 transition-colors hover:border-accent-soft hover:text-ink"
           >
-            O que você estudou não é o que você executou.
-          </h1>
-
-          <p
-            className="apr-entra mt-7 max-w-[50ch] text-[17px] leading-[1.62] text-ink-2"
-            style={{ animationDelay: "200ms" }}
-          >
-            O AION guarda o backteste e a operação real como duas séries que nunca se
-            somam, calcula a estatística de cada uma e mostra, setup por setup, onde a
-            execução deixou de entregar o que o estudo prometia.
-          </p>
-
-          <p
-            className="apr-entra mt-9 max-w-[46ch] text-[13.5px] leading-[1.7] text-ink-3"
-            style={{ animationDelay: "260ms" }}
-          >
-            Next.js 16 e TypeScript no App Router, Postgres e Auth no Supabase, Tailwind
-            para o sistema visual, hospedado na Vercel.
-          </p>
+            Entrar
+          </a>
         </div>
 
-        <CartaoDivergencia />
+        <div className="grid grid-cols-1 items-center gap-14 py-[58px] lg:grid-cols-[1fr_450px] lg:gap-20 lg:py-[80px]">
+          <div>
+            <h1
+              className="apr-entra display text-[clamp(36px,5.2vw,60px)] leading-[1.03]"
+              style={{ animationDelay: "140ms" }}
+            >
+              O que você estudou não é o que você executou.
+            </h1>
+
+            <p
+              className="apr-entra mt-7 max-w-[50ch] text-[17px] leading-[1.62] text-ink-2"
+              style={{ animationDelay: "200ms" }}
+            >
+              O AION guarda o backteste e a operação real como duas séries que nunca se
+              somam, calcula a estatística de cada uma e mostra, setup por setup, onde a
+              execução deixou de entregar o que o estudo prometia.
+            </p>
+
+            <p
+              className="apr-entra mt-9 max-w-[46ch] text-[13.5px] leading-[1.7] text-ink-3"
+              style={{ animationDelay: "260ms" }}
+            >
+              Next.js 16 e TypeScript no App Router, Postgres e Auth no Supabase, Tailwind
+              para o sistema visual, hospedado na Vercel.
+            </p>
+          </div>
+
+          <CartaoDivergencia />
+        </div>
       </div>
     </header>
   );
