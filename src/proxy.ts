@@ -7,6 +7,13 @@ import { fetchTolerante } from "@/lib/supabase/rede";
 const PUBLICAS = ["/login", "/api/manter-ativo"];
 
 export async function proxy(request: NextRequest) {
+  // A apresentação é estática e não lê sessão. Sair antes de falar com o
+  // Supabase poupa uma ida à rede por visita e mantém a página no ar mesmo
+  // com o projeto pausado — as outras rotas públicas ainda precisam da sessão.
+  if (request.nextUrl.pathname.startsWith("/apresentacao")) {
+    return NextResponse.next({ request });
+  }
+
   const { url, chave } = credenciaisSupabase();
   let resposta = NextResponse.next({ request });
 

@@ -1,0 +1,36 @@
+/* ---------------------------------------------------------------------------
+   AION — apresentação
+   Um único momento de movimento: o hero monta e a linha de diferença resolve
+   por último. Nada anima no scroll — a página não precisa de coreografia, e
+   conteúdo que depende de animação some quando o JavaScript falha.
+--------------------------------------------------------------------------- */
+
+@keyframes apr-sobe {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.apr-entra {
+  opacity: 0;
+  animation: apr-sobe 0.62s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+/* Rolagem suave só para quem não pediu menos movimento. */
+@media (prefers-reduced-motion: no-preference) {
+  .apr {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apr-entra {
+    opacity: 1;
+    animation: none;
+  }
+}
