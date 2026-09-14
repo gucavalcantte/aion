@@ -142,7 +142,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
                   {resumo.sequencia.quantidade}
                 </span>
                 <span className="text-[11.5px] text-ink-3">
-                  {resumo.sequencia.tipo === "Zerado" ? "zerado" : `${resumo.sequencia.tipo.toLowerCase()}s`}
+                  {resumo.sequencia.tipo === "Zerado" ? "zerado" : resumo.sequencia.tipo === "Loss" ? "loss" : "gains"}
                 </span>
               </p>
               <span className="mt-2 flex gap-[2px]">
