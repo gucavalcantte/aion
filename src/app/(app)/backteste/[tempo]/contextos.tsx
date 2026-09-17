@@ -39,22 +39,7 @@ export function Contextos({
   filtros: { setup?: string; ativo?: string; operacao?: string };
   setups: { id: string; nome: string }[];
 }) {
-  if (linhas.length < MINIMO_PARA_ANALISE) {
-    return (
-      <section className="rounded-xl border border-dashed border-line-strong bg-card/50 px-6 py-10 text-center">
-        <p className="text-[15px] text-ink-2">A análise de contexto abre com mais registros.</p>
-        <p className="mx-auto mt-2 max-w-[520px] text-[13.5px] leading-relaxed text-ink-4">
-          São <span className="num">{inteiro(linhas.length)}</span> de{" "}
-          <span className="num">{MINIMO_PARA_ANALISE}</span>. Com menos que isso, qualquer
-          combinação teria uma ou duas linhas — e um contexto de duas linhas a 100% não diz nada.
-        </p>
-      </section>
-    );
-  }
-
-  const dimensoes = porDimensao(linhas, dimensao);
-  const matriz = matrizDasMedias(linhas, INCLINACOES);
-  const maiorNaMatriz = Math.max(...matriz.flat().map((c) => c.registros));
+  const amostraInsuficiente = linhas.length < MINIMO_PARA_ANALISE;
 
   const urlComSetup = (setupId: string) => {
     const url = new URLSearchParams();
@@ -98,6 +83,44 @@ export function Contextos({
         </div>
       </div>
 
+      {amostraInsuficiente ? (
+        <section className="rounded-xl border border-dashed border-line-strong bg-card/50 px-6 py-10 text-center">
+          <p className="text-[15px] text-ink-2">A análise de contexto abre com mais registros.</p>
+          <p className="mx-auto mt-2 max-w-[520px] text-[13.5px] leading-relaxed text-ink-4">
+            São <span className="num">{inteiro(linhas.length)}</span> de{" "}
+            <span className="num">{MINIMO_PARA_ANALISE}</span>. Com menos que isso, qualquer
+            combinação teria uma ou duas linhas — e um contexto de duas linhas a 100% não diz nada.
+          </p>
+        </section>
+      ) : (
+        <ConteudoComAmostra
+          linhas={linhas}
+          tempo={tempo}
+          dimensao={dimensao}
+          filtros={filtros}
+        />
+      )}
+    </div>
+  );
+}
+
+function ConteudoComAmostra({
+  linhas,
+  tempo,
+  dimensao,
+  filtros,
+}: {
+  linhas: LinhaAnalisavel[];
+  tempo: string;
+  dimensao: Dimensao;
+  filtros: { setup?: string; ativo?: string; operacao?: string };
+}) {
+  const dimensoes = porDimensao(linhas, dimensao);
+  const matriz = matrizDasMedias(linhas, INCLINACOES);
+  const maiorNaMatriz = Math.max(...matriz.flat().map((c) => c.registros));
+
+  return (
+    <>
       {!filtros.setup ? (
         <div className="grid grid-cols-2 gap-3.5">
           <Cartao
@@ -201,7 +224,7 @@ export function Contextos({
           </p>
         </section>
       </div>
-    </div>
+    </>
   );
 }
 
