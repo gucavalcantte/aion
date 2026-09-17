@@ -73,9 +73,18 @@ export function contextos(linhas: LinhaAnalisavel[]) {
 
   const comAmostra = completos.filter((c) => c.registros >= AMOSTRA_MINIMA);
 
+  // Piso nunca passa do teto, então as duas condições abaixo são mutuamente
+  // exclusivas: um contexto nunca entra nas duas listas ao mesmo tempo. Sem
+  // esse corte, "melhores" e "piores" viravam o mesmo top-N sempre que a
+  // amostra tinha poucos contextos qualificados — mesmo quando todos eram bons.
+  const melhores = comAmostra.filter((c) => c.piso > 50);
+  const piores = comAmostra.filter((c) => c.teto < 50);
+
   return {
-    melhores: [...comAmostra].sort((a, b) => b.piso - a.piso).slice(0, 4),
-    piores: [...comAmostra].sort((a, b) => a.teto - b.teto).slice(0, 3),
+    melhores: [...melhores].sort((a, b) => b.piso - a.piso).slice(0, 4),
+    piores: [...piores].sort((a, b) => a.teto - b.teto).slice(0, 3),
+    /** Quantos contextos bateram a amostra mínima — diferencia "sem amostra" de "sem destaque" no card vazio. */
+    candidatos: comAmostra.length,
     // Fica de fora do ranking, mas o card diz por quê — senão parece bug.
     curtos: completos
       .filter((c) => c.registros < AMOSTRA_MINIMA)

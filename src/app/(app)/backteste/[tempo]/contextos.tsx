@@ -16,6 +16,16 @@ import { curto, INCLINACOES } from "@/lib/opcoes";
 /** Abaixo disso nenhum dos rankings tem o que dizer. */
 const MINIMO_PARA_ANALISE = 12;
 
+const TOOLTIP_MELHORES =
+  "A porcentagem grande é o que já foi observado. \"Pior cenário\" é quanto essa taxa pode cair " +
+  "considerando que a amostra é limitada — quanto mais registros, mais perto os dois números ficam " +
+  "um do outro. Ranqueamos por esse número, não pelo bruto, pra amostra pequena com sorte não subir no ranking.";
+
+const TOOLTIP_PIORES =
+  "A porcentagem grande é o que já foi observado. \"Melhor cenário\" é o quanto essa taxa poderia " +
+  "chegar dando o benefício da dúvida à amostra. Se mesmo assim o número é baixo, dá pra confiar que " +
+  "o contexto é fraco de verdade, não azar.";
+
 export function Contextos({
   linhas,
   tempo,
@@ -59,31 +69,33 @@ export function Contextos({
     <div className="flex flex-col gap-3.5">
       <div className="flex flex-wrap items-center gap-[7px]">
         <span className="mr-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-4">Setup</span>
-        <Link
-          href={urlComSetup("")}
-          className={
-            "flex h-8 items-center rounded-lg border px-3 text-[13.5px] font-medium " +
-            (!filtros.setup
-              ? "border-accent bg-accent font-semibold text-accent-ink"
-              : "border-line-strong bg-raised text-ink-3 hover:text-ink-2")
-          }
-        >
-          Todos os setups
-        </Link>
-        {setups.map((s) => (
+        <div className="flex flex-wrap items-center gap-0.5 rounded-lg border border-line-soft bg-well p-[3px]">
           <Link
-            key={s.id}
-            href={urlComSetup(s.id)}
+            href={urlComSetup("")}
             className={
-              "flex h-8 items-center rounded-lg border px-3 text-[13.5px] font-medium " +
-              (filtros.setup === s.id
-                ? "border-accent bg-accent font-semibold text-accent-ink"
-                : "border-line-strong bg-raised text-ink-3 hover:text-ink-2")
+              "flex h-7 items-center rounded-md px-3 text-[13.5px] font-medium transition-colors duration-150 " +
+              (!filtros.setup
+                ? "bg-accent font-semibold text-accent-ink shadow-sm"
+                : "text-ink-3 hover:bg-raised hover:text-ink-2")
             }
           >
-            {s.nome}
+            Todos os setups
           </Link>
-        ))}
+          {setups.map((s) => (
+            <Link
+              key={s.id}
+              href={urlComSetup(s.id)}
+              className={
+                "flex h-7 items-center rounded-md px-3 text-[13.5px] font-medium transition-colors duration-150 " +
+                (filtros.setup === s.id
+                  ? "bg-accent font-semibold text-accent-ink shadow-sm"
+                  : "text-ink-3 hover:bg-raised hover:text-ink-2")
+              }
+            >
+              {s.nome}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {!filtros.setup ? (
@@ -92,7 +104,8 @@ export function Contextos({
             titulo="Melhores contextos"
             descricao="Onde este setup, neste tempo gráfico, aparece mais forte"
             selo="ESCOLHA UM SETUP"
-            seloClasse="bg-accent/20 text-accent-soft"
+            seloTom="accent"
+            tooltip={TOOLTIP_MELHORES}
           >
             <SemSetup />
           </Cartao>
@@ -100,7 +113,8 @@ export function Contextos({
             titulo="Piores contextos"
             descricao="Onde vale parar de operar este setup"
             selo="ESCOLHA UM SETUP"
-            seloClasse="bg-loss-bg text-loss"
+            seloTom="loss"
+            tooltip={TOOLTIP_PIORES}
           >
             <SemSetup />
           </Cartao>
@@ -110,15 +124,15 @@ export function Contextos({
       )}
 
       <div className="grid grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-3.5">
-        <section className="rounded-xl border border-line bg-card p-[22px]">
+        <section className="rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
           <div className="mb-4">
             <h3 className="display text-[19px]">Assertividade por dimensão</h3>
-            <p className="mt-1.5 text-[13px] text-ink-4">
+            <p className="mt-1.5 text-[13px] text-ink-3">
               Escolha um campo e veja como ele se comporta sozinho
             </p>
           </div>
 
-          <div className="mb-5 flex flex-wrap gap-[7px]">
+          <div className="mb-5 flex flex-wrap items-center gap-0.5 rounded-lg border border-line-soft bg-well p-[3px]">
             {DIMENSOES.map((d) => {
               const ativo = d.chave === dimensao;
               const url = new URLSearchParams({ dim: d.chave });
@@ -129,10 +143,10 @@ export function Contextos({
                   key={d.chave}
                   href={`/backteste/${encodeURIComponent(tempo)}?${url}#contexto`}
                   className={
-                    "flex h-8 items-center rounded-lg border px-3 text-[13.5px] font-medium " +
+                    "flex h-7 items-center rounded-md px-3 text-[13.5px] font-medium transition-colors duration-150 " +
                     (ativo
-                      ? "border-accent bg-accent font-semibold text-accent-ink"
-                      : "border-line-strong bg-raised text-ink-3 hover:text-ink-2")
+                      ? "bg-accent font-semibold text-accent-ink shadow-sm"
+                      : "text-ink-3 hover:bg-raised hover:text-ink-2")
                   }
                 >
                   {d.rotulo}
@@ -143,7 +157,7 @@ export function Contextos({
 
           <div className="flex flex-col gap-4">
             {dimensoes.map((g) => (
-              <div key={g.chave}>
+              <div key={g.chave} className="-mx-2 rounded-lg px-2 py-1 transition-colors duration-150 hover:bg-well">
                 <div className="mb-2 flex items-baseline justify-between">
                   <span className="text-[14px] text-ink-2">{curto(g.chave)}</span>
                   <span>
@@ -154,18 +168,18 @@ export function Contextos({
                   </span>
                 </div>
                 <span className="flex h-[9px] gap-0.5">
-                  <span className="rounded-[5px] bg-gain" style={{ width: `${g.assertividade}%` }} />
-                  <span className="flex-1 rounded-[5px] bg-loss" />
+                  <span className="rounded-full bg-gain" style={{ width: `${g.assertividade}%` }} />
+                  <span className="flex-1 rounded-full bg-loss" />
                 </span>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="rounded-xl border border-line bg-card p-[22px]">
+        <section className="rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
           <div className="mb-4">
             <h3 className="display text-[19px]">M20 × M200</h3>
-            <p className="mt-1.5 text-[13px] text-ink-4">As duas médias cruzadas</p>
+            <p className="mt-1.5 text-[13px] text-ink-3">As duas médias cruzadas</p>
           </div>
 
           <div className="grid grid-cols-[76px_repeat(3,minmax(0,1fr))] gap-1.5">
@@ -197,18 +211,19 @@ export function Contextos({
  * só roda depois que um setup é escolhido no filtro (ver `Contextos` acima).
  */
 function MelhoresPiores({ linhas }: { linhas: LinhaAnalisavel[] }) {
-  const { melhores, piores, curtos } = contextos(linhas);
+  const { melhores, piores, curtos, candidatos } = contextos(linhas);
 
   return (
     <div className="grid grid-cols-2 gap-3.5">
       <Cartao
         titulo="Melhores contextos"
         descricao="Onde este setup, neste tempo gráfico, aparece mais forte"
-        selo="ORDENADO PELO PISO"
-        seloClasse="bg-accent/20 text-accent-soft"
+        selo="ORDENADO PELO PIOR CENÁRIO"
+        seloTom="accent"
+        tooltip={TOOLTIP_MELHORES}
       >
         {melhores.length === 0 ? (
-          <Nenhum />
+          <Nenhum semDestaque={candidatos > 0} bom />
         ) : (
           melhores.map((c) => <Linha key={c.chave} contexto={c} bom />)
         )}
@@ -226,7 +241,7 @@ function MelhoresPiores({ linhas }: { linhas: LinhaAnalisavel[] }) {
               </span>{" "}
               tem <span className="num">{percentual(curtos[0].assertividade, 0)}</span> em{" "}
               <span className="num">{curtos[0].registros}</span>{" "}
-              {curtos[0].registros === 1 ? "registro" : "registros"} — piso de apenas{" "}
+              {curtos[0].registros === 1 ? "registro" : "registros"} — no pior cenário cai pra apenas{" "}
               <span className="num">{percentual(curtos[0].piso)}</span>.
             </span>
           </p>
@@ -237,9 +252,14 @@ function MelhoresPiores({ linhas }: { linhas: LinhaAnalisavel[] }) {
         titulo="Piores contextos"
         descricao="Onde vale parar de operar este setup"
         selo={`MÍNIMO ${AMOSTRA_MINIMA}`}
-        seloClasse="bg-loss-bg text-loss"
+        seloTom="loss"
+        tooltip={TOOLTIP_PIORES}
       >
-        {piores.length === 0 ? <Nenhum /> : piores.map((c) => <Linha key={c.chave} contexto={c} />)}
+        {piores.length === 0 ? (
+          <Nenhum semDestaque={candidatos > 0} />
+        ) : (
+          piores.map((c) => <Linha key={c.chave} contexto={c} />)
+        )}
       </Cartao>
     </div>
   );
@@ -281,7 +301,7 @@ function Celulas({
                   ? "var(--well)"
                   : `color-mix(in srgb, ${bom ? "var(--gain)" : "var(--loss)"} ${forca * 100}%, var(--well))`,
             }}
-            className="rounded-[10px] border border-line-soft px-1.5 py-[9px] text-center"
+            className="rounded-[10px] border border-line-soft px-1.5 py-[9px] text-center transition-transform duration-150 hover:z-10 hover:scale-105 hover:shadow-lg"
           >
             <span className={`num block text-[15px] font-semibold ${c.assertividade === null ? "text-ink-4" : bom ? "text-gain" : "text-loss"}`}>
               {percentual(c.assertividade, 0)}
@@ -301,28 +321,58 @@ function Cartao({
   titulo,
   descricao,
   selo,
-  seloClasse,
+  seloTom,
+  tooltip,
   children,
 }: {
   titulo: string;
   descricao: string;
   selo: string;
-  seloClasse: string;
+  seloTom: "accent" | "loss";
+  tooltip?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-line bg-card p-[22px]">
+    <section className="rounded-xl border border-line bg-card p-[22px] transition-all duration-150 hover:border-line-strong hover:shadow-lg">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <h3 className="display text-[19px]">{titulo}</h3>
-          <p className="mt-1.5 text-[13px] text-ink-4">{descricao}</p>
+          <h3 className="display flex items-center gap-1.5 text-[19px]">
+            {titulo}
+            {tooltip && <InfoTooltip texto={tooltip} />}
+          </h3>
+          <p className="mt-1.5 text-[13px] text-ink-3">{descricao}</p>
         </div>
-        <span className={`inline-flex h-6 shrink-0 items-center rounded-[7px] px-2.5 text-[11.5px] font-semibold tracking-[0.05em] ${seloClasse}`}>
+        <span className="inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-full border border-line-strong px-2.5 text-[11px] font-semibold tracking-[0.05em] text-ink-3">
+          <span className={`size-[6px] rounded-full ${seloTom === "accent" ? "bg-accent-soft" : "bg-loss"}`} />
           {selo}
         </span>
       </div>
       <div className="flex flex-col gap-2.5">{children}</div>
     </section>
+  );
+}
+
+/** Ícone de ajuda com balão em CSS puro — sem lib de UI no projeto, hover/foco bastam pro fluxo de mouse do app. */
+function InfoTooltip({ texto }: { texto: string }) {
+  return (
+    <span className="group relative inline-flex">
+      <button
+        type="button"
+        aria-label="O que isso significa"
+        className="flex h-4 w-4 items-center justify-center rounded-full text-ink-4 hover:text-ink-2 focus-visible:text-ink-2 focus-visible:outline-none"
+      >
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <circle cx="8" cy="8" r="6.2" />
+          <path d="M8 7.2v3.4M8 5.1v.1" />
+        </svg>
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-[240px] -translate-x-1/2 rounded-[10px] border border-line-strong bg-raised px-3 py-2.5 font-sans text-[12.5px] font-normal leading-relaxed tracking-normal text-ink-2 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+      >
+        {texto}
+      </span>
+    </span>
   );
 }
 
@@ -337,7 +387,7 @@ function Linha({ contexto, bom = false }: { contexto: Contexto; bom?: boolean })
   const claro = bom ? contexto.assertividade - contexto.piso : contexto.teto - contexto.assertividade;
 
   return (
-    <div className="rounded-[10px] border border-line-soft bg-well px-4 py-3.5">
+    <div className="rounded-[10px] border border-line-soft bg-well px-4 py-3.5 transition-all duration-150 hover:-translate-y-0.5 hover:border-line-strong hover:bg-raised hover:shadow-lg">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[14.5px] font-semibold leading-[1.35] text-ink">
@@ -349,13 +399,13 @@ function Linha({ contexto, bom = false }: { contexto: Contexto; bom?: boolean })
           <p className={`num text-[21px] font-semibold tracking-[-0.03em] ${cor}`}>
             {percentual(contexto.assertividade)}
           </p>
-          <p className="num mt-1 text-[12px] text-ink-4">
-            {bom ? "piso" : "teto"} {percentual(limite)}
+          <p className="mt-1 text-[12px] text-ink-4">
+            {bom ? "pior cenário" : "melhor cenário"} <span className="num">{percentual(limite)}</span>
           </p>
         </div>
       </div>
 
-      <span className="mt-3 flex h-[5px] overflow-hidden rounded-[3px] bg-track">
+      <span className="mt-3 flex h-[5px] overflow-hidden rounded-full bg-track">
         <span className={barra} style={{ width: `${solido}%` }} />
         <span className={suave} style={{ width: `${Math.max(0, claro)}%` }} />
       </span>
@@ -368,10 +418,14 @@ function Linha({ contexto, bom = false }: { contexto: Contexto; bom?: boolean })
   );
 }
 
-function Nenhum() {
+function Nenhum({ semDestaque = false, bom = false }: { semDestaque?: boolean; bom?: boolean }) {
   return (
     <p className="rounded-[10px] border border-line-soft bg-well px-4 py-6 text-center text-[13.5px] text-ink-4">
-      Nenhuma combinação chegou a {AMOSTRA_MINIMA} registros ainda.
+      {semDestaque
+        ? bom
+          ? "Nenhuma combinação provou ser boa o bastante ainda — mesmo no pior cenário, nenhuma passa de 50%."
+          : "Nenhuma combinação provou ser ruim o bastante ainda — mesmo no melhor cenário, todas passam de 50%."
+        : `Nenhuma combinação chegou a ${AMOSTRA_MINIMA} registros ainda.`}
     </p>
   );
 }
