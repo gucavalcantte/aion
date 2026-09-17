@@ -70,7 +70,7 @@ export function CalendarioDeConsistencia({
               key={iso}
               style={{ background: fundo }}
               className={
-                "flex h-[62px] flex-col justify-between rounded-lg border p-[7px] px-[9px] " +
+                "flex h-[62px] flex-col justify-between rounded-lg border p-[7px] px-[9px] transition-transform duration-150 hover:z-10 hover:scale-105 hover:shadow-lg " +
                 (iso === hoje ? "border-accent" : futuro ? "border-dashed border-line-soft" : "border-line-soft")
               }
             >

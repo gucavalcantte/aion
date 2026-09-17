@@ -120,8 +120,8 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
         <ItemFaixa titulo="Assertividade" valor={percentual(resumo.assertividade)}>
           {resumo.assertividade !== null && (
             <span className="mt-2 flex h-[4px] gap-0.5">
-              <span className="rounded-[2px] bg-gain" style={{ width: `${resumo.assertividade}%` }} />
-              <span className="flex-1 rounded-[2px] bg-loss opacity-60" />
+              <span className="rounded-full bg-gain" style={{ width: `${resumo.assertividade}%` }} />
+              <span className="flex-1 rounded-full bg-loss opacity-60" />
             </span>
           )}
         </ItemFaixa>
@@ -149,7 +149,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
                 {resumo.ultimos.map((s, i) => (
                   <span
                     key={i}
-                    className={`h-[10px] flex-1 rounded-[2px] ${s === "Gain" ? "bg-gain" : s === "Loss" ? "bg-loss" : "bg-neutral"}`}
+                    className={`h-[10px] flex-1 rounded-full ${s === "Gain" ? "bg-gain" : s === "Loss" ? "bg-loss" : "bg-neutral"}`}
                     style={{ opacity: i < resumo.ultimos.length - resumo.sequencia!.quantidade ? 0.5 : 1 }}
                   />
                 ))}
@@ -173,8 +173,8 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           ) : (
             <>
               <p className="num mt-2 text-[18px] font-semibold text-accent-soft">{moeda(resumo.meta.falta, conta.moeda)}</p>
-              <span className="mt-2 block h-[4px] overflow-hidden rounded-[2px] bg-track">
-                <span className="block h-full rounded-[2px] bg-accent" style={{ width: `${Math.max(0, Math.min(100, resumo.meta.percentual))}%` }} />
+              <span className="mt-2 block h-[4px] overflow-hidden rounded-full bg-track">
+                <span className="block h-full rounded-full bg-accent" style={{ width: `${Math.max(0, Math.min(100, resumo.meta.percentual))}%` }} />
               </span>
               <p className="mt-1 text-[11px] text-ink-4">{percentual(Math.max(0, resumo.meta.percentual))} da meta</p>
             </>
@@ -184,20 +184,20 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
       {/* CALENDÁRIO + CURVA */}
       <div className="mb-3 grid grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-3">
-        <section className="rounded-xl border border-line bg-card p-[22px]">
+        <section className="rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
           <div className="mb-4">
             <h2 className="display text-[19px]">Calendário de consistência</h2>
-            <p className="mt-1.5 text-[13px] text-ink-4">
+            <p className="mt-1.5 text-[13px] text-ink-3">
               {MESES[mesNum - 1]} de {ano} · <span className="num">{resumo.tradesNoMes}</span> trades · só dias úteis
             </p>
           </div>
           <CalendarioDeConsistencia mes={mes} porDia={porDia} moedaConta={conta.moeda} />
         </section>
 
-        <section className="flex flex-col rounded-xl border border-line bg-card p-[22px]">
+        <section className="flex flex-col rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
           <div className="mb-4">
             <h2 className="display text-[19px]">Evolução da conta</h2>
-            <p className="mt-1.5 text-[13px] text-ink-4">Saldo acumulado desde a abertura</p>
+            <p className="mt-1.5 text-[13px] text-ink-3">Saldo acumulado desde a abertura</p>
           </div>
           <div className="flex-1 rounded-[10px] border border-line-soft bg-well p-3">
             <CurvaDeCapital pontos={curva.pontos} marcadores={curva.marcadores} meta={conta.meta} moedaConta={conta.moeda} />
@@ -207,11 +207,11 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
       {/* BARRAS + DISCIPLINA */}
       <div className="mb-5 grid grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-3">
-        <section className="rounded-xl border border-line bg-card p-[22px]">
+        <section className="rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
           <div className="mb-4 flex items-baseline justify-between">
             <div>
               <h2 className="display text-[19px]">Resultado por operação</h2>
-              <p className="mt-1.5 text-[13px] text-ink-4">
+              <p className="mt-1.5 text-[13px] text-ink-3">
                 Cada barra é um trade, em ordem — histórico completo, não só {MESES[mesNum - 1]}
               </p>
             </div>
@@ -230,9 +230,9 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           </div>
         </section>
 
-        <section className="rounded-xl border border-line bg-card p-[22px]">
+        <section className="rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
           <h2 className="display text-[19px]">Disciplina</h2>
-          <p className="mt-1.5 text-[13px] text-ink-4">Assertividade conforme você seguiu o plano</p>
+          <p className="mt-1.5 text-[13px] text-ink-3">Assertividade conforme você seguiu o plano</p>
 
           {d === null ? (
             <p className="mt-6 text-[13.5px] text-ink-4">Ainda não há trades suficientes.</p>
@@ -272,11 +272,11 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
       </div>
 
       {/* CONFIRMADA x ANTECIPADA */}
-      <section className="mb-5 rounded-xl border border-line bg-card p-[22px]">
+      <section className="mb-5 rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
         <div className="flex items-baseline justify-between">
           <div>
             <h2 className="display text-[19px]">Confirmada × Antecipada</h2>
-            <p className="mt-1.5 text-[13px] text-ink-4">Assertividade e resultado por tipo de entrada</p>
+            <p className="mt-1.5 text-[13px] text-ink-3">Assertividade e resultado por tipo de entrada</p>
           </div>
           {pe !== null && pe.semRegistro > 0 && (
             <p className="text-[12.5px] text-ink-4">
@@ -294,7 +294,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
         ) : (
           <div className="mt-5 grid grid-cols-2 gap-3">
             {pe.fatias.map((f) => (
-              <div key={f.entrada} className="rounded-[10px] border border-line-soft bg-well p-4">
+              <div key={f.entrada} className="rounded-[10px] border border-line-soft bg-well p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-line-strong hover:bg-raised hover:shadow-lg">
                 <div className="flex items-baseline justify-between">
                   <span className="text-[13.5px] font-semibold text-ink-2">{f.entrada}</span>
                   <span className="num text-[12.5px] text-ink-4">
@@ -305,8 +305,8 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
                   {percentual(f.assertividade)}
                 </p>
                 <div className="mt-3 flex h-[6px] gap-0.5">
-                  <span className="rounded-[3px] bg-gain" style={{ width: `${f.assertividade ?? 0}%` }} />
-                  <span className="flex-1 rounded-[3px] bg-loss opacity-50" />
+                  <span className="rounded-full bg-gain" style={{ width: `${f.assertividade ?? 0}%` }} />
+                  <span className="flex-1 rounded-full bg-loss opacity-50" />
                 </div>
                 <p className="mt-3 text-[12.5px] text-ink-3">
                   resultado{" "}
@@ -321,9 +321,9 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
       </section>
 
       {/* EXECUÇÕES — parciais e adições */}
-      <section className="mb-5 rounded-xl border border-line bg-card p-[22px]">
+      <section className="mb-5 rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
         <h2 className="display text-[19px]">Execuções (parciais e adições)</h2>
-        <p className="mt-1.5 text-[13px] text-ink-4">
+        <p className="mt-1.5 text-[13px] text-ink-3">
           Uso do log de execuções e o efeito no resultado — nada aqui recalcula resultado ou status
         </p>
 
@@ -450,7 +450,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
       </section>
 
       {lancamentos.length > 0 && (
-        <section className="rounded-xl border border-line bg-card p-[22px]">
+        <section className="rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
           <h2 className="display mb-4 text-[19px]">Saques e aportes</h2>
           <ul className="flex flex-col gap-2">
             {lancamentos.map((l) => (
@@ -504,7 +504,7 @@ function AvisoDeSemSetup({ quantidade }: { quantidade: number }) {
 
 function Cartao({ titulo, destaque, children }: { titulo: string; destaque?: boolean; children: React.ReactNode }) {
   return (
-    <div className={`rounded-xl border bg-card px-5 py-[18px] ${destaque ? "border-accent/45" : "border-line"}`}>
+    <div className={`rounded-xl border bg-card px-5 py-[18px] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg ${destaque ? "border-accent/45" : "border-line hover:border-line-strong"}`}>
       <p className={`text-[11.5px] font-semibold uppercase tracking-[0.10em] ${destaque ? "text-accent-soft" : "text-ink-3"}`}>{titulo}</p>
       {children}
     </div>
@@ -526,7 +526,7 @@ function ItemFaixa({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="px-4 first:pl-5 last:pr-5">
+    <div className="rounded-lg px-4 transition-colors duration-150 hover:bg-raised first:pl-5 last:pr-5">
       <p className="text-[10.5px] font-semibold uppercase tracking-[0.09em] text-ink-3">{titulo}</p>
       {valor !== undefined && <p className={`num mt-2 text-[18px] font-semibold ${cor}`}>{valor}</p>}
       {extra && <p className="mt-1 text-[11px] text-ink-4">{extra}</p>}
@@ -537,14 +537,14 @@ function ItemFaixa({
 
 function BarraDeDisciplina({ rotulo, assertividade }: { rotulo: string; assertividade: number | null }) {
   return (
-    <div>
+    <div className="-mx-2 rounded-lg px-2 py-1 transition-colors duration-150 hover:bg-well">
       <div className="mb-1.5 flex items-baseline justify-between text-[12.5px] text-ink-2">
         <span>{rotulo}</span>
         <span className="num">{percentual(assertividade)}</span>
       </div>
       <div className="flex h-[6px] gap-0.5">
-        <span className="rounded-[3px] bg-gain" style={{ width: `${assertividade ?? 0}%` }} />
-        <span className="flex-1 rounded-[3px] bg-loss opacity-50" />
+        <span className="rounded-full bg-gain" style={{ width: `${assertividade ?? 0}%` }} />
+        <span className="flex-1 rounded-full bg-loss opacity-50" />
       </div>
     </div>
   );

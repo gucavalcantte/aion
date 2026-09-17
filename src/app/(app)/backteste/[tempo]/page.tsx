@@ -195,7 +195,7 @@ function Filtros({
 
 function Cartao({ titulo, valor, cor = "" }: { titulo: string; valor: string; cor?: string }) {
   return (
-    <div className="rounded-xl border border-line bg-card px-[18px] py-[15px]">
+    <div className="rounded-xl border border-line bg-card px-[18px] py-[15px] transition-all duration-150 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-lg">
       <p className="text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3">{titulo}</p>
       <p className={`num mt-2 text-[26px] font-semibold tracking-[-0.03em] ${cor}`}>{valor}</p>
     </div>
