@@ -33,13 +33,18 @@ export function moedaDoAtivo(codigo: Ativo): Moeda {
 }
 
 /**
- * Corretora da conta. Fechada nesses três valores, como os demais enums do
- * app — uma quarta corretora é uma migration, não um cadastro.
+ * Corretora (ou mesa) da conta. Fechada nesses valores, como os demais enums
+ * do app — uma corretora nova é uma migration, não um cadastro.
  */
-export const CORRETORAS = ["Ylos", "ZeroMarkets", "B3"] as const;
+export const CORRETORAS = ["Ylos", "ZeroMarkets", "Insinder", "Goat", "B3"] as const;
 export type Corretora = (typeof CORRETORAS)[number];
 
-/** USD opera por Ylos ou ZeroMarkets; BRL só tem B3 (única praça do WIN). */
+/**
+ * USD opera por Ylos, ZeroMarkets, Insinder ou Goat; BRL só tem B3 (única
+ * praça do WIN). Insinder e Goat cobrem menos ativos que as demais (só o
+ * lote micro de Ouro, Nasdaq e Dow) — a cobertura real vem das linhas de
+ * `valores_ponto_corretora`, não daqui.
+ */
 export function corretorasPorMoeda(moeda: Moeda): Corretora[] {
-  return moeda === "USD" ? ["Ylos", "ZeroMarkets"] : ["B3"];
+  return moeda === "USD" ? ["Ylos", "ZeroMarkets", "Insinder", "Goat"] : ["B3"];
 }

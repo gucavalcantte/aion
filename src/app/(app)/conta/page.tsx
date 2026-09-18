@@ -82,6 +82,9 @@ function CartaoConta({ conta }: { conta: ContaComSaldo }) {
           <span className="inline-flex h-[23px] items-center rounded-md bg-raised px-[9px] text-[12.5px] font-semibold text-ink-3">
             {conta.moeda}
           </span>
+          <span className="inline-flex h-[23px] items-center rounded-md bg-raised px-[9px] text-[12.5px] font-semibold text-ink-3">
+            {conta.corretora}
+          </span>
           {conta.is_padrao && (
             <span className="inline-flex h-[23px] items-center rounded-md bg-accent px-[9px] text-[12.5px] font-semibold text-accent-ink">
               Padrão

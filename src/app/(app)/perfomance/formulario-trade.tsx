@@ -64,7 +64,9 @@ export function FormularioTrade({
   aoFechar?: () => void;
 }) {
   const editando = Boolean(trade);
-  const ativosPermitidos = ATIVOS.filter((a) => a.moeda === moedaConta || a.codigo === trade?.ativo);
+  const ativosPermitidos = ATIVOS.filter(
+    (a) => (a.moeda === moedaConta && especificacoes[a.codigo]) || a.codigo === trade?.ativo,
+  );
   const dialogo = useRef<HTMLDialogElement>(null);
   const [estado, acao, enviando] = useActionState(salvarTrade, INICIAL);
 

@@ -11,9 +11,10 @@ Estudar setups de day trade e medir estatística, acompanhar a performance real
 dos trades, e comparar o que foi estudado (backteste) com o que está sendo
 executado de verdade (perfomance).
 
-**Três usuários** (o dono, a esposa e um convidado em teste), uso pessoal, **desktop apenas**.
+**Quatro usuários** (o dono, a esposa, um convidado em teste e um usuário que opera
+pelas mesas Insinder/Goat), uso pessoal, **desktop apenas**.
 
-**Os dados são totalmente separados entre os três.** Setups, contas, backtestes e
+**Os dados são totalmente separados entre os quatro.** Setups, contas, backtestes e
 trades pertencem a um `user_id` e nunca aparecem para os outros. Nada é
 compartilhado — nem os setups. Toda consulta filtra por `user_id`.
 
@@ -109,15 +110,15 @@ Todas as tabelas têm `id`, `user_id`, `created_at`.
   Default `USD` para não quebrar contas já cadastradas. No formulário de trade
   (Perfomance), o seletor de ativo filtra pela moeda da conta escolhida — uma
   conta em USD nunca oferece WIN, e uma conta em BRL só oferece WIN.
-- `corretora` (enum `Ylos` | `ZeroMarkets` | `B3`) — de qual corretora a conta
-  opera. Trava por moeda, mesmo esquema do campo `moeda` acima: uma conta em
-  BRL só pode ser `B3` (única praça do WIN); uma conta em USD só pode ser
-  `Ylos` ou `ZeroMarkets`. No formulário de Conta, o seletor de corretora
-  filtra pelas opções válidas para a moeda escolhida. Default `Ylos` para as
-  contas já cadastradas em USD (o que já valia, implicitamente, antes de
-  existir o conceito); a conta em BRL virou `B3` na migração. É essa coluna
-  que decide qual linha de `valores_ponto_corretora` (abaixo) os trades da
-  conta usam.
+- `corretora` (enum `Ylos` | `ZeroMarkets` | `Insinder` | `Goat` | `B3`) — de qual
+  corretora (ou mesa) a conta opera. Trava por moeda, mesmo esquema do campo
+  `moeda` acima: uma conta em BRL só pode ser `B3` (única praça do WIN); uma
+  conta em USD pode ser `Ylos`, `ZeroMarkets`, `Insinder` ou `Goat`. No
+  formulário de Conta, o seletor de corretora filtra pelas opções válidas para
+  a moeda escolhida. Default `Ylos` para as contas já cadastradas em USD (o
+  que já valia, implicitamente, antes de existir o conceito); a conta em BRL
+  virou `B3` na migração. É essa coluna que decide qual linha de
+  `valores_ponto_corretora` (abaixo) os trades da conta usam.
 - `saldo_inicial` (numeric) — **saldo atual é sempre calculado**, nunca digitado
 - `meta` (numeric, **nullable**) — lucro acumulado necessário para liberar o saque.
   Nulo = conta sem meta (simulador, por exemplo)
@@ -127,9 +128,13 @@ Todas as tabelas têm `id`, `user_id`, `created_at`.
 
 ### `valores_ponto_corretora`
 Especificação de contrato por corretora — **por usuário, não global** (mesma
-regra da seção 1: nada é compartilhado entre os três). Uma linha por ativo
+regra da seção 1: nada é compartilhado entre os quatro). Uma linha por ativo
 que a corretora cobre: Ylos e ZeroMarkets cobrem os seis ativos em USD; B3
-cobre só WIN.
+cobre só WIN; Insinder e Goat cobrem só o lote micro de três ativos — Ouro
+(MGC), Nasdaq (MNQ) e Dow Jones (MYM). A cobertura não é uma regra fixa em
+código — é simplesmente quais linhas existem para aquela corretora; o
+formulário de trade (5.3) só oferece um ativo se houver linha cadastrada
+para a corretora da conta selecionada.
 
 `corretora` (enum) · `ativo` (enum) · `valor_ponto` (numeric) · `unidade`
 (text: `pontos` | `dólares` | `%`)
@@ -300,7 +305,7 @@ Tela cheia com o degradê de fundo, marca AION centralizada (arco no acento, nom
 `letter-spacing` largo, tagline "ciclos · tempo · consistência") e um card de 428px
 com e-mail, senha, "manter conectado" e o botão Entrar.
 
-**Não existe "criar conta".** São três usuários e as contas são criadas manualmente
+**Não existe "criar conta".** São quatro usuários e as contas são criadas manualmente
 no painel do Supabase. O rodapé diz isso explicitamente. Autenticação via Supabase
 Auth (e-mail + senha). Logout volta para esta tela.
 
@@ -309,9 +314,10 @@ Auth (e-mail + senha). Logout volta para esta tela.
 CRUD simples: número, tipo, moeda, corretora, saldo inicial, MLPT, marcar
 como padrão. Ações: editar, remover. Sem filtros.
 
-**Corretoras** — link no topo da tela. Lista as três corretoras, cada uma
-com a tabela dos ativos que ela cobre (Ylos/ZeroMarkets: os seis em USD;
-B3: só WIN), com **valor por ponto e unidade editáveis inline** por linha —
+**Corretoras** — link no topo da tela. Lista as cinco corretoras/mesas, cada
+uma com a tabela dos ativos que ela cobre (Ylos/ZeroMarkets: os seis em USD;
+Insinder/Goat: só lote micro de Ouro, Nasdaq e Dow; B3: só WIN), com **valor
+por ponto e unidade editáveis inline** por linha —
 mesmo padrão de "clica, edita a célula, confirma" do cadastro inline do
 Backteste (5.2). Editar aqui vale para toda conta marcada com aquela
 corretora, não só a que abriu o link.
