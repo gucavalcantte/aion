@@ -69,7 +69,7 @@ export function Galeria({ estudos }: { estudos: EstudoComImagem[] }) {
                   />
                 </div>
               </div>
-              <p className="text-[14px] leading-[1.6] text-ink-2">
+              <p className="whitespace-pre-wrap text-[14px] leading-[1.6] text-ink-2">
                 {estudo.observacao || <span className="text-ink-4">sem observação</span>}
               </p>
             </div>
@@ -100,7 +100,7 @@ export function Galeria({ estudos }: { estudos: EstudoComImagem[] }) {
             className="max-h-[78vh] max-w-full rounded-lg object-contain shadow-2xl"
           />
           {ampliada.observacao && (
-            <p className="max-w-[680px] text-center text-[14px] leading-relaxed text-white/70">
+            <p className="max-w-[680px] whitespace-pre-wrap text-center text-[14px] leading-relaxed text-white/70">
               {ampliada.observacao}
             </p>
           )}
