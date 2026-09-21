@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "tsx src/lib/metricas.check.ts && tsx src/lib/execucoes-trade.check.ts"
+    "check": "tsx src/lib/metricas.check.ts && tsx src/lib/execucoes-trade.check.ts && tsx src/lib/constancia.check.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
