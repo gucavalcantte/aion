@@ -14,6 +14,7 @@ import { FormularioLancamento } from "./formulario-lancamento";
 import { FormularioTrade } from "./formulario-trade";
 import { SeletorConta, SeletorMes } from "./seletores";
 import { TabelaTrades } from "./tabela-trades";
+import { VisualizadorTrades, type TradeComPrint } from "./visualizador-trades";
 
 export const metadata = { title: "Perfomance — AION" };
 
@@ -46,8 +47,29 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
     entrada: typeof params.entrada === "string" && params.entrada ? params.entrada : undefined,
   };
 
-  const { listagem, lancamentos, setups, resumo, curva, porDia, execucoesPorTrade, imagensPorTrade, semSetupNoRecorte } =
+  const { trades, listagem, lancamentos, setups, resumo, curva, porDia, execucoesPorTrade, imagensPorTrade, semSetupNoRecorte } =
     await dadosDaPerfomance(conta, mes, filtros);
+
+  // O visualizador percorre a conta inteira (não só o recorte filtrado), do mais recente ao mais antigo.
+  const tradesComPrint: TradeComPrint[] = [...trades]
+    .sort((a, b) => (a.data === b.data ? b.hora_inicio.localeCompare(a.hora_inicio) : b.data.localeCompare(a.data)))
+    .filter((t) => imagensPorTrade[t.id])
+    .map((t) => ({
+      id: t.id,
+      url: imagensPorTrade[t.id],
+      data: t.data,
+      hora_inicio: t.hora_inicio,
+      hora_fim: t.hora_fim,
+      ativo: t.ativo,
+      tempo_grafico: t.tempo_grafico,
+      setup: t.setup_id === null ? "Sem setup" : (setups.find((s) => s.id === t.setup_id)?.nome ?? VAZIO),
+      entrada: t.entrada,
+      resultado: t.resultado,
+      risco_retorno: t.risco_retorno,
+      status: t.status,
+      respeitou_plano: t.respeitou_plano,
+      observacao: t.observacao,
+    }));
   const especificacoes = await especificacoesDaCorretora(conta.corretora);
   const [ano, mesNum] = mes.split("-").map(Number);
   const lucro = resumo.saldo - conta.saldo_inicial;
@@ -79,6 +101,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
         <div className="flex gap-2.5">
           <SeletorConta contas={contas} atual={conta.id} mes={mes} />
           <SeletorMes mes={mes} contaId={conta.id} />
+          <VisualizadorTrades trades={tradesComPrint} moedaConta={conta.moeda} />
           <FormularioLancamento contaId={conta.id} moedaConta={conta.moeda} />
           <FormularioTrade contaId={conta.id} setups={setups} moedaConta={conta.moeda} especificacoes={especificacoes} />
         </div>
