@@ -122,7 +122,7 @@ function ConteudoComAmostra({
   return (
     <>
       {!filtros.setup ? (
-        <div className="grid grid-cols-2 gap-3.5">
+        <div className="grid grid-cols-2 gap-3.5 tab:grid-cols-1">
           <Cartao
             titulo="Melhores contextos"
             descricao="Onde este setup, neste tempo gráfico, aparece mais forte"
@@ -146,7 +146,7 @@ function ConteudoComAmostra({
         <MelhoresPiores linhas={linhas} />
       )}
 
-      <div className="grid grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-3.5">
+      <div className="grid grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-3.5 tab:grid-cols-1">
         <section className="rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
           <div className="mb-4">
             <h3 className="display text-[19px]">Assertividade por dimensão</h3>
@@ -237,7 +237,7 @@ function MelhoresPiores({ linhas }: { linhas: LinhaAnalisavel[] }) {
   const { melhores, piores, curtos, candidatos } = contextos(linhas);
 
   return (
-    <div className="grid grid-cols-2 gap-3.5">
+    <div className="grid grid-cols-2 gap-3.5 tab:grid-cols-1">
       <Cartao
         titulo="Melhores contextos"
         descricao="Onde este setup, neste tempo gráfico, aparece mais forte"

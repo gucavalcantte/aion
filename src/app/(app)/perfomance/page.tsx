@@ -89,7 +89,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
   return (
     <>
-      <header className="mb-5 flex items-end justify-between">
+      <header className="mb-5 flex items-end justify-between med:flex-col med:items-start med:gap-3">
         <div>
           <h1 className="display text-[30px] leading-[1.05]">Perfomance</h1>
           <p className="mt-2 text-[14px] text-ink-3">
@@ -98,7 +98,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
               : `${inteiro(resumo.totalTrades)} trades registrados`}
           </p>
         </div>
-        <div className="flex gap-2.5">
+        <div className="flex flex-wrap gap-2.5">
           <SeletorConta contas={contas} atual={conta.id} mes={mes} />
           <SeletorMes mes={mes} contaId={conta.id} />
           <VisualizadorTrades trades={tradesComPrint} moedaConta={conta.moeda} />
@@ -111,7 +111,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
       <AvisoDeSemSetup quantidade={semSetupNoRecorte} />
 
       {/* HERO — R:R médio dos gains e o saldo dividem o topo */}
-      <div className="mb-3 grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-3">
+      <div className="mb-3 grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-3 tab:grid-cols-1">
         <Cartao titulo="R:R médio dos gains">
           <GaugeRiscoRetorno valor={resumo.riscoRetorno} />
           <p className="mt-1 text-center text-[12.5px] text-ink-4">
@@ -137,7 +137,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
       {/* FAIXA — estatísticas secundárias, uma tira só em vez de seis cards
           disputando atenção com o topo. */}
-      <div className="mb-5 grid grid-cols-6 divide-x divide-line rounded-xl border border-line bg-card py-4 transition-colors hover:border-line-strong">
+      <div className="mb-5 grid grid-cols-6 divide-x divide-line med:grid-cols-3 med:gap-y-5 med:divide-x-0 cel:grid-cols-2 rounded-xl border border-line bg-card py-4 transition-colors hover:border-line-strong">
         <ItemFaixa titulo="Trades" valor={inteiro(resumo.totalTrades)} extra={`${resumo.tradesNoMes} no mês`} />
 
         <ItemFaixa titulo="Assertividade" valor={percentual(resumo.assertividade)}>
@@ -206,7 +206,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
       </div>
 
       {/* CALENDÁRIO + CURVA */}
-      <div className="mb-3 grid grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-3">
+      <div className="mb-3 grid grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-3 tab:grid-cols-1">
         <section className="rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
           <div className="mb-4">
             <h2 className="display text-[19px]">Calendário de consistência</h2>
@@ -222,16 +222,16 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
             <h2 className="display text-[19px]">Evolução da conta</h2>
             <p className="mt-1.5 text-[13px] text-ink-3">Saldo acumulado desde a abertura</p>
           </div>
-          <div className="flex-1 rounded-[10px] border border-line-soft bg-well p-3">
+          <div className="flex min-h-0 flex-1 flex-col rounded-[10px] border border-line-soft bg-well p-3">
             <CurvaDeCapital pontos={curva.pontos} marcadores={curva.marcadores} meta={conta.meta} moedaConta={conta.moeda} />
           </div>
         </section>
       </div>
 
       {/* BARRAS + DISCIPLINA */}
-      <div className="mb-5 grid grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-3">
+      <div className="mb-5 grid grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-3 tab:grid-cols-1">
         <section className="rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
-          <div className="mb-4 flex items-baseline justify-between">
+          <div className="mb-4 flex items-baseline justify-between tab:flex-col tab:gap-2">
             <div>
               <h2 className="display text-[19px]">Resultado por operação</h2>
               <p className="mt-1.5 text-[13px] text-ink-3">
@@ -296,7 +296,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
       {/* CONFIRMADA x ANTECIPADA */}
       <section className="mb-5 rounded-xl border border-line bg-card p-[22px] transition-colors duration-150 hover:border-line-strong">
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-baseline justify-between tab:flex-col tab:gap-1">
           <div>
             <h2 className="display text-[19px]">Confirmada × Antecipada</h2>
             <p className="mt-1.5 text-[13px] text-ink-3">Assertividade e resultado por tipo de entrada</p>
@@ -315,7 +315,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
             entram aqui conforme você editar cada um.
           </p>
         ) : (
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="mt-5 grid grid-cols-2 gap-3 tab:grid-cols-1">
             {pe.fatias.map((f) => (
               <div key={f.entrada} className="rounded-[10px] border border-line-soft bg-well p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-line-strong hover:bg-raised hover:shadow-lg">
                 <div className="flex items-baseline justify-between">
@@ -357,7 +357,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           </p>
         ) : (
           <>
-            <div className="mt-5 grid grid-cols-3 gap-3">
+            <div className="mt-5 grid grid-cols-3 gap-3 tab:grid-cols-1">
               <div className="rounded-[10px] border border-line-soft bg-well p-4">
                 <span className="text-[12.5px] text-ink-3">Trades com execuções</span>
                 <p className="num mt-2 text-[26px] font-semibold leading-none">
@@ -383,7 +383,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="mt-3 grid grid-cols-2 gap-3 tab:grid-cols-1">
               <div className="rounded-[10px] border border-line-soft bg-well p-4">
                 <p className="text-[13.5px] font-semibold text-ink-2">Distribuição por tipo</p>
                 <div className="mt-3 flex h-[26px] overflow-hidden rounded-md">
@@ -425,7 +425,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
               <div className="rounded-[10px] border border-line-soft bg-well p-4">
                 <p className="text-[13.5px] font-semibold text-ink-2">Resultado: com × sem execuções</p>
-                <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="mt-3 grid grid-cols-2 gap-3 tab:grid-cols-1">
                   <div>
                     <p className="text-[11.5px] text-ink-4">Assertividade</p>
                     <p className="num mt-1 text-[15px] font-semibold">
@@ -455,7 +455,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
       {/* TABELA */}
       <section className="mb-5 overflow-hidden rounded-xl border border-line bg-card">
-        <div className="flex items-center justify-between border-b border-line px-5 py-4">
+        <div className="flex items-center justify-between border-b border-line px-5 py-4 med:flex-col med:items-start med:gap-3">
           <h2 className="display text-[20px]">Trades</h2>
           <Filtros contaId={conta.id} mes={mes} setups={setups} atual={filtros} />
         </div>
@@ -477,7 +477,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
           <h2 className="display mb-4 text-[19px]">Saques e aportes</h2>
           <ul className="flex flex-col gap-2">
             {lancamentos.map((l) => (
-              <li key={l.id} className="flex items-center gap-4 rounded-[10px] border border-line-soft bg-well px-4 py-3">
+              <li key={l.id} className="flex flex-wrap items-center gap-4 rounded-[10px] border border-line-soft bg-well px-4 py-3">
                 <span className={`inline-flex h-[23px] items-center rounded-md px-[9px] text-[13px] font-semibold ${l.tipo === "Aporte" ? "bg-gain-bg text-gain" : "bg-track text-ink-2"}`}>
                   {l.tipo}
                 </span>
@@ -588,7 +588,7 @@ function Filtros({
     `h-[34px] rounded-lg border bg-raised px-3 text-[14px] outline-none ${ativo ? "border-accent text-accent-soft" : "border-line-strong text-ink-2"}`;
 
   return (
-    <form action="/perfomance" className="flex gap-2">
+    <form action="/perfomance" className="flex flex-wrap gap-2">
       <input type="hidden" name="conta" value={contaId} />
       <input type="hidden" name="mes" value={mes} />
       <label htmlFor="f-setup" className="sr-only">Setup</label>

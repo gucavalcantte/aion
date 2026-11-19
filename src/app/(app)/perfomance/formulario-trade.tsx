@@ -215,9 +215,9 @@ export function FormularioTrade({
             </button>
           </header>
 
-          <div className="grid grid-cols-[minmax(0,1fr)_344px] gap-[26px] px-[26px] py-6">
+          <div className="grid grid-cols-[minmax(0,1fr)_344px] gap-[26px] tab:grid-cols-1 px-[26px] py-6">
             <div className="flex flex-col gap-5">
-              <div className="grid grid-cols-[1fr_1fr_1fr] gap-4">
+              <div className="grid grid-cols-[1fr_1fr_1fr] gap-4 tab:grid-cols-2 cel:grid-cols-1">
                 <label>
                   <span className={rotulo}>Data</span>
                   <input name="data" type="date" value={data} onChange={(e) => setData(e.target.value)} className={`${campo} num`} />
@@ -314,7 +314,7 @@ export function FormularioTrade({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-4 tab:grid-cols-2 cel:grid-cols-1">
                 <label>
                   <span className={rotulo}>Stop em {unidade}</span>
                   <input name="pontos_stop" inputMode="decimal" value={pontos} onChange={(e) => setPontos(e.target.value)} placeholder="12,5" className={`${campo} num`} />
@@ -411,7 +411,7 @@ export function FormularioTrade({
                 )}
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-4 tab:grid-cols-2 cel:grid-cols-1">
                 <label>
                   <span className={rotulo}>Resultado ({moedaConta})</span>
                   <input

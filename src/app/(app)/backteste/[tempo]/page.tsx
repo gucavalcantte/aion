@@ -60,7 +60,7 @@ export default async function PaginaTempo({
         </h1>
       </header>
 
-      <div className="mb-5 grid grid-cols-3 gap-3">
+      <div className="mb-5 grid grid-cols-3 gap-3 cel:grid-cols-1">
         <Cartao
           titulo={temFiltro ? "Registros no filtro" : "Registros"}
           valor={inteiro(resumo.registros)}

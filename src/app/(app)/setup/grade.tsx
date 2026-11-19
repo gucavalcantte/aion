@@ -31,7 +31,7 @@ export function GradeDeSetups({ setups }: { setups: SetupComEstatistica[] }) {
 
   return (
     <>
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 gap-4 tab:grid-cols-2 cel:grid-cols-1">
       {ordem.map((setup) => (
         <article
           key={setup.id}

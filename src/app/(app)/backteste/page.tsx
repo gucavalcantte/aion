@@ -15,7 +15,7 @@ export default async function PaginaBackteste() {
         <p className="mt-2 text-[14px] text-ink-3">Escolha o tempo gráfico para estudar</p>
       </header>
 
-      <div className="mb-5 grid grid-cols-3 gap-3">
+      <div className="mb-5 grid grid-cols-3 gap-3 cel:grid-cols-1">
         <Cartao titulo="Total de backtestes" valor={inteiro(geral.registros)} />
         <Cartao titulo="Assertividade geral" valor={percentual(geral.assertividade)} />
         <Cartao
@@ -31,7 +31,7 @@ export default async function PaginaBackteste() {
         />
       </div>
 
-      <section className="rounded-xl border border-line bg-card p-[22px]">
+      <section className="rounded-xl border border-line bg-card p-[22px] tab:overflow-x-auto">
         <div className="mb-4">
           <h2 className="display text-[19px]">Tempos gráficos</h2>
           <p className="mt-1.5 text-[13px] text-ink-4">
@@ -39,7 +39,7 @@ export default async function PaginaBackteste() {
           </p>
         </div>
 
-        <div className="mb-2 grid grid-cols-[78px_74px_1fr_96px_26px] gap-[18px] px-[18px] pb-2">
+        <div className="mb-2 grid grid-cols-[78px_74px_1fr_96px_26px] gap-[18px] px-[18px] pb-2 tab:min-w-[540px]">
           <Rotulo>Tempo</Rotulo>
           <Rotulo>Registros</Rotulo>
           <Rotulo>Gain / loss</Rotulo>
@@ -47,7 +47,7 @@ export default async function PaginaBackteste() {
           <span />
         </div>
 
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-2 tab:min-w-[540px]">
           {porTempo.map((t) => (
             <li key={t.tempo}>
               <LinhaTempo resumo={t} />

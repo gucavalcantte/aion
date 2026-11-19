@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Responsivo: "med" = até 1100px (janela estreita ou menu aberto); "tab" = até 769px (tablet em pé e menores); "cel" = até 520px (celular). */
+@custom-variant med (@media (max-width: 1100px));
+@custom-variant tab (@media (max-width: 769px));
+@custom-variant cel (@media (max-width: 520px));
+
 /* ---------------------------------------------------------------------------
    AION — tokens
    Escuro é o padrão da marca. Claro é uma troca deliberada, não um inverso

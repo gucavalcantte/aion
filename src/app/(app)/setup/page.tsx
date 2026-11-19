@@ -12,7 +12,7 @@ export default async function PaginaSetup({ searchParams }: PageProps<"/setup">)
 
   return (
     <>
-      <header className="mb-5 flex items-end justify-between">
+      <header className="mb-5 flex items-end justify-between med:flex-col med:items-start med:gap-3">
         <div>
           <h1 className="display text-[30px] leading-[1.05]">Setups</h1>
           <p className="mt-2 text-[14px] text-ink-3">

@@ -28,14 +28,14 @@ export default async function PaginaEstudos({ searchParams }: PageProps<"/estudo
 
   return (
     <>
-      <header className="mb-[18px] flex items-end justify-between">
+      <header className="mb-[18px] flex items-end justify-between med:flex-col med:items-start med:gap-3">
         <div>
           <h1 className="display text-[30px] leading-[1.05]">Estudos do dia</h1>
           <p className="mt-2 text-[14px] text-ink-3">
             Prints do que aconteceu no gráfico — inclusive o que você deixou passar
           </p>
         </div>
-        <div className="flex gap-2.5">
+        <div className="flex flex-wrap gap-2.5">
           <SeletorMes mes={mes} />
           <FormularioEstudo dia={diaSelecionado} />
         </div>
@@ -43,8 +43,8 @@ export default async function PaginaEstudos({ searchParams }: PageProps<"/estudo
 
       <AvisoDeConstancia />
 
-      <div className="flex items-start gap-3.5">
-        <section className="w-[392px] shrink-0 rounded-xl border border-line bg-card p-[22px]">
+      <div className="flex items-start gap-3.5 med:flex-col med:items-stretch">
+        <section className="w-[392px] shrink-0 med:w-full rounded-xl border border-line bg-card p-[22px]">
           <div className="mb-4">
             <h2 className="display text-[19px]">{MESES[mesNum - 1]}</h2>
             <p className="mt-1.5 text-[13px] text-ink-4">

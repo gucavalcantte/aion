@@ -22,7 +22,7 @@ export default async function PaginaConta({
 
   return (
     <>
-      <header className="mb-5 flex items-end justify-between">
+      <header className="mb-5 flex items-end justify-between med:flex-col med:items-start med:gap-3">
         <div>
           <h1 className="display text-[30px] leading-[1.05]">Contas</h1>
           <p className="mt-2 text-[14px] text-ink-3">
@@ -42,7 +42,7 @@ export default async function PaginaConta({
         </p>
       )}
 
-      <div className="flex items-start gap-5">
+      <div className="flex items-start gap-5 med:flex-col med:items-stretch">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           {contas.length === 0 ? (
             <div className="rounded-xl border border-dashed border-line-strong bg-card/50 p-10 text-center">
@@ -108,7 +108,7 @@ function CartaoConta({ conta }: { conta: ContaComSaldo }) {
         </div>
       </div>
 
-      <div className="mb-5 grid grid-cols-5 gap-4">
+      <div className="mb-5 grid grid-cols-[repeat(auto-fit,minmax(125px,1fr))] gap-4">
         <Metrica titulo="Saldo inicial" valor={moeda(conta.saldo_inicial, conta.moeda)} />
         <Metrica titulo="Saldo atual" valor={moeda(conta.saldo_atual, conta.moeda)} cor={corSaldo} destaque />
         <Metrica titulo="Meta para saque" valor={conta.meta === null ? VAZIO : moeda(conta.meta, conta.moeda)} />

@@ -87,7 +87,7 @@ export function FormularioEstudo({
             </button>
           </header>
 
-          <div className="grid grid-cols-[minmax(0,1fr)_344px] gap-[26px] px-[26px] py-6">
+          <div className="grid grid-cols-[minmax(0,1fr)_344px] gap-[26px] tab:grid-cols-1 px-[26px] py-6">
             <div>
               <span className={rotulo}>Print do gráfico</span>
               <div className="rounded-[12px] border border-dashed border-line-strong bg-well p-3">

@@ -87,7 +87,7 @@ export function FormularioPlano({
         </p>
       )}
 
-      <div className="grid grid-cols-[392px_minmax(0,1fr)] items-start gap-4">
+      <div className="grid grid-cols-[392px_minmax(0,1fr)] items-start gap-4 tab:grid-cols-1">
         <div className="flex flex-col gap-4">
           <section className="rounded-xl border border-line bg-card p-[22px]">
             <div className="mb-4 flex items-center justify-between">
@@ -135,7 +135,7 @@ export function FormularioPlano({
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-2 gap-3 cel:grid-cols-1">
               <label>
                 <span className="mb-2.5 block text-[14px] text-ink-2">Mínimo de trades</span>
                 <input name="min_trades" inputMode="numeric" defaultValue={plano?.min_trades ?? ""} className={`${campo} num`} />
@@ -195,7 +195,7 @@ export function FormularioPlano({
             </p>
           </section>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 cel:grid-cols-1">
             <section className="rounded-xl border border-line bg-card p-[22px]">
               <span className={`${rotulo} mb-4 block`}>Checklist de abertura</span>
               <ListaEditavel

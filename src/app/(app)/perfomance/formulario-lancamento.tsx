@@ -62,7 +62,7 @@ export function FormularioLancamento({ contaId, moedaConta }: { contaId: string;
               </div>
             </fieldset>
 
-            <div className="mb-[17px] grid grid-cols-2 gap-3">
+            <div className="mb-[17px] grid grid-cols-2 gap-3 cel:grid-cols-1">
               <label>
                 <span className={rotulo}>Data</span>
                 <input name="data" type="date" defaultValue={new Date().toISOString().slice(0, 10)} className={`${campo} num`} />

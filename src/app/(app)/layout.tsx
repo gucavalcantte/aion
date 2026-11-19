@@ -14,9 +14,9 @@ export default function LayoutAplicacao({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-dvh">
+    <div className="flex min-h-dvh tab:flex-col">
       <BarraLateral sair={sair} />
-      <main className="min-w-0 flex-1 px-[30px] py-[26px]">{children}</main>
+      <main className="min-w-0 flex-1 px-[30px] py-[26px] tab:px-4 tab:py-5">{children}</main>
     </div>
   );
 }

@@ -80,7 +80,7 @@ export function FormularioSetup({ setup }: { setup: SetupEmEdicao }) {
         </p>
       )}
 
-      <div className="grid grid-cols-[392px_minmax(0,1fr)] items-start gap-4">
+      <div className="grid grid-cols-[392px_minmax(0,1fr)] items-start gap-4 tab:grid-cols-1">
         <section className="flex flex-col gap-[18px] rounded-xl border border-line bg-card p-[22px]">
           <h2 className="text-[11.5px] font-semibold uppercase tracking-[0.10em] text-ink-3">
             Identificação
@@ -146,7 +146,7 @@ export function FormularioSetup({ setup }: { setup: SetupEmEdicao }) {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-[22px] gap-y-[18px]">
+          <div className="grid grid-cols-2 gap-x-[22px] gap-y-[18px] cel:grid-cols-1">
             <Campo nome="plano_evento" titulo="Evento / gatilho" valor={setup?.plano_evento} />
             <Campo nome="plano_adicao" titulo="Adição" valor={setup?.plano_adicao} />
             <Campo nome="plano_localizacao" titulo="Localização" valor={setup?.plano_localizacao} />

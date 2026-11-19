@@ -112,7 +112,7 @@ function Painel({
       aria-label="Visualizar meus trades"
       className="fixed inset-0 z-50 flex flex-col bg-black/90"
     >
-      <header className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-white/10 px-6 py-3.5">
+      <header className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-white/10 px-6 py-3.5 tab:px-4">
         <h2 className="display text-[18px] text-white">Meus trades</h2>
 
         <div className="flex gap-1.5" role="group" aria-label="Filtrar por resultado">
@@ -153,7 +153,7 @@ function Painel({
       {total === 0 ? (
         <p className="m-auto text-[14px] text-white/60">Nenhum trade {filtro === "Todos" ? "" : `${filtro} `}com print.</p>
       ) : (
-        <div className={`grid min-h-0 flex-1 gap-3 p-4 ${comparando ? "grid-cols-2" : "grid-cols-1"}`}>
+        <div className={`grid min-h-0 flex-1 gap-3 p-4 tab:overflow-y-auto tab:p-2 ${comparando ? "grid-cols-2 tab:grid-cols-1" : "grid-cols-1"}`}>
           {lados.map((l) => (
             <Quadro
               key={l}
@@ -206,10 +206,10 @@ function Quadro({
   return (
     <section
       onClick={aoAtivar}
-      className={`flex min-h-0 min-w-0 flex-col rounded-xl border bg-card/60 ${ativo ? "border-accent" : "border-white/10"}`}
+      className={`flex min-h-0 min-w-0 flex-col rounded-xl border bg-card/60 tab:min-h-[70vh] ${ativo ? "border-accent" : "border-white/10"}`}
     >
-      <div className={`flex min-h-0 flex-1 ${detalhado ? "flex-row" : "flex-col"}`}>
-        <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center p-3">
+      <div className={`flex min-h-0 flex-1 ${detalhado ? "flex-row tab:flex-col" : "flex-col"}`}>
+        <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center p-3 tab:min-h-[50vh]">
           <SetaLateral lado="esquerda" desabilitada={posicao === 0} aoClicar={() => aoMover(-1)} />
 
           {falhou === trade.url ? (
@@ -234,13 +234,13 @@ function Quadro({
         </div>
 
         {detalhado && (
-          <aside className="w-[290px] shrink-0 overflow-y-auto border-l border-white/10 p-5">
+          <aside className="w-[290px] shrink-0 overflow-y-auto border-l border-white/10 p-5 tab:w-full tab:border-l-0 tab:border-t">
             <Detalhes trade={trade} moedaConta={moedaConta} cor={cor} />
           </aside>
         )}
       </div>
 
-      <footer className="flex items-center gap-3 border-t border-white/10 px-4 py-2.5 text-[13.5px] text-white/80">
+      <footer className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-white/10 px-4 py-2.5 text-[13.5px] text-white/80">
         <span className="num text-white/50">{posicao + 1} / {total}</span>
         <span className="num font-semibold">{trade.ativo} · {trade.tempo_grafico}</span>
         <span className="num text-white/60">{fData(trade.data)}</span>

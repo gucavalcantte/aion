@@ -33,7 +33,7 @@ export function FormularioConta({ conta }: { conta: Conta | null }) {
       action={acao}
       autoComplete="off"
       key={conta?.id ?? "nova"}
-      className="w-[352px] shrink-0 rounded-xl border border-line bg-card p-[22px]"
+      className="w-[352px] shrink-0 med:w-full rounded-xl border border-line bg-card p-[22px]"
     >
       <input type="hidden" name="id" defaultValue={conta?.id ?? ""} />
 
@@ -130,7 +130,7 @@ export function FormularioConta({ conta }: { conta: Conta | null }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 cel:grid-cols-1">
           <div>
             <label className={rotulo} htmlFor="mlpt">MLPT ({moedaSelecionada})</label>
             <input id="mlpt" name="mlpt" inputMode="decimal" defaultValue={conta ? String(conta.mlpt) : ""} placeholder="150" className={`${campo} num`} />

@@ -15,7 +15,7 @@ export function Galeria({ estudos }: { estudos: EstudoComImagem[] }) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-2 gap-3.5 med:grid-cols-1">
         {estudos.map((estudo) => (
           <article key={estudo.id} className="overflow-hidden rounded-xl border border-line bg-card">
             <div className="flex h-[196px] items-center justify-center border-b border-line-soft bg-input p-2">

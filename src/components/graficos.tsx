@@ -1,9 +1,13 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
 import type { MarcaDeCaixa, PontoDaCurva } from "@/lib/dados/trades";
 import { emR, moeda, simboloDaMoeda } from "@/lib/formato";
 import type { Moeda } from "@/lib/ativos";
 
 /**
- * SVG puro, renderizado no servidor. Sem biblioteca de charts: são duas formas
+ * SVG puro (sem biblioteca de charts: são duas formas
  * simples, e uma dependência custaria mais em peso e em teimosia com o tema do
  * que escrever as coordenadas. As cores saem dos tokens, então o modo claro
  * funciona sem trabalho extra.
@@ -93,13 +97,30 @@ export function CurvaDeCapital({
   moedaConta: Moeda;
   largura?: number;
 }) {
-  if (pontos.length < 2) return <Vazio texto="A curva aparece a partir do segundo trade." />;
+  // O cartão divide a linha com o calendário, que é bem mais alto. Em vez de
+  // um aspecto fixo (que deixava vão vazio abaixo da curva), o gráfico mede o
+  // espaço que sobrou e se desenha nele em pixels reais.
+  const area_ = useRef<HTMLDivElement>(null);
+  const [tamanho, setTamanho] = useState<{ w: number; h: number } | null>(null);
+
+  const semDados = pontos.length < 2;
+
+  useEffect(() => {
+    const el = area_.current;
+    if (!el) return;
+    const medir = () => setTamanho({ w: Math.round(el.clientWidth), h: Math.round(el.clientHeight) });
+    medir();
+    const obs = new ResizeObserver(medir);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [semDados]);
+
+  if (semDados) return <Vazio texto="A curva aparece a partir do segundo trade." />;
 
   const simbolo = simboloDaMoeda(moedaConta);
 
-  // Aspecto mais alto que os demais gráficos: este cartão divide a linha com
-  // o calendário, que é bem mais alto, e sobrava vão vazio abaixo da curva.
-  const ALTURA = 300;
+  const larguraReal = tamanho && tamanho.w > 0 ? tamanho.w : largura;
+  const ALTURA = tamanho && tamanho.h > 0 ? Math.max(220, tamanho.h) : 300;
   const BASE = ALTURA - 32;
   const EIXO_X = ALTURA - 10;
 
@@ -107,7 +128,7 @@ export function CurvaDeCapital({
   if (meta !== null) valores.push(meta);
   const { min, max } = escala(valores);
 
-  const x = (i: number) => ESQ + ((i - 1) / (pontos.length - 1)) * (largura - ESQ - DIR);
+  const x = (i: number) => ESQ + ((i - 1) / (pontos.length - 1)) * (larguraReal - ESQ - DIR);
   const y = (v: number) => BASE - ((v - min) / (max - min)) * (BASE - TOPO);
 
   // Média móvel: enxerga a tendência através do zigue-zague.
@@ -125,7 +146,7 @@ export function CurvaDeCapital({
   const passo = passoDoEixoX(pontos.length);
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <Legenda
         itens={[
           { cor: "var(--accent-soft)", texto: "Lucro acumulado" },
@@ -133,7 +154,8 @@ export function CurvaDeCapital({
           ...(meta !== null ? [{ cor: "var(--accent)", texto: "Meta", tracejado: true }] : []),
         ]}
       />
-      <svg viewBox={`0 0 ${largura} ${ALTURA}`} className="block h-auto w-full" role="img" aria-label="Lucro acumulado da conta">
+      <div ref={area_} className="relative min-h-[300px] flex-1">
+      <svg viewBox={`0 0 ${larguraReal} ${ALTURA}`} width={larguraReal} height={ALTURA} className="absolute inset-0 block" role="img" aria-label="Lucro acumulado da conta">
         <defs>
           <linearGradient id="areaLucro" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--accent-soft)" stopOpacity="0.30" />
@@ -143,7 +165,7 @@ export function CurvaDeCapital({
 
         {marcasDoEixo(min, max).map((v, i) => (
           <g key={i}>
-            <line x1={ESQ} y1={y(v)} x2={largura - DIR} y2={y(v)} stroke="var(--line-soft)" strokeWidth="1" />
+            <line x1={ESQ} y1={y(v)} x2={larguraReal - DIR} y2={y(v)} stroke="var(--line-soft)" strokeWidth="1" />
             <text x={ESQ - 8} y={y(v) + 4} textAnchor="end" fontSize="11.5" fill="var(--ink-4)" className="num">
               {curto(v, simbolo)}
             </text>
@@ -151,12 +173,12 @@ export function CurvaDeCapital({
         ))}
 
         {/* Breakeven: acima disso a conta está no lucro. */}
-        <line x1={ESQ} y1={y(0)} x2={largura - DIR} y2={y(0)} stroke="var(--ink-4)" strokeWidth="1.2" strokeDasharray="4 4" />
+        <line x1={ESQ} y1={y(0)} x2={larguraReal - DIR} y2={y(0)} stroke="var(--ink-4)" strokeWidth="1.2" strokeDasharray="4 4" />
 
         {meta !== null && meta <= max && (
           <>
-            <line x1={ESQ} y1={y(meta)} x2={largura - DIR} y2={y(meta)} stroke="var(--accent)" strokeWidth="1.4" strokeDasharray="5 4" />
-            <text x={largura - DIR} y={y(meta) - 6} textAnchor="end" fontSize="10.5" fontWeight="600" fill="var(--accent)">
+            <line x1={ESQ} y1={y(meta)} x2={larguraReal - DIR} y2={y(meta)} stroke="var(--accent)" strokeWidth="1.4" strokeDasharray="5 4" />
+            <text x={larguraReal - DIR} y={y(meta) - 6} textAnchor="end" fontSize="10.5" fontWeight="600" fill="var(--accent)">
               META
             </text>
           </>
@@ -199,6 +221,7 @@ export function CurvaDeCapital({
           ) : null,
         )}
       </svg>
+      </div>
     </div>
   );
 }

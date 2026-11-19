@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { Arco, Marca } from "@/components/marca";
 import { AlternadorDeTema } from "@/components/tema";
@@ -18,9 +18,27 @@ const ITENS = [
   { href: "/estudos", rotulo: "Estudos", icone: <><rect x="2" y="3" width="12" height="10" rx="1.6" /><path d="M2 10.6l3.2-3.2 2.6 2.6 2-2L14 11.2" /><circle cx="10.4" cy="5.9" r="1" /></> },
 ];
 
+const CONSULTA_CELULAR = "(max-width: 769px)";
+
+/** Até 769px o menu vira gaveta; o estado "recolhido" só vale no desktop. */
+function useTelaPequena() {
+  return useSyncExternalStore(
+    (aviso) => {
+      const mq = window.matchMedia(CONSULTA_CELULAR);
+      mq.addEventListener("change", aviso);
+      return () => mq.removeEventListener("change", aviso);
+    },
+    () => window.matchMedia(CONSULTA_CELULAR).matches,
+    () => false,
+  );
+}
+
 export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
   const caminho = usePathname();
   const [recolhida, setRecolhida] = useState(false);
+  const [gavetaAberta, setGavetaAberta] = useState(false);
+  const telaPequena = useTelaPequena();
+  const compacta = recolhida && !telaPequena;
 
   // Igual ao tema: o servidor não conhece o localStorage, então o padrão SSR-safe
   // é "expandida" e a correção acontece depois do mount, para não gerar erro de
@@ -33,6 +51,13 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
       // navegação privada: fica sempre expandida
     }
   }, []);
+
+  useEffect(() => {
+    if (!gavetaAberta) return;
+    const aoTeclar = (e: KeyboardEvent) => e.key === "Escape" && setGavetaAberta(false);
+    window.addEventListener("keydown", aoTeclar);
+    return () => window.removeEventListener("keydown", aoTeclar);
+  }, [gavetaAberta]);
 
   function alternar() {
     setRecolhida((atual) => {
@@ -47,26 +72,53 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
   }
 
   return (
+    <>
+      {/* Barra do topo: só aparece até 769px */}
+      <header className="sticky top-0 z-30 hidden h-[54px] items-center justify-between border-b border-line-soft bg-tint px-4 tab:flex">
+        <Marca />
+        <button
+          type="button"
+          onClick={() => setGavetaAberta((a) => !a)}
+          aria-label={gavetaAberta ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={gavetaAberta}
+          className="flex size-9 items-center justify-center rounded-lg text-ink-2 hover:bg-raised"
+        >
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden>
+            <path d="M2.5 4h11M2.5 8h11M2.5 12h11" />
+          </svg>
+        </button>
+      </header>
+
+      {gavetaAberta && (
+        <div
+          onClick={() => setGavetaAberta(false)}
+          aria-hidden
+          className="fixed inset-0 z-30 hidden bg-black/60 tab:block"
+        />
+      )}
+
     <aside
       className={
-        "flex shrink-0 flex-col border-r border-line-soft bg-tint py-6 transition-[width] duration-150 " +
-        (recolhida ? "w-[68px] px-[10px]" : "w-[236px] px-[14px]")
+        "flex shrink-0 flex-col border-r border-line-soft bg-tint py-6 transition-[width,transform] duration-150 " +
+        "tab:fixed tab:inset-y-0 tab:left-0 tab:z-40 tab:w-[260px] tab:overflow-y-auto tab:px-[14px] " +
+        (gavetaAberta ? "tab:translate-x-0 " : "tab:-translate-x-full ") +
+        (compacta ? "w-[68px] px-[10px]" : "w-[236px] px-[14px]")
       }
     >
       <div
         className={
           "flex pb-[26px] pt-0.5 " +
-          (recolhida ? "flex-col items-center gap-[10px] px-0" : "items-center justify-between px-[10px]")
+          (compacta ? "flex-col items-center gap-[10px] px-0" : "items-center justify-between px-[10px]")
         }
       >
-        {recolhida ? <Arco tamanho={22} /> : <Marca />}
+        {compacta ? <Arco tamanho={22} /> : <Marca />}
 
         <button
           type="button"
           onClick={alternar}
-          title={recolhida ? "Expandir menu" : "Recolher menu"}
-          aria-label={recolhida ? "Expandir menu" : "Recolher menu"}
-          className="flex shrink-0 items-center justify-center rounded-lg p-[7px] text-ink-4 hover:bg-raised hover:text-ink-2"
+          title={compacta ? "Expandir menu" : "Recolher menu"}
+          aria-label={compacta ? "Expandir menu" : "Recolher menu"}
+          className="flex shrink-0 items-center justify-center rounded-lg p-[7px] text-ink-4 hover:bg-raised hover:text-ink-2 tab:hidden"
         >
           <svg
             width="15"
@@ -82,7 +134,7 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
           >
             <rect x="2" y="2.5" width="12" height="11" rx="1.8" />
             <path d="M6.4 2.5v11" />
-            {recolhida ? <path d="M9.6 5.6l2 2.4-2 2.4" /> : <path d="M9.6 5.6l-2 2.4 2 2.4" />}
+            {compacta ? <path d="M9.6 5.6l2 2.4-2 2.4" /> : <path d="M9.6 5.6l-2 2.4 2 2.4" />}
           </svg>
         </button>
       </div>
@@ -95,10 +147,11 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
               key={item.href}
               href={item.href}
               aria-current={ativo ? "page" : undefined}
-              title={recolhida ? item.rotulo : undefined}
+              onClick={() => setGavetaAberta(false)}
+              title={compacta ? item.rotulo : undefined}
               className={
                 "flex items-center gap-[11px] rounded-lg py-[10px] font-medium " +
-                (recolhida ? "justify-center px-0" : "px-[11px]") +
+                (compacta ? "justify-center px-0" : "px-[11px]") +
                 " " +
                 (ativo
                   ? "bg-accent font-semibold text-accent-ink"
@@ -108,21 +161,21 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
               <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0">
                 {item.icone}
               </svg>
-              {!recolhida && item.rotulo}
+              {!compacta && item.rotulo}
             </Link>
           );
         })}
       </nav>
 
       <div className="mt-auto flex flex-col gap-[3px] border-t border-line-soft pt-4">
-        <AlternadorDeTema compacto={recolhida} />
+        <AlternadorDeTema compacto={compacta} />
         <form action={sair}>
           <button
             type="submit"
-            title={recolhida ? "Sair" : undefined}
+            title={compacta ? "Sair" : undefined}
             className={
               "flex w-full items-center gap-[11px] rounded-lg py-[10px] font-medium text-ink-3 hover:bg-raised hover:text-ink-2 " +
-              (recolhida ? "justify-center px-0" : "px-[11px]")
+              (compacta ? "justify-center px-0" : "px-[11px]")
             }
           >
             <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0">
@@ -130,10 +183,11 @@ export function BarraLateral({ sair }: { sair: () => Promise<void> }) {
               <path d="M10.6 11.2L13.8 8l-3.2-3.2" />
               <path d="M13.8 8H6.2" />
             </svg>
-            {!recolhida && "Sair"}
+            {!compacta && "Sair"}
           </button>
         </form>
       </div>
     </aside>
+    </>
   );
 }

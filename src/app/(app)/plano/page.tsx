@@ -16,7 +16,7 @@ export default async function PaginaPlano({ searchParams }: PageProps<"/plano">)
 
   return (
     <>
-      <header className="mb-[18px] flex items-end justify-between">
+      <header className="mb-[18px] flex items-end justify-between med:flex-col med:items-start med:gap-3">
         <div>
           <h1 className="display text-[30px] leading-[1.05]">Plano de trade</h1>
           <p className="mt-2 text-[14px] text-ink-3">
@@ -26,7 +26,7 @@ export default async function PaginaPlano({ searchParams }: PageProps<"/plano">)
             {plano?.revisado_em && ` · última revisão em ${fData(plano.revisado_em)}`}
           </p>
         </div>
-        <div className="flex gap-2.5">
+        <div className="flex flex-wrap gap-2.5">
           <Link
             href={`/imprimir/plano${conta ? `?conta=${conta.id}` : ""}`}
             target="_blank"
@@ -69,7 +69,7 @@ export default async function PaginaPlano({ searchParams }: PageProps<"/plano">)
           <span className="display text-[20px]">Pré-mercado</span>
         </h2>
 
-        <div className="grid grid-cols-[280px_minmax(0,1fr)_minmax(0,1fr)] gap-7">
+        <div className="grid grid-cols-[280px_minmax(0,1fr)_minmax(0,1fr)] gap-7 tab:grid-cols-1 tab:gap-5">
           <div className="flex flex-col gap-5">
             <div>
               <Rotulo>Gerenciamento</Rotulo>
@@ -215,7 +215,7 @@ function BlocoDoSetup({ setup }: { setup: SetupDoPlano }) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-3 gap-x-[26px] gap-y-[22px]">
+      <div className="grid grid-cols-3 gap-x-[26px] gap-y-[22px] tab:grid-cols-2 cel:grid-cols-1">
         {CAMPOS_DE_EXECUCAO.map(([campo, titulo]) =>
           setup[campo] ? (
             <div key={campo} className="flex flex-col gap-2.5">
