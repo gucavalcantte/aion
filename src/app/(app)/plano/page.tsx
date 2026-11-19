@@ -16,7 +16,7 @@ export default async function PaginaPlano({ searchParams }: PageProps<"/plano">)
 
   return (
     <>
-      <header className="mb-[18px] flex items-end justify-between med:flex-col med:items-start med:gap-3">
+      <header className="mb-[18px] flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div>
           <h1 className="display text-[30px] leading-[1.05]">Plano de trade</h1>
           <p className="mt-2 text-[14px] text-ink-3">

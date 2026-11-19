@@ -89,7 +89,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
   return (
     <>
-      <header className="mb-5 flex items-end justify-between med:flex-col med:items-start med:gap-3">
+      <header className="mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div>
           <h1 className="display text-[30px] leading-[1.05]">Perfomance</h1>
           <p className="mt-2 text-[14px] text-ink-3">
@@ -137,7 +137,8 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
 
       {/* FAIXA — estatísticas secundárias, uma tira só em vez de seis cards
           disputando atenção com o topo. */}
-      <div className="mb-5 grid grid-cols-6 divide-x divide-line med:grid-cols-3 med:gap-y-5 med:divide-x-0 cel:grid-cols-2 rounded-xl border border-line bg-card py-4 transition-colors hover:border-line-strong">
+      <div className="@container mb-5">
+      <div className="grid grid-cols-3 gap-y-5 rounded-xl border border-line bg-card py-4 transition-colors hover:border-line-strong cel:grid-cols-2 @min-[1180px]:grid-cols-6 @min-[1180px]:gap-y-0 @min-[1180px]:divide-x @min-[1180px]:divide-line">
         <ItemFaixa titulo="Trades" valor={inteiro(resumo.totalTrades)} extra={`${resumo.tradesNoMes} no mês`} />
 
         <ItemFaixa titulo="Assertividade" valor={percentual(resumo.assertividade)}>
@@ -203,6 +204,7 @@ export default async function PaginaPerfomance({ searchParams }: PageProps<"/per
             </>
           )}
         </ItemFaixa>
+      </div>
       </div>
 
       {/* CALENDÁRIO + CURVA */}

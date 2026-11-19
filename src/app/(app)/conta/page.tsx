@@ -22,7 +22,7 @@ export default async function PaginaConta({
 
   return (
     <>
-      <header className="mb-5 flex items-end justify-between med:flex-col med:items-start med:gap-3">
+      <header className="mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div>
           <h1 className="display text-[30px] leading-[1.05]">Contas</h1>
           <p className="mt-2 text-[14px] text-ink-3">
