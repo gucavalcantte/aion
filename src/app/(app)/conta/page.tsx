@@ -31,9 +31,14 @@ export default async function PaginaConta({
               : `${contas.length} ${contas.length === 1 ? "conta" : "contas"}${prontas > 0 ? ` · ${prontas} pronta${prontas > 1 ? "s" : ""} para saque` : ""}`}
           </p>
         </div>
-        <Link href="/conta/corretoras" className="text-[14px] text-ink-3 hover:text-ink">
-          Corretoras →
-        </Link>
+        <div className="flex items-center gap-5 text-[14px]">
+          <Link href="/conta/ativos" className="text-ink-3 hover:text-ink">
+            Ativos →
+          </Link>
+          <Link href="/conta/corretoras" className="text-ink-3 hover:text-ink">
+            Corretoras →
+          </Link>
+        </div>
       </header>
 
       {typeof erro === "string" && (
