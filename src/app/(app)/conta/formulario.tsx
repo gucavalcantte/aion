@@ -14,7 +14,23 @@ const rotulo = "mb-[9px] block text-[11.5px] font-semibold uppercase tracking-[0
 const campo =
   "h-[42px] w-full rounded-[9px] border border-line-strong bg-input px-[13px] text-[15px] text-ink outline-none placeholder:text-ink-4 focus:border-accent";
 
+/**
+ * A corretora marcada nasce da prop `conta`. O `key` é o que faz o formulário
+ * recomeçar quando muda a conta em edição: o Next não remonta a página só porque
+ * o `?editar=` mudou, então sem ele o React manteria a corretora anterior marcada
+ * e salvar qualquer campo mudaria a conta de corretora — e, com ela, de moeda.
+ */
 export function FormularioConta({
+  conta,
+  corretoras,
+}: {
+  conta: Conta | null;
+  corretoras: CorretoraCadastrada[];
+}) {
+  return <CorpoDoFormulario key={conta?.id ?? "nova"} conta={conta} corretoras={corretoras} />;
+}
+
+function CorpoDoFormulario({
   conta,
   corretoras,
 }: {
@@ -34,7 +50,6 @@ export function FormularioConta({
     <form
       action={acao}
       autoComplete="off"
-      key={conta?.id ?? "nova"}
       className="w-[352px] shrink-0 med:w-full rounded-xl border border-line bg-card p-[22px]"
     >
       <input type="hidden" name="id" defaultValue={conta?.id ?? ""} />

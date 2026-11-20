@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import { QuadroTick } from "@/components/quadro-tick";
 import type { Moeda } from "@/lib/ativos";
@@ -22,7 +22,17 @@ const opcao =
 /** 0.1 → "0,1": o campo mostra o número como o usuário digitaria. */
 const comoTexto = (n: number) => String(n).replace(".", ",");
 
+/**
+ * O estado dos campos nasce da prop `ativo`. O `key` é o que faz o formulário
+ * recomeçar quando muda o ativo em edição: o Next não remonta a página só porque
+ * o `?editar=` mudou, então sem ele o React manteria o estado anterior e o
+ * formulário mostraria os valores de outro ativo (ou vazios) com o `id` do clicado.
+ */
 export function FormularioAtivo({ ativo }: { ativo: AtivoCadastrado | null }) {
+  return <CorpoDoFormulario key={ativo?.id ?? "novo"} ativo={ativo} />;
+}
+
+function CorpoDoFormulario({ ativo }: { ativo: AtivoCadastrado | null }) {
   const [estado, acao, enviando] = useActionState(salvarAtivo, INICIAL);
   const editando = Boolean(ativo);
 
@@ -35,11 +45,22 @@ export function FormularioAtivo({ ativo }: { ativo: AtivoCadastrado | null }) {
   const [valorTick, setValorTick] = useState(ativo ? comoTexto(ativo.valorTick) : "");
   const [unidade, setUnidade] = useState<string>(ativo?.unidade ?? "pontos");
 
+  // Cadastro novo concluído: o formulário volta vazio em vez de ficar com o ativo recém-criado.
+  // (Edição concluída redireciona para a lista e o `key` do invólucro já remonta tudo.)
+  useEffect(() => {
+    if (!estado.ok) return;
+    /* eslint-disable react-hooks/set-state-in-effect -- limpa só depois da Server Action confirmar */
+    setCodigo("");
+    setNome("");
+    setTamanhoTick("");
+    setValorTick("");
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [estado]);
+
   return (
     <form
       action={acao}
       autoComplete="off"
-      key={ativo?.id ?? "novo"}
       className="w-[352px] shrink-0 med:w-full rounded-xl border border-line bg-card p-[22px]"
     >
       <input type="hidden" name="id" defaultValue={ativo?.id ?? ""} />

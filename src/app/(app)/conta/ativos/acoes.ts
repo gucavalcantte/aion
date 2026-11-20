@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { lerNumero, normalizarCodigoAtivo, validarEspecificacao } from "@/lib/contrato";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
-export type EstadoAtivo = { erro?: string };
+export type EstadoAtivo = { erro?: string; ok?: boolean };
 
 export async function salvarAtivo(
   _anterior: EstadoAtivo,
@@ -47,7 +47,10 @@ export async function salvarAtivo(
   }
 
   revalidatePath("/conta/ativos");
-  redirect("/conta/ativos");
+  // Edição volta para a lista (sai do modo "Editar"); cadastro novo fica na tela e o
+  // formulário se limpa sozinho ao receber `ok`.
+  if (id) redirect("/conta/ativos");
+  return { ok: true };
 }
 
 export async function removerAtivo(dados: FormData) {

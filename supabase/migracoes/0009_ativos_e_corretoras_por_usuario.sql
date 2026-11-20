@@ -7,6 +7,12 @@
 -- (valor_tick / tamanho_tick). A moeda da conta passa a vir da corretora.
 -- Ver docs/superpowers/specs/2026-11-20-ativos-e-corretoras-por-usuario-design.md
 --
+-- ORDEM: rode esta migração ANTES de fazer o merge/deploy do código desta
+-- mudança. O código novo lê as tabelas `ativos` e `corretoras`; se ele subir
+-- antes, Conta, Ativos, Corretoras, Backteste, Estudos e Plano quebram. O
+-- contrário é seguro: o app antigo continua funcionando contra o schema novo
+-- (só a edição na tela Corretoras antiga falha, pois `valor_ponto` agora é gerada).
+--
 -- COMO RODAR: faça um backup antes (Supabase → Database → Backups), cole o
 -- arquivo INTEIRO no SQL Editor e rode de uma vez. Não há ALTER TYPE ... ADD
 -- VALUE, então não precisa de etapas. Tudo roda numa transação: o bloco de
@@ -130,12 +136,20 @@ create trigger trg_semear_ativos_novo_usuario
   for each row execute function public.semear_ativos_novo_usuario();
 
 -- -----------------------------------------------------------------------------
--- 4. Corretoras que cada usuário já usa (B3 é BRL; as demais, USD — a regra antiga)
+-- 4. Corretoras que cada usuário já usa. A moeda vem das CONTAS que já existem
+--    nela (o dado real); só uma corretora sem contas usa a regra antiga
+--    (B3 é BRL; as demais, USD). Se uma corretora tiver contas em duas moedas,
+--    a asserção do fim aborta a migração em vez de escolher uma em silêncio.
 -- -----------------------------------------------------------------------------
 
 insert into public.corretoras (user_id, nome, moeda)
-select distinct x.user_id, x.corretora,
-  case when x.corretora = 'B3' then 'BRL'::moeda_conta else 'USD'::moeda_conta end
+select x.user_id, x.corretora,
+  coalesce(
+    (select c.moeda from public.contas c
+      where c.user_id = x.user_id and c.corretora::text = x.corretora
+      order by c.created_at, c.id limit 1),
+    case when x.corretora = 'B3' then 'BRL'::moeda_conta else 'USD'::moeda_conta end
+  )
 from (
   select user_id, corretora::text as corretora from public.valores_ponto_corretora
   union
@@ -433,6 +447,16 @@ begin
   where c.moeda is distinct from a.moeda;
   if n > 0 then
     raise exception 'ASSERÇÃO: % conta(s) mudaram de moeda', n;
+  end if;
+
+  -- Invariante do design: a moeda de cada conta é a da corretora. Sem isto, a
+  -- primeira edição de uma conta fora da regra antiga a viraria em silêncio.
+  select count(*) into n
+  from public.contas c
+  join public.corretoras k on k.user_id = c.user_id and k.nome = c.corretora
+  where c.moeda is distinct from k.moeda;
+  if n > 0 then
+    raise exception 'ASSERÇÃO: % conta(s) com moeda diferente da corretora (corretora com contas em duas moedas?) — ajuste os dados e rode de novo', n;
   end if;
 
   select count(*) into n
