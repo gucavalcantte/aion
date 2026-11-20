@@ -33,20 +33,5 @@ export function moedaDoAtivo(codigo: Ativo): Moeda {
   return ativo(codigo).moeda;
 }
 
-/**
- * Corretora (ou mesa) da conta. Fechada nesses valores, como os demais enums
- * do app — uma corretora nova é uma migration, não um cadastro.
- */
-export const CORRETORAS = ["Ylos", "ZeroMarkets", "Insinder", "Goat", "B3"] as const;
 /** Nome da corretora no cadastro do usuário (ex.: "Ylos"). */
 export type Corretora = string;
-
-/**
- * USD opera por Ylos, ZeroMarkets, Insinder ou Goat; BRL só tem B3 (única
- * praça do WIN). Insinder e Goat cobrem menos ativos que as demais (só o
- * lote micro de Ouro, Nasdaq e Dow) — a cobertura real vem das linhas de
- * `valores_ponto_corretora`, não daqui.
- */
-export function corretorasPorMoeda(moeda: Moeda): Corretora[] {
-  return moeda === "USD" ? ["Ylos", "ZeroMarkets", "Insinder", "Goat"] : ["B3"];
-}

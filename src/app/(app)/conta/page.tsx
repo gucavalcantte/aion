@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BotaoRemover } from "@/components/botao-remover";
 
 import { buscarConta, listarContas } from "@/lib/dados/contas";
+import { listarCorretorasDoUsuario } from "@/lib/dados/corretoras";
 import { moeda, percentual, VAZIO } from "@/lib/formato";
 import type { ContaComSaldo } from "@/lib/tipos";
 
@@ -15,7 +16,7 @@ export default async function PaginaConta({
   searchParams,
 }: PageProps<"/conta">) {
   const { editar, erro } = await searchParams;
-  const contas = await listarContas();
+  const [contas, corretoras] = await Promise.all([listarContas(), listarCorretorasDoUsuario()]);
   const emEdicao = typeof editar === "string" ? await buscarConta(editar) : null;
 
   const prontas = contas.filter((c) => c.progresso && c.progresso.percentual >= 100).length;
@@ -61,7 +62,7 @@ export default async function PaginaConta({
           )}
         </div>
 
-        <FormularioConta conta={emEdicao} />
+        <FormularioConta conta={emEdicao} corretoras={corretoras} />
       </div>
     </>
   );

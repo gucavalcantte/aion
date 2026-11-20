@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
-import { corretorasPorMoeda, type Corretora, type Moeda } from "@/lib/ativos";
+import type { CorretoraCadastrada } from "@/lib/dados/corretoras";
 import type { Conta } from "@/lib/tipos";
 
 import { salvarConta, type EstadoConta } from "./acoes";
@@ -14,19 +14,21 @@ const rotulo = "mb-[9px] block text-[11.5px] font-semibold uppercase tracking-[0
 const campo =
   "h-[42px] w-full rounded-[9px] border border-line-strong bg-input px-[13px] text-[15px] text-ink outline-none placeholder:text-ink-4 focus:border-accent";
 
-export function FormularioConta({ conta }: { conta: Conta | null }) {
+export function FormularioConta({
+  conta,
+  corretoras,
+}: {
+  conta: Conta | null;
+  corretoras: CorretoraCadastrada[];
+}) {
   const [estado, acao, enviando] = useActionState(salvarConta, INICIAL);
   const editando = Boolean(conta);
-  const [moedaSelecionada, setMoedaSelecionada] = useState<Moeda>(conta?.moeda ?? "USD");
-  const [corretoraSelecionada, setCorretoraSelecionada] = useState<Corretora>(
-    conta?.corretora ?? corretorasPorMoeda(conta?.moeda ?? "USD")[0],
+  const [corretoraSelecionada, setCorretoraSelecionada] = useState<string>(
+    conta?.corretora ?? corretoras[0]?.nome ?? "",
   );
-
-  function trocarMoeda(m: Moeda) {
-    setMoedaSelecionada(m);
-    const opcoes = corretorasPorMoeda(m);
-    if (!opcoes.includes(corretoraSelecionada)) setCorretoraSelecionada(opcoes[0]);
-  }
+  // A moeda da conta é a da corretora (o banco a define); aqui só serve para os rótulos.
+  const moedaSelecionada =
+    corretoras.find((c) => c.nome === corretoraSelecionada)?.moeda ?? conta?.moeda ?? "USD";
 
   return (
     <form
@@ -73,45 +75,38 @@ export function FormularioConta({ conta }: { conta: Conta | null }) {
         </fieldset>
 
         <fieldset>
-          <legend className={rotulo}>Moeda da conta</legend>
-          <div className="flex gap-1 rounded-[9px] border border-line-strong bg-input p-[3px]">
-            {(["USD", "BRL"] as const).map((m) => (
-              <label key={m} className="flex-1">
-                <input
-                  type="radio"
-                  name="moeda"
-                  value={m}
-                  checked={moedaSelecionada === m}
-                  onChange={() => trocarMoeda(m)}
-                  className="peer sr-only"
-                />
-                <span className="block cursor-pointer rounded-md py-[7px] text-center text-[14.5px] font-medium text-ink-3 peer-checked:bg-raised peer-checked:text-ink">
-                  {m === "USD" ? "Dólar" : "Real"}
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset>
           <legend className={rotulo}>Corretora</legend>
-          <div className="flex gap-1 rounded-[9px] border border-line-strong bg-input p-[3px]">
-            {corretorasPorMoeda(moedaSelecionada).map((c) => (
-              <label key={c} className="flex-1">
-                <input
-                  type="radio"
-                  name="corretora"
-                  value={c}
-                  checked={corretoraSelecionada === c}
-                  onChange={() => setCorretoraSelecionada(c)}
-                  className="peer sr-only"
-                />
-                <span className="block cursor-pointer rounded-md py-[7px] text-center text-[14.5px] font-medium text-ink-3 peer-checked:bg-raised peer-checked:text-ink">
-                  {c}
-                </span>
-              </label>
-            ))}
-          </div>
+          {corretoras.length === 0 ? (
+            <p className="text-[13.5px] leading-relaxed text-ink-3">
+              Você ainda não tem corretoras.{" "}
+              <Link href="/conta/corretoras" className="text-accent-soft">Cadastre uma corretora primeiro</Link>
+              {" "}— a conta usa a moeda e os valores dos ativos dela.
+            </p>
+          ) : (
+            <>
+              <div className="flex flex-wrap gap-1 rounded-[9px] border border-line-strong bg-input p-[3px]">
+                {corretoras.map((c) => (
+                  <label key={c.id} className="min-w-[96px] flex-1">
+                    <input
+                      type="radio"
+                      name="corretora"
+                      value={c.nome}
+                      checked={corretoraSelecionada === c.nome}
+                      onChange={() => setCorretoraSelecionada(c.nome)}
+                      className="peer sr-only"
+                    />
+                    <span className="block cursor-pointer rounded-md px-2 py-[7px] text-center text-[14.5px] font-medium text-ink-3 peer-checked:bg-raised peer-checked:text-ink">
+                      {c.nome}
+                      <span className="ml-1.5 text-[12px] text-ink-4">{c.moeda === "USD" ? "US$" : "R$"}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+              <p className="mt-2 text-[12px] leading-relaxed text-ink-4">
+                A moeda da conta ({moedaSelecionada === "USD" ? "dólar" : "real"}) vem da corretora.
+              </p>
+            </>
+          )}
         </fieldset>
 
         <div>
@@ -160,13 +155,22 @@ export function FormularioConta({ conta }: { conta: Conta | null }) {
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={enviando}
-          className="h-10 rounded-[9px] bg-accent text-[14.5px] font-semibold text-accent-ink disabled:opacity-60"
-        >
-          {enviando ? "Salvando…" : editando ? "Salvar alterações" : "Criar conta"}
-        </button>
+        {corretoras.length === 0 ? (
+          <Link
+            href="/conta/corretoras"
+            className="flex h-10 items-center justify-center rounded-[9px] border border-accent/60 text-[14.5px] font-semibold text-accent-soft"
+          >
+            Cadastrar uma corretora
+          </Link>
+        ) : (
+          <button
+            type="submit"
+            disabled={enviando}
+            className="h-10 rounded-[9px] bg-accent text-[14.5px] font-semibold text-accent-ink disabled:opacity-60"
+          >
+            {enviando ? "Salvando…" : editando ? "Salvar alterações" : "Criar conta"}
+          </button>
+        )}
       </div>
     </form>
   );
