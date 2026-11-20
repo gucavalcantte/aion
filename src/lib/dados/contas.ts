@@ -41,7 +41,7 @@ export async function listarContas(): Promise<ContaComSaldo[]> {
       mlpt: n(conta.mlpt),
       mlpd: n(conta.mlpd),
       moeda: (conta.moeda ?? "USD") as Moeda,
-      corretora: (conta.corretora ?? "Ylos") as Corretora,
+      corretora: conta.corretora as Corretora,
       saldo_atual: saldo,
       trades: resultados.length,
       progresso: progressoDaMeta(saldo, n(conta.saldo_inicial), conta.meta === null ? null : n(conta.meta)),
@@ -63,7 +63,7 @@ export async function contaPadraoParaBackteste(): Promise<ContaPadraoBackteste> 
     .maybeSingle();
   if (error) throw error;
   if (!data) return { mlpt: null, corretora: null };
-  return { mlpt: n(data.mlpt), corretora: (data.corretora ?? "Ylos") as Corretora };
+  return { mlpt: n(data.mlpt), corretora: data.corretora as Corretora };
 }
 
 export async function buscarConta(id: string): Promise<Conta | null> {
@@ -71,5 +71,5 @@ export async function buscarConta(id: string): Promise<Conta | null> {
   const { data, error } = await supabase.from("contas").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   if (!data) return null;
-  return { ...data, moeda: (data.moeda ?? "USD") as Moeda, corretora: (data.corretora ?? "Ylos") as Corretora } as Conta;
+  return { ...data, moeda: (data.moeda ?? "USD") as Moeda, corretora: data.corretora as Corretora } as Conta;
 }

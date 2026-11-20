@@ -68,7 +68,7 @@ export async function contasParaSeletor() {
     mlpt: n(c.mlpt),
     mlpd: n(c.mlpd),
     moeda: (c.moeda ?? "USD") as Moeda,
-    corretora: (c.corretora ?? "Ylos") as Corretora,
+    corretora: c.corretora as Corretora,
   })) as Conta[];
 }
 

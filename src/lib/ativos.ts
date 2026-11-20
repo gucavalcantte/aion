@@ -16,10 +16,11 @@ export const ATIVOS = [
   { codigo: "WIN", nome: "Mini Índice", moeda: "BRL" },
 ] as const;
 
-export type Ativo = (typeof ATIVOS)[number]["codigo"];
-export type Moeda = (typeof ATIVOS)[number]["moeda"];
+/** Código do ativo no cadastro do usuário (ex.: "MES"). Cada usuário cadastra os seus. */
+export type Ativo = string;
+export type Moeda = "USD" | "BRL";
 
-const PORCODIGO = new Map(ATIVOS.map((a) => [a.codigo, a]));
+const PORCODIGO = new Map<string, (typeof ATIVOS)[number]>(ATIVOS.map((a) => [a.codigo, a]));
 
 export function ativo(codigo: Ativo) {
   const a = PORCODIGO.get(codigo);
@@ -37,7 +38,8 @@ export function moedaDoAtivo(codigo: Ativo): Moeda {
  * do app — uma corretora nova é uma migration, não um cadastro.
  */
 export const CORRETORAS = ["Ylos", "ZeroMarkets", "Insinder", "Goat", "B3"] as const;
-export type Corretora = (typeof CORRETORAS)[number];
+/** Nome da corretora no cadastro do usuário (ex.: "Ylos"). */
+export type Corretora = string;
 
 /**
  * USD opera por Ylos, ZeroMarkets, Insinder ou Goat; BRL só tem B3 (única
