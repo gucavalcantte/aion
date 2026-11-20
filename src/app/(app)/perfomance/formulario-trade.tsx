@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 
-import { ATIVOS, type Ativo, type Moeda } from "@/lib/ativos";
+import type { Ativo, Moeda } from "@/lib/ativos";
 import type { EspecificacaoAtivo } from "@/lib/dados/corretoras";
 import { fechamentoDeExecucoes, type ExecucaoTrade } from "@/lib/execucoes-trade";
 import { moeda, VAZIO } from "@/lib/formato";
@@ -64,13 +65,17 @@ export function FormularioTrade({
   aoFechar?: () => void;
 }) {
   const editando = Boolean(trade);
-  const ativosPermitidos = ATIVOS.filter(
-    (a) => (a.moeda === moedaConta && especificacoes[a.codigo]) || a.codigo === trade?.ativo,
-  );
+  // Os ativos vinculados à corretora da conta (as chaves de `especificacoes`), mais o
+  // ativo do próprio trade na edição, mesmo que tenha sido desvinculado depois.
+  const ativosPermitidos = Array.from(
+    new Set([...Object.keys(especificacoes), ...(trade ? [trade.ativo] : [])]),
+  )
+    .sort()
+    .map((codigo) => ({ codigo }));
   const dialogo = useRef<HTMLDialogElement>(null);
   const [estado, acao, enviando] = useActionState(salvarTrade, INICIAL);
 
-  const [ativo, setAtivo] = useState<Ativo>(trade?.ativo ?? ativosPermitidos[0]?.codigo ?? "MNQ");
+  const [ativo, setAtivo] = useState<Ativo>(trade?.ativo ?? ativosPermitidos[0]?.codigo ?? "");
   // "" = nada escolhido ainda (obrigatório); SEM_SETUP é a sentinela de "Sem setup".
   const [setupId, setSetupId] = useState(trade ? (trade.setup_id ?? SEM_SETUP) : "");
   const semSetup = setupId === SEM_SETUP;
@@ -234,6 +239,13 @@ export function FormularioTrade({
 
               <div>
                 <span className={rotulo}>Ativo</span>
+                {ativosPermitidos.length === 0 && (
+                  <p className="text-[13.5px] leading-relaxed text-ink-3">
+                    Esta corretora não tem ativos vinculados.{" "}
+                    <Link href="/conta/corretoras" className="text-accent-soft">Vincule em Corretoras</Link>{" "}
+                    para registrar trades nesta conta.
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-[7px]">
                   {ativosPermitidos.map((a) => (
                     <label key={a.codigo}>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { DIMENSOES, type Dimensao } from "@/lib/analise";
-import { ATIVOS } from "@/lib/ativos";
+import { listarAtivos } from "@/lib/dados/ativos";
 import { listarBacktestes, totalDoTempo } from "@/lib/dados/backtestes";
 import { contaPadraoParaBackteste } from "@/lib/dados/contas";
 import { especificacoesDaCorretora } from "@/lib/dados/corretoras";
@@ -34,14 +34,16 @@ export default async function PaginaTempo({
   const temFiltro = Boolean(filtros.setup || filtros.ativo || filtros.operacao);
   const dimensao = (DIMENSOES.find((d) => d.chave === dim)?.chave ?? "localizacao") as Dimensao;
 
-  const [{ linhas, resumo }, setups, total, contaPadrao] = await Promise.all([
+  const [{ linhas, resumo }, setups, total, contaPadrao, ativos] = await Promise.all([
     listarBacktestes(tempo, filtros),
     listarSetupsSimples(),
     totalDoTempo(tempo),
     contaPadraoParaBackteste(),
+    listarAtivos(),
   ]);
 
-  const especificacoes = await especificacoesDaCorretora(contaPadrao.corretora ?? "Ylos");
+  // Sem conta cadastrada não há corretora: a calculadora de contratos simplesmente não aparece.
+  const especificacoes = contaPadrao.corretora ? await especificacoesDaCorretora(contaPadrao.corretora) : {};
 
   const nomeDoSetup = setups.find((s) => s.id === filtros.setup)?.nome;
 
@@ -95,6 +97,7 @@ export default async function PaginaTempo({
             <Filtros
               tempo={tempo}
               setups={setups}
+              ativos={ativos}
               atual={filtros}
               dim={typeof dim === "string" ? dim : undefined}
             />
@@ -113,6 +116,8 @@ export default async function PaginaTempo({
             setups={setups}
             mlpt={contaPadrao.mlpt}
             especificacoes={especificacoes}
+            ativos={ativos}
+            moedaConta={contaPadrao.moeda ?? "USD"}
           />
 
           <div id="contexto" className="mt-5 scroll-mt-6">
@@ -127,11 +132,13 @@ export default async function PaginaTempo({
 function Filtros({
   tempo,
   setups,
+  ativos,
   atual,
   dim,
 }: {
   tempo: string;
   setups: { id: string; nome: string }[];
+  ativos: { codigo: string; nome: string }[];
   atual: { setup?: string; ativo?: string; operacao?: string };
   dim?: string;
 }) {
@@ -165,7 +172,7 @@ function Filtros({
         className={`${estilo(Boolean(atual.ativo))} num`}
       >
         <option value="">Todos os ativos</option>
-        {ATIVOS.map((a) => (
+        {ativos.map((a) => (
           <option key={a.codigo} value={a.codigo}>{a.codigo} · {a.nome}</option>
         ))}
       </select>

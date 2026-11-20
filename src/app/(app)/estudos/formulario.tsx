@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 
-import { ATIVOS } from "@/lib/ativos";
 import { TEMPOS_GRAFICOS } from "@/lib/opcoes";
 import type { Estudo } from "@/lib/tipos";
 
@@ -18,11 +18,14 @@ const opcao =
 
 export function FormularioEstudo({
   dia,
+  ativos,
   estudo,
   aoFechar,
 }: {
   /** Data que o botão "Novo estudo" já traz preenchida. */
   dia: string;
+  /** Os ativos do cadastro do usuário. */
+  ativos: { codigo: string; nome: string }[];
   estudo?: Estudo & { imagem: string | null };
   aoFechar?: () => void;
 }) {
@@ -125,10 +128,17 @@ export function FormularioEstudo({
 
               <div>
                 <span className={rotulo}>Ativo</span>
+                {ativos.length === 0 && (
+                  <p className="text-[13.5px] leading-relaxed text-ink-3">
+                    Você ainda não tem ativos.{" "}
+                    <Link href="/conta/ativos" className="text-accent-soft">Cadastre em Ativos</Link>{" "}
+                    para registrar estudos.
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-[7px]">
-                  {ATIVOS.map((a) => (
+                  {ativos.map((a) => (
                     <label key={a.codigo}>
-                      <input type="radio" name="ativo" value={a.codigo} defaultChecked={(estudo?.ativo ?? "MNQ") === a.codigo} className="peer sr-only" />
+                      <input type="radio" name="ativo" value={a.codigo} defaultChecked={(estudo?.ativo ?? ativos[0]?.codigo) === a.codigo} className="peer sr-only" />
                       <span className={`num ${opcao}`}>{a.codigo}</span>
                     </label>
                   ))}

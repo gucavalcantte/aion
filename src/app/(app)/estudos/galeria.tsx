@@ -9,7 +9,7 @@ import { data as fData } from "@/lib/formato";
 import { removerEstudo } from "./acoes";
 import { FormularioEstudo } from "./formulario";
 
-export function Galeria({ estudos }: { estudos: EstudoComImagem[] }) {
+export function Galeria({ estudos, ativos }: { estudos: EstudoComImagem[]; ativos: { codigo: string; nome: string }[] }) {
   const [ampliada, setAmpliada] = useState<EstudoComImagem | null>(null);
   const [editando, setEditando] = useState<EstudoComImagem | null>(null);
 
@@ -78,7 +78,7 @@ export function Galeria({ estudos }: { estudos: EstudoComImagem[] }) {
       </div>
 
       {editando && (
-        <FormularioEstudo dia={editando.data} estudo={editando} aoFechar={() => setEditando(null)} />
+        <FormularioEstudo dia={editando.data} ativos={ativos} estudo={editando} aoFechar={() => setEditando(null)} />
       )}
 
       {ampliada?.imagem && (
