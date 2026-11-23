@@ -18,6 +18,20 @@
 -- VALUE, então não precisa de etapas. Tudo roda numa transação: o bloco de
 -- asserções no fim desfaz TUDO se algum valor por ponto, trade ou conta
 -- mudou durante a migração.
+--
+-- HISTÓRICO DE APLICAÇÃO (produção, 2026-11-23): o SQL Editor do Supabase
+-- executou o arquivo comando a comando, sem manter a transação. Todo o DDL foi
+-- gravado, mas o bloco de asserções do fim falhou com `relation "_vpc_antes"
+-- does not exist` (as tabelas temporárias `on commit drop` já tinham sumido) —
+-- ou seja, a promessa de "desfaz TUDO" acima NÃO valeu nessa execução. As
+-- conferências foram refeitas à mão contra o estado final: 7 ativos por
+-- usuário, moeda das contas = moeda da corretora, triggers e RLS presentes,
+-- valores por ponto dos vínculos preservados. Diferenças achadas eram dado
+-- anterior à migração, não efeito dela: contas de um usuário marcadas como
+-- `Ylos` (default da 0003) que na prática eram Goat/Insinder — corrigidas por
+-- update — e 2 trades de ZeroMarkets com valor por ponto da Ylos congelado
+-- pelo backfill da 0003. Para rodar de novo em outro banco, prefira o
+-- `psql -f` ou a CLI do Supabase, que respeitam o begin/commit.
 -- =============================================================================
 
 begin;
