@@ -20,7 +20,6 @@ import {
   stopEmDolar,
   tetoDeConfianca,
 } from "./metricas";
-import { moedaDoAtivo } from "./ativos";
 import { moeda } from "./formato";
 
 let falhas = 0;
@@ -189,10 +188,6 @@ eq(
     sem: { trades: 2, assertividade: 50, riscoRetorno: 1 },
   },
 );
-
-// WIN entrou como ativo em BRL — os outros seis continuam em USD
-eq("moeda nativa do WIN", moedaDoAtivo("WIN"), "BRL");
-eq("moeda nativa do MES", moedaDoAtivo("MES"), "USD");
 
 // moeda() exige a moeda — símbolo muda, formatação decimal não
 eq("moeda em dólar", moeda(1234.5, "USD"), "$1.234,50");

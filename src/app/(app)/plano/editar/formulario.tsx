@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 
-import { ATIVOS, type Moeda } from "@/lib/ativos";
+import type { Moeda } from "@/lib/ativos";
 import type { Plano } from "@/lib/dados/plano";
 import { moeda } from "@/lib/formato";
 
@@ -19,9 +19,12 @@ const AVISO_SAIDA = "Você tem alterações não salvas neste plano. Sair sem sa
 
 export function FormularioPlano({
   plano,
+  ativos,
   conta,
 }: {
   plano: Plano | null;
+  /** Os ativos do cadastro do usuário. */
+  ativos: { codigo: string; nome: string }[];
   conta: { id: string; numero: string; moeda: Moeda; mlpt: number; mlpd: number } | null;
 }) {
   const [estado, acao, enviando] = useActionState(salvarPlano, INICIAL);
@@ -158,7 +161,7 @@ export function FormularioPlano({
           <section className="rounded-xl border border-line bg-card p-[22px]">
             <span className={rotulo}>Ativos autorizados</span>
             <div className="mt-3.5 flex flex-wrap gap-2">
-              {ATIVOS.map((a) => (
+              {ativos.map((a) => (
                 <label key={a.codigo}>
                   <input
                     type="checkbox"

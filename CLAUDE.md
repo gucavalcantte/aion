@@ -42,7 +42,6 @@ compartilhado — nem os setups. Toda consulta filtra por `user_id`.
 
 | Enum | Valores |
 |---|---|
-| `ativo` | MES, MYM, MNQ, MGC, MCL, MBT, WIN |
 | `tempo_grafico` | 1m, 2m, 3m, 5m, 15m, 60m, 1D |
 | `periodo` | Manhã, Tarde, Noite |
 | `operacao` | Compra, Venda |
@@ -55,35 +54,52 @@ compartilhado — nem os setups. Toda consulta filtra por `user_id`.
 | `tipo_conta` | Remunerada, Simulador |
 | `tipo_lancamento` | Saque, Aporte |
 
-### 3.2 Tabela de ativos (constante da aplicação, não editável pelo usuário)
+### 3.2 Ativos e corretoras (cadastros de cada usuário)
 
-| Código | Nome | Moeda |
-|---|---|---|
-| MES | S&P | USD |
-| MYM | Dow | USD |
-| MNQ | Nasdaq | USD |
-| MGC | Gold | USD |
-| MCL | Oil | USD |
-| MBT | Bitcoin | USD |
-| WIN | Mini Índice | BRL |
+**Ativos e corretoras não são mais listas fixas.** Cada usuário cadastra os
+seus (tabelas `ativos` e `corretoras`, seção 4), vincula um ao outro e
+ajusta os valores sem depender do dono do app. Corretora e ativo continuam
+gravados como **texto** (o código `MES`, o nome `Ylos`) em contas, trades,
+backtestes e estudos, ligados ao cadastro por chave estrangeira composta
+`(user_id, código|nome)` com `on update cascade` — renomear propaga.
 
-**Valor por ponto e unidade não são mais fixos por ativo — variam por
-corretora.** Vivem em `valores_ponto_corretora` (seção 4), uma linha por
-ativo e por corretora, editável na tela Corretoras (5.1). O rótulo da
-unidade muda o label do campo de stop conforme o ativo *e* a corretora da
-conta escolhida — foi o Oil (MCL) que forçou essa mudança: a Ylos mede o
-stop dele em `%` (1% = 1,00 de movimento = $100 por contrato), a
-ZeroMarkets mede o mesmo MCL em `pontos`. Uma constante única por ativo não
-tinha como representar as duas convenções ao mesmo tempo. Os outros seis
-ativos concordam em `pontos` nas duas corretoras, mas o dado passou a viver
-por corretora do mesmo jeito.
+**Catálogo padrão.** Todo usuário (os existentes na migração 0009 e os novos,
+por trigger em `auth.users`) nasce com estes 7 ativos, que ele pode editar,
+remover (se não tiverem registros) ou complementar:
 
-**Moeda por ativo, sem conversão.** Os campos derivados de `valor_ponto`
-(`stop_dolar` em `trades`, MLPT/MLPD na conta, etc.) herdam a moeda do próprio
-ativo — WIN produz valores em R$, os demais em US$. O app não converte entre
-moedas; o nome dos campos (`stop_dolar`, "em USD") é histórico de quando só
-havia ativos em dólar e deve ser lido como "na moeda do ativo/conta", não
-literalmente USD.
+| Código | Nome | Moeda do padrão | Tick | Valor do tick | Unidade | = valor/ponto |
+|---|---|---|---|---|---|---|
+| MES | S&P | USD | 0,25 | 1,25 | pontos | 5 |
+| MYM | Dow | USD | 1 | 0,50 | pontos | 0,5 |
+| MNQ | Nasdaq | USD | 0,25 | 0,50 | pontos | 2 |
+| MGC | Gold | USD | 0,10 | 1,00 | pontos | 10 |
+| MCL | Oil | USD | 0,01 | 1,00 | % | 100 |
+| MBT | Bitcoin | USD | 5 | 0,50 | pontos | 0,1 |
+| WIN | Mini Índice | BRL | 5 | 1,00 | pontos | 0,2 |
+
+**Tick, não valor por ponto.** O usuário informa o **tamanho do tick** e o
+**valor do tick**; o **valor por ponto é calculado** (`valor_tick ÷
+tamanho_tick`, coluna gerada) — nunca digitado (regra 6). O cadastro mostra
+um quadro de exemplo ao vivo ("1 tick = 0,1 pontos = $1,00 / 1 ponto = 10
+ticks = $10,00 / Ex.: stop de 10 pontos × 1 contrato = $100,00"). A
+**unidade** (`pontos` | `dólares` | `%`) muda o rótulo do campo de stop:
+foi o Oil (MCL) que a tornou por corretora — a Ylos mede o stop dele em `%`
+(1% = 1,00 de movimento = $100 por contrato), a ZeroMarkets em `pontos`.
+
+**O padrão vive no ativo; cada corretora tem a sua cópia.** Ao vincular um
+ativo a uma corretora, ela recebe uma **cópia** do padrão do ativo (não é
+herança): mudar o padrão depois não altera vínculos existentes, e "Voltar ao
+padrão" recopia o padrão atual do ativo. É a corretora quem manda em quanto
+vale um ponto — o MES vale 5 na Ylos e 1 na ZeroMarkets.
+
+**Moeda é da corretora, sem conversão.** Qualquer ativo pode ser vinculado a
+corretora de qualquer moeda (há mesas que operam o índice em dólar). Os
+campos derivados de `valor_ponto` (`stop_dolar` em `trades`, MLPT/MLPD na
+conta, etc.) herdam a moeda da **corretora/conta**. O app não converte entre
+moedas; o nome dos campos (`stop_dolar`, "em USD") é histórico e deve ser lido
+como "na moeda da conta", não literalmente USD. Quando o padrão do ativo está
+em outra moeda que a da corretora (ex.: WIN, padrão em R$, numa mesa em US$),
+a tela Corretoras avisa para conferir os valores.
 
 ### 3.3 Risco/retorno
 
@@ -105,42 +121,48 @@ Todas as tabelas têm `id`, `user_id`, `created_at`.
 ### `contas`
 - `numero` (text) — identificador da conta
 - `tipo_conta` (enum)
-- `moeda` (enum `USD` | `BRL`) — moeda de exibição da conta. Não converte:
-  uma conta em BRL deveria operar só ativos nativos em BRL (hoje, só WIN).
-  Default `USD` para não quebrar contas já cadastradas. No formulário de trade
-  (Perfomance), o seletor de ativo filtra pela moeda da conta escolhida — uma
-  conta em USD nunca oferece WIN, e uma conta em BRL só oferece WIN.
-- `corretora` (enum `Ylos` | `ZeroMarkets` | `Insinder` | `Goat` | `B3`) — de qual
-  corretora (ou mesa) a conta opera. Trava por moeda, mesmo esquema do campo
-  `moeda` acima: uma conta em BRL só pode ser `B3` (única praça do WIN); uma
-  conta em USD pode ser `Ylos`, `ZeroMarkets`, `Insinder` ou `Goat`. No
-  formulário de Conta, o seletor de corretora filtra pelas opções válidas para
-  a moeda escolhida. Default `Ylos` para as contas já cadastradas em USD (o
-  que já valia, implicitamente, antes de existir o conceito); a conta em BRL
-  virou `B3` na migração. É essa coluna que decide qual linha de
-  `valores_ponto_corretora` (abaixo) os trades da conta usam.
+- `corretora` (text) — de qual das **corretoras do usuário** a conta opera;
+  chave estrangeira `(user_id, corretora)` → `corretoras` (`on update
+  cascade`, `on delete restrict`: corretora com contas não pode ser apagada).
+  É essa coluna que decide qual linha de `valores_ponto_corretora` os trades
+  da conta usam.
+- `moeda` (enum `USD` | `BRL`) — moeda de exibição da conta. **Não é
+  digitada: o banco a preenche com a moeda da corretora** (trigger). Não
+  converte.
 - `saldo_inicial` (numeric) — **saldo atual é sempre calculado**, nunca digitado
 - `meta` (numeric, **nullable**) — lucro acumulado necessário para liberar o saque.
   Nulo = conta sem meta (simulador, por exemplo)
-- `mlpt` (numeric) — perda máxima aceita por trade, em USD
-- `mlpd` (numeric) — perda máxima aceita no dia, em USD
+- `mlpt` (numeric) — perda máxima aceita por trade, na moeda da conta
+- `mlpd` (numeric) — perda máxima aceita no dia, na moeda da conta
 - `is_padrao` (boolean) — a conta pré-selecionada na Perfomance; só uma por usuário
 
+### `ativos` — por usuário
+`codigo` (text, maiúsculas e dígitos, 1–10) · `nome` · `moeda` (moeda dos
+valores **padrão**; não restringe onde o ativo é usado) · `tamanho_tick` ·
+`valor_tick` · `unidade` · `valor_ponto` (**gerada**: `valor_tick ÷
+tamanho_tick`). `unique (user_id, codigo)`. Ver seção 3.2 para o catálogo
+padrão. Remover só sem trades, backtestes e estudos (`on delete restrict`);
+alterar o código propaga (`on update cascade`) e também `plano.ativos`, por
+trigger.
+
+### `corretoras` — por usuário
+`nome` (1–40 caracteres, único por usuário **sem diferenciar maiúsculas**) ·
+`moeda`. A moeda só muda se nenhuma conta usa a corretora. Renomear propaga
+para contas e vínculos.
+
 ### `valores_ponto_corretora`
-Especificação de contrato por corretora — **por usuário, não global** (mesma
-regra da seção 1: nada é compartilhado entre os quatro). Uma linha por ativo
-que a corretora cobre: Ylos e ZeroMarkets cobrem os seis ativos em USD; B3
-cobre só WIN; Insinder e Goat cobrem só o lote micro de três ativos — Ouro
-(MGC), Nasdaq (MNQ) e Dow Jones (MYM). A cobertura não é uma regra fixa em
-código — é simplesmente quais linhas existem para aquela corretora; o
-formulário de trade (5.3) só oferece um ativo se houver linha cadastrada
+Vínculo ativo × corretora, com a especificação de contrato **daquela
+corretora** — **por usuário, não global** (mesma regra da seção 1: nada é
+compartilhado). A cobertura não é regra em código: é quais linhas existem para
+a corretora; o formulário de trade (5.3) só oferece um ativo se houver linha
 para a corretora da conta selecionada.
 
-`corretora` (enum) · `ativo` (enum) · `valor_ponto` (numeric) · `unidade`
-(text: `pontos` | `dólares` | `%`)
-
-Editável na tela Corretoras (5.1). É daqui que `trades.valor_ponto` (abaixo)
-busca o valor no momento do cadastro.
+`corretora` (text, FK) · `ativo` (text, FK) · `tamanho_tick` ·
+`valor_tick` · `valor_ponto` (**gerada**, `valor_tick ÷ tamanho_tick`) ·
+`unidade` (text: `pontos` | `dólares` | `%`). Criada como **cópia** do
+padrão do ativo (RPCs `criar_corretora`, `vincular_ativo`,
+`voltar_ao_padrao`) e editável na tela Corretoras (5.1). É daqui que
+`trades.valor_ponto` (abaixo) busca o valor no momento do cadastro.
 
 ### `lancamentos`
 Movimentações de dinheiro que **não são resultado de operação**.
@@ -190,7 +212,7 @@ Parte do plano que não pertence a um setup específico (o "pré-mercado"):
 - `janela_inicio`, `janela_fim` (time) — janela operacional
 - `min_trades`, `max_trades` (int)
 - `max_loss_seguidos` (int) — depois de quantos losses seguidos encerra o dia
-- `ativos` (array de `ativo`) — quais ativos o plano autoriza
+- `ativos` (array de códigos de ativo, `text[]`) — quais ativos o plano autoriza
 - `regras` (text[]) — uma linha por regra
 - `checklist_abertura` (text[])
 - `checklist_fechamento` (text[])
@@ -245,7 +267,9 @@ descrevem a mesma coisa):
   cadastro**: editar o valor por ponto de uma corretora depois na tela
   Corretoras não muda trades já salvos, só passa a valer para os novos.
   Trocar a conta ou o ativo de um trade existente recalcula o snapshot com o
-  valor vigente naquele momento.
+  valor vigente naquele momento. **Renomear o código de um ativo não
+  recalcula** (o trigger percebe que o código antigo deixou de existir no
+  cadastro e mantém o snapshot).
 - `stop_dolar` = `pontos_stop × valor_ponto × contratos`
 - `resultado_pontos` = `resultado ÷ (valor_ponto × contratos)`
 - `status` = `resultado > 0 → Gain` · `resultado < 0 → Loss` · `resultado = 0 → Zerado`
@@ -311,16 +335,29 @@ Auth (e-mail + senha). Logout volta para esta tela.
 
 ### 5.1 Conta
 
-CRUD simples: número, tipo, moeda, corretora, saldo inicial, MLPT, marcar
-como padrão. Ações: editar, remover. Sem filtros.
+CRUD simples: número, tipo, corretora (das **corretoras do usuário**), saldo
+inicial, MLPT, marcar como padrão. A moeda não é escolhida: vem da corretora
+e aparece ao lado dela. Sem nenhuma corretora cadastrada, o formulário
+mostra "Cadastre uma corretora primeiro" com link. Ações: editar, remover.
+Sem filtros. Links no topo: **Ativos** e **Corretoras**.
 
-**Corretoras** — link no topo da tela. Lista as cinco corretoras/mesas, cada
-uma com a tabela dos ativos que ela cobre (Ylos/ZeroMarkets: os seis em USD;
-Insinder/Goat: só lote micro de Ouro, Nasdaq e Dow; B3: só WIN), com **valor
-por ponto e unidade editáveis inline** por linha —
-mesmo padrão de "clica, edita a célula, confirma" do cadastro inline do
-Backteste (5.2). Editar aqui vale para toda conta marcada com aquela
-corretora, não só a que abriu o link.
+**Ativos** (`/conta/ativos`) — lista os ativos do usuário (código, nome, tick,
+valor do tick, valor do ponto calculado, unidade) e o formulário "Novo
+ativo"/"Editar ativo": código, nome, moeda dos valores padrão, tamanho do
+tick, valor do tick, unidade do stop e o **quadro de exemplo ao vivo**.
+Editar o padrão não altera corretoras já vinculadas. Remover é bloqueado se
+houver trades, backtestes ou estudos com o ativo.
+
+**Corretoras** (`/conta/corretoras`) — um card por corretora do usuário (nome,
+moeda, número de contas; Editar e Remover) com a tabela dos ativos vinculados:
+ativo, tick, valor do tick, valor do ponto (calculado), unidade. Por linha:
+**Editar** inline (mesmo padrão "clica, edita a célula, confirma" do cadastro
+inline do Backteste, 5.2, com o quadro de exemplo), **Voltar ao padrão**
+(visível só quando difere do padrão do ativo) e **Desvincular**. "Vincular
+ativo" adiciona um ativo ainda não vinculado (entra com o padrão). "Nova
+corretora": nome, moeda e os ativos que cobre (cada um entra com o padrão).
+Editar aqui vale para toda conta marcada com aquela corretora, não só a que
+abriu o link; trades já registrados não mudam.
 
 ### 5.2 Backteste
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AvisoDeConstancia } from "@/components/aviso-constancia";
+import { listarAtivos } from "@/lib/dados/ativos";
 import { estudosDoMes, type EstudoComImagem } from "@/lib/dados/estudos";
 import { inteiro } from "@/lib/formato";
 
@@ -16,7 +17,7 @@ export default async function PaginaEstudos({ searchParams }: PageProps<"/estudo
   const params = await searchParams;
   const hoje = new Date().toISOString().slice(0, 10);
   const mes = typeof params.mes === "string" ? params.mes : hoje.slice(0, 7);
-  const { estudos, porDia } = await estudosDoMes(mes);
+  const [{ estudos, porDia }, ativos] = await Promise.all([estudosDoMes(mes), listarAtivos()]);
 
   const diaSelecionado =
     typeof params.dia === "string" && params.dia.startsWith(mes)
@@ -37,7 +38,7 @@ export default async function PaginaEstudos({ searchParams }: PageProps<"/estudo
         </div>
         <div className="flex flex-wrap gap-2.5">
           <SeletorMes mes={mes} />
-          <FormularioEstudo dia={diaSelecionado} />
+          <FormularioEstudo dia={diaSelecionado} ativos={ativos} />
         </div>
       </header>
 
@@ -75,7 +76,7 @@ export default async function PaginaEstudos({ searchParams }: PageProps<"/estudo
               </p>
             </div>
           ) : (
-            <Galeria estudos={doDia} />
+            <Galeria estudos={doDia} ativos={ativos} />
           )}
         </section>
       </div>

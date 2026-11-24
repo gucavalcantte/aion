@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 
-import { ATIVOS, type Ativo, type Moeda } from "@/lib/ativos";
+import { SelectComSeta } from "@/components/select-com-seta";
+import type { Ativo, Moeda } from "@/lib/ativos";
 import type { EspecificacaoAtivo } from "@/lib/dados/corretoras";
 import { fechamentoDeExecucoes, type ExecucaoTrade } from "@/lib/execucoes-trade";
 import { moeda, VAZIO } from "@/lib/formato";
@@ -64,13 +66,17 @@ export function FormularioTrade({
   aoFechar?: () => void;
 }) {
   const editando = Boolean(trade);
-  const ativosPermitidos = ATIVOS.filter(
-    (a) => (a.moeda === moedaConta && especificacoes[a.codigo]) || a.codigo === trade?.ativo,
-  );
+  // Os ativos vinculados à corretora da conta (as chaves de `especificacoes`), mais o
+  // ativo do próprio trade na edição, mesmo que tenha sido desvinculado depois.
+  const ativosPermitidos = Array.from(
+    new Set([...Object.keys(especificacoes), ...(trade ? [trade.ativo] : [])]),
+  )
+    .sort()
+    .map((codigo) => ({ codigo }));
   const dialogo = useRef<HTMLDialogElement>(null);
   const [estado, acao, enviando] = useActionState(salvarTrade, INICIAL);
 
-  const [ativo, setAtivo] = useState<Ativo>(trade?.ativo ?? ativosPermitidos[0]?.codigo ?? "MNQ");
+  const [ativo, setAtivo] = useState<Ativo>(trade?.ativo ?? ativosPermitidos[0]?.codigo ?? "");
   // "" = nada escolhido ainda (obrigatório); SEM_SETUP é a sentinela de "Sem setup".
   const [setupId, setSetupId] = useState(trade ? (trade.setup_id ?? SEM_SETUP) : "");
   const semSetup = setupId === SEM_SETUP;
@@ -234,6 +240,13 @@ export function FormularioTrade({
 
               <div>
                 <span className={rotulo}>Ativo</span>
+                {ativosPermitidos.length === 0 && (
+                  <p className="text-[13.5px] leading-relaxed text-ink-3">
+                    Esta corretora não tem ativos vinculados.{" "}
+                    <Link href="/conta/corretoras" className="text-accent-soft">Vincule em Corretoras</Link>{" "}
+                    para registrar trades nesta conta.
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-[7px]">
                   {ativosPermitidos.map((a) => (
                     <label key={a.codigo}>
@@ -276,21 +289,21 @@ export function FormularioTrade({
 
               <label>
                 <span className={rotulo}>Setup</span>
-                <select
+                <SelectComSeta
                   name="setup_id"
                   value={setupId}
                   onChange={(e) => {
                     setSetupId(e.target.value);
                     if (e.target.value === SEM_SETUP) setRespeitouPlano(false);
                   }}
-                  className={`${campo} appearance-none`}
+                  className={campo}
                 >
                   <option value="">Selecione</option>
                   <option value={SEM_SETUP}>Sem setup</option>
                   {setups.map((s) => (
                     <option key={s.id} value={s.id}>{s.nome}</option>
                   ))}
-                </select>
+                </SelectComSeta>
               </label>
 
               <div>
@@ -349,17 +362,17 @@ export function FormularioTrade({
                 {teveParciais && (
                   <div className="mt-4 flex flex-col gap-2.5">
                     {linhas.map((l, i) => (
-                      <div key={i} className="grid grid-cols-[1fr_100px_1fr_32px] items-center gap-2">
-                        <select
+                      <div key={i} className="grid grid-cols-[1.5fr_92px_1fr_32px] items-center gap-2">
+                        <SelectComSeta
                           name="execucao_tipo"
                           value={l.tipo}
                           onChange={(e) => atualizarLinha(i, "tipo", e.target.value)}
-                          className={`${campo} h-[38px] appearance-none text-[14px]`}
+                          className={`${campo} h-[38px] text-[14px]`}
                         >
                           {TIPOS_EXECUCAO.map((t) => (
                             <option key={t} value={t}>{t}</option>
                           ))}
-                        </select>
+                        </SelectComSeta>
                         <input
                           name="execucao_quantidade"
                           inputMode="decimal"

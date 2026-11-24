@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { corretorasPorMoeda, type Corretora, type Moeda } from "@/lib/ativos";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 export type EstadoConta = { erro?: string };
@@ -24,7 +23,6 @@ export async function salvarConta(
   const id = String(dados.get("id") ?? "").trim();
   const numeroConta = String(dados.get("numero") ?? "").trim();
   const tipo = String(dados.get("tipo_conta") ?? "");
-  const moedaConta = String(dados.get("moeda") ?? "");
   const corretoraConta = String(dados.get("corretora") ?? "");
   const saldoInicial = numero(dados.get("saldo_inicial"));
   const meta = numero(dados.get("meta"));
@@ -34,10 +32,7 @@ export async function salvarConta(
 
   if (!numeroConta) return { erro: "Informe o número da conta." };
   if (tipo !== "Remunerada" && tipo !== "Simulador") return { erro: "Escolha o tipo da conta." };
-  if (moedaConta !== "USD" && moedaConta !== "BRL") return { erro: "Escolha a moeda da conta." };
-  if (!corretorasPorMoeda(moedaConta as Moeda).includes(corretoraConta as Corretora)) {
-    return { erro: "Escolha uma corretora válida para a moeda selecionada." };
-  }
+  if (!corretoraConta) return { erro: "Escolha a corretora da conta." };
   if (saldoInicial === null) return { erro: "Informe o saldo inicial." };
   if (mlpt === null || mlpt <= 0) return { erro: "Informe o MLPT (maior que zero)." };
   if (mlpd === null || mlpd <= 0) return { erro: "Informe o MLPD (maior que zero)." };
@@ -57,7 +52,7 @@ export async function salvarConta(
   const campos = {
     numero: numeroConta,
     tipo_conta: tipo,
-    moeda: moedaConta,
+    // A moeda não é enviada: o banco a define a partir da corretora.
     corretora: corretoraConta,
     saldo_inicial: saldoInicial,
     meta,
@@ -70,7 +65,10 @@ export async function salvarConta(
     ? await supabase.from("contas").update(campos).eq("id", id)
     : await supabase.from("contas").insert(campos);
 
-  if (error) return { erro: error.message };
+  if (error) {
+    if (error.message.includes("corretora_inexistente")) return { erro: "Escolha uma corretora da sua lista." };
+    return { erro: error.message };
+  }
 
   revalidatePath("/conta");
   redirect("/conta");

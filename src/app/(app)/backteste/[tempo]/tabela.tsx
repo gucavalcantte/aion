@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { BotaoRemover } from "@/components/botao-remover";
-import { ATIVOS, type Ativo } from "@/lib/ativos";
+import { SelectComSeta } from "@/components/select-com-seta";
+import type { Ativo, Moeda } from "@/lib/ativos";
 import type { Backteste } from "@/lib/dados/backtestes";
 import type { EspecificacaoAtivo } from "@/lib/dados/corretoras";
 import { data as formatarData, moeda, simboloDaMoeda, VAZIO } from "@/lib/formato";
@@ -55,6 +56,8 @@ const LARGURA = COLUNAS.reduce((a, c) => a + c.largura, 0);
 const TAMANHO_PAGINA = 20;
 
 type Setups = { id: string; nome: string }[];
+/** Ativo do cadastro do usuário, como o seletor da linha de cadastro o oferece. */
+type AtivoOpcao = { codigo: string; nome: string };
 
 export function TabelaBackteste({
   tempo,
@@ -62,12 +65,17 @@ export function TabelaBackteste({
   setups,
   mlpt,
   especificacoes,
+  ativos,
+  moedaConta,
 }: {
   tempo: string;
   linhas: Backteste[];
   setups: Setups;
   mlpt: number | null;
   especificacoes: Partial<Record<Ativo, EspecificacaoAtivo>>;
+  ativos: AtivoOpcao[];
+  /** Moeda da conta padrão: é nela que o stop em dinheiro é mostrado. */
+  moedaConta: Moeda;
 }) {
   const [editando, setEditando] = useState<string | null>(null);
   const [expandida, setExpandida] = useState(false);
@@ -116,7 +124,7 @@ export function TabelaBackteste({
         </tr>
       </thead>
       <tbody>
-        <LinhaEditavel formId="nova-linha" tempo={tempo} setups={setups} inicial={null} especificacoes={especificacoes} />
+        <LinhaEditavel formId="nova-linha" tempo={tempo} setups={setups} inicial={null} especificacoes={especificacoes} ativos={ativos} />
 
         {linhasPagina.map((linha, i) => {
           const indice = inicioPagina + i;
@@ -130,6 +138,7 @@ export function TabelaBackteste({
               inicial={linha}
               numero={numero}
               especificacoes={especificacoes}
+              ativos={ativos}
               aoFechar={() => setEditando(null)}
             />
           ) : (
@@ -141,6 +150,7 @@ export function TabelaBackteste({
               setups={setups}
               mlpt={mlpt}
               especificacoes={especificacoes}
+              moedaConta={moedaConta}
               aoEditar={() => setEditando(linha.id)}
             />
           );
@@ -236,6 +246,7 @@ function LinhaEditavel({
   inicial,
   numero,
   especificacoes,
+  ativos,
   aoFechar,
 }: {
   formId: string;
@@ -244,6 +255,7 @@ function LinhaEditavel({
   inicial: Backteste | null;
   numero?: number;
   especificacoes: Partial<Record<Ativo, EspecificacaoAtivo>>;
+  ativos: AtivoOpcao[];
   aoFechar?: () => void;
 }) {
   const editando = inicial !== null;
@@ -325,7 +337,7 @@ function LinhaEditavel({
 
         <td className={td}>
           <Escolha form={formId} nome="ativo" valor={valor("ativo")} onChange={(v) => trocar("ativo", v)}>
-            {ATIVOS.map((a) => (
+            {ativos.map((a) => (
               <option key={a.codigo} value={a.codigo}>{a.codigo} · {a.nome}</option>
             ))}
           </Escolha>
@@ -470,6 +482,7 @@ function LinhaSalva({
   setups,
   mlpt,
   especificacoes,
+  moedaConta,
   aoEditar,
 }: {
   linha: Backteste;
@@ -478,6 +491,7 @@ function LinhaSalva({
   setups: Setups;
   mlpt: number | null;
   especificacoes: Partial<Record<Ativo, EspecificacaoAtivo>>;
+  moedaConta: Moeda;
   aoEditar: () => void;
 }) {
   const setup = setups.find((s) => s.id === linha.setup_id)?.nome ?? VAZIO;
@@ -513,6 +527,7 @@ function LinhaSalva({
             tamanhoStop={linha.tamanho_stop}
             mlpt={mlpt}
             especificacao={especificacoes[linha.ativo as Ativo] ?? null}
+            moedaConta={moedaConta}
           />
         </span>
       </td>
@@ -621,14 +636,16 @@ function ValorStopDolar({
   tamanhoStop,
   mlpt,
   especificacao,
+  moedaConta,
 }: {
   ativo: string;
   tamanhoStop: number;
   mlpt: number | null;
   especificacao: EspecificacaoAtivo | null;
+  /** Moeda da conta padrão (a mesma do MLPT) — o ativo não manda mais na moeda. */
+  moedaConta: Moeda;
 }) {
-  const dadosAtivo = ATIVOS.find((a) => a.codigo === ativo);
-  if (!dadosAtivo || !especificacao || !Number.isFinite(tamanhoStop) || !mlpt) return null;
+  if (!especificacao || !Number.isFinite(tamanhoStop) || !mlpt) return null;
 
   const stopPorContrato = tamanhoStop * especificacao.valorPonto;
   const contratos = contratosIdeais(stopPorContrato, mlpt);
@@ -640,7 +657,7 @@ function ValorStopDolar({
         aria-label="Quantidade ideal de contratos para o MLPT da conta"
         className="flex size-[17px] items-center justify-center rounded-full border border-line-strong text-[10px] font-bold leading-none text-ink-4 group-hover:border-accent-soft group-hover:text-accent-soft group-focus-visible:border-accent-soft group-focus-visible:text-accent-soft"
       >
-        {simboloDaMoeda(dadosAtivo.moeda)}
+        {simboloDaMoeda(moedaConta)}
       </button>
       <span
         role="tooltip"
@@ -652,7 +669,7 @@ function ValorStopDolar({
         {contratos >= 1 ? (
           <span className="num mt-1 flex items-center justify-between gap-3 whitespace-nowrap text-[12.5px]">
             <span className="text-ink-4">{contratos} {contratos === 1 ? "contrato" : "contratos"}</span>
-            <span className="ml-3 font-semibold text-ink">{moeda(stopPorContrato * contratos, dadosAtivo.moeda)}</span>
+            <span className="ml-3 font-semibold text-ink">{moeda(stopPorContrato * contratos, moedaConta)}</span>
           </span>
         ) : (
           <span className="mt-1 block whitespace-nowrap text-[12.5px] text-loss">
@@ -680,18 +697,18 @@ function Escolha({
   onChange: (v: string) => void;
 }) {
   return (
-    <select
+    <SelectComSeta
       form={form}
       name={nome}
       value={valor}
       onChange={(e) => onChange(e.target.value)}
-      className={`${celula} appearance-none`}
+      className={celula}
     >
       <option value="">Selecione</option>
       {opcoes?.map((o) => (
         <option key={o} value={o}>{o}</option>
       ))}
       {children}
-    </select>
+    </SelectComSeta>
   );
 }

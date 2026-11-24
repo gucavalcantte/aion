@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BotaoRemover } from "@/components/botao-remover";
 
 import { buscarConta, listarContas } from "@/lib/dados/contas";
+import { listarCorretorasDoUsuario } from "@/lib/dados/corretoras";
 import { moeda, percentual, VAZIO } from "@/lib/formato";
 import type { ContaComSaldo } from "@/lib/tipos";
 
@@ -15,7 +16,7 @@ export default async function PaginaConta({
   searchParams,
 }: PageProps<"/conta">) {
   const { editar, erro } = await searchParams;
-  const contas = await listarContas();
+  const [contas, corretoras] = await Promise.all([listarContas(), listarCorretorasDoUsuario()]);
   const emEdicao = typeof editar === "string" ? await buscarConta(editar) : null;
 
   const prontas = contas.filter((c) => c.progresso && c.progresso.percentual >= 100).length;
@@ -31,9 +32,14 @@ export default async function PaginaConta({
               : `${contas.length} ${contas.length === 1 ? "conta" : "contas"}${prontas > 0 ? ` · ${prontas} pronta${prontas > 1 ? "s" : ""} para saque` : ""}`}
           </p>
         </div>
-        <Link href="/conta/corretoras" className="text-[14px] text-ink-3 hover:text-ink">
-          Corretoras →
-        </Link>
+        <div className="flex items-center gap-5 text-[14px]">
+          <Link href="/conta/ativos" className="text-ink-3 hover:text-ink">
+            Ativos →
+          </Link>
+          <Link href="/conta/corretoras" className="text-ink-3 hover:text-ink">
+            Corretoras →
+          </Link>
+        </div>
       </header>
 
       {typeof erro === "string" && (
@@ -56,7 +62,7 @@ export default async function PaginaConta({
           )}
         </div>
 
-        <FormularioConta conta={emEdicao} />
+        <FormularioConta conta={emEdicao} corretoras={corretoras} />
       </div>
     </>
   );
