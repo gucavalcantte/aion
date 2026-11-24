@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { BotaoRemover } from "@/components/botao-remover";
+import { SelectComSeta } from "@/components/select-com-seta";
 import type { Ativo, Moeda } from "@/lib/ativos";
 import type { Backteste } from "@/lib/dados/backtestes";
 import type { EspecificacaoAtivo } from "@/lib/dados/corretoras";
@@ -696,18 +697,18 @@ function Escolha({
   onChange: (v: string) => void;
 }) {
   return (
-    <select
+    <SelectComSeta
       form={form}
       name={nome}
       value={valor}
       onChange={(e) => onChange(e.target.value)}
-      className={`${celula} appearance-none`}
+      className={celula}
     >
       <option value="">Selecione</option>
       {opcoes?.map((o) => (
         <option key={o} value={o}>{o}</option>
       ))}
       {children}
-    </select>
+    </SelectComSeta>
   );
 }

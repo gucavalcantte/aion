@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
+import { SelectComSeta } from "@/components/select-com-seta";
 import type { CorretoraCadastrada } from "@/lib/dados/corretoras";
 import type { Conta } from "@/lib/tipos";
 
@@ -89,8 +90,8 @@ function CorpoDoFormulario({
           </div>
         </fieldset>
 
-        <fieldset>
-          <legend className={rotulo}>Corretora</legend>
+        <div>
+          <label className={rotulo} htmlFor="corretora">Corretora</label>
           {corretoras.length === 0 ? (
             <p className="text-[13.5px] leading-relaxed text-ink-3">
               Você ainda não tem corretoras.{" "}
@@ -99,30 +100,27 @@ function CorpoDoFormulario({
             </p>
           ) : (
             <>
-              <div className="flex flex-wrap gap-1 rounded-[9px] border border-line-strong bg-input p-[3px]">
+              <SelectComSeta
+                id="corretora"
+                name="corretora"
+                value={corretoraSelecionada}
+                onChange={(e) => setCorretoraSelecionada(e.target.value)}
+                className={campo}
+              >
                 {corretoras.map((c) => (
-                  <label key={c.id} className="min-w-[96px] flex-1">
-                    <input
-                      type="radio"
-                      name="corretora"
-                      value={c.nome}
-                      checked={corretoraSelecionada === c.nome}
-                      onChange={() => setCorretoraSelecionada(c.nome)}
-                      className="peer sr-only"
-                    />
-                    <span className="block cursor-pointer rounded-md px-2 py-[7px] text-center text-[14.5px] font-medium text-ink-3 peer-checked:bg-raised peer-checked:text-ink">
-                      {c.nome}
-                      <span className="ml-1.5 text-[12px] text-ink-4">{c.moeda === "USD" ? "US$" : "R$"}</span>
-                    </span>
-                  </label>
+                  <option key={c.id} value={c.nome}>
+                    {c.nome} · {c.moeda === "USD" ? "US$" : "R$"}
+                  </option>
                 ))}
-              </div>
+              </SelectComSeta>
               <p className="mt-2 text-[12px] leading-relaxed text-ink-4">
                 A moeda da conta ({moedaSelecionada === "USD" ? "dólar" : "real"}) vem da corretora.
+                {" "}Não achou a corretora?{" "}
+                <Link href="/conta/corretoras" className="text-accent-soft">Cadastre aqui</Link>.
               </p>
             </>
           )}
-        </fieldset>
+        </div>
 
         <div>
           <label className={rotulo} htmlFor="saldo_inicial">Saldo inicial ({moedaSelecionada})</label>
